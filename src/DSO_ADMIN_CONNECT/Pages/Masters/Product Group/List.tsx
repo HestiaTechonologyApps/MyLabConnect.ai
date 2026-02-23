@@ -107,7 +107,7 @@ const DsoProductGroupList: React.FC = () => {
         showColumnToggle={true}
         defaultRowsPerPage={10}
         highlightOnHover={true}
-        auditLogTableName="dso_product_group"
+        auditLogTableName="DSO_productGroup"
       />
 
       <DsoProductGroupCreateModal

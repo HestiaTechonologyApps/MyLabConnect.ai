@@ -91,6 +91,22 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSOProductGroup/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSOProductGroup/getall-paginated`,
   },
+  DSO_PROTHESIS_TYPE: {
+    GET_ALL: `${API_BASE_URL}/DSOProthesisType`,
+    CREATE: `${API_BASE_URL}/DSOProthesisType`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/DSOProthesisType/getall-paginated`,
+  },
+  DSO_RESTORATION_TYPE: {
+    GET_ALL: `${API_BASE_URL}/DSORestorationType`,
+    CREATE: `${API_BASE_URL}/DSORestorationType`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/DSORestorationType/getall-paginated`,
+  },
 
 
 
@@ -149,14 +165,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSOProduct/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSOProduct/getall-paginated`,
   },
-  DSO_PROTHESIS_TYPE: {
-    GET_ALL: `${API_BASE_URL}/DSOProthesisType`,
-    CREATE: `${API_BASE_URL}/DSOProthesisType`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/DSOProthesisType/${id}`,
-    UPDATE_PAGINATION: `${API_BASE_URL}/DSOProthesisType/getall-paginated`,
-  },
+
   DSO_REGION: {
     GET_ALL: `${API_BASE_URL}/DSORegion`,
     CREATE: `${API_BASE_URL}/DSORegion`,
@@ -165,14 +174,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSORegion/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSORegion/getall-paginated`,
   },
-  DSO_RESTORATION_TYPE: {
-    GET_ALL: `${API_BASE_URL}/DSORestorationType`,
-    CREATE: `${API_BASE_URL}/DSORestorationType`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/DSORestorationType/${id}`,
-    UPDATE_PAGINATION: `${API_BASE_URL}/DSORestorationType/getall-paginated`,
-  },
+
   DSO_SCHEMA: {
     GET_ALL: `${API_BASE_URL}/DSOSchema`,
     CREATE: `${API_BASE_URL}/DSOSchema`,
