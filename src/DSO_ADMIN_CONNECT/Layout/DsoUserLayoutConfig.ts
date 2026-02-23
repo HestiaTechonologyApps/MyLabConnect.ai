@@ -100,7 +100,7 @@ export const dsoAdminMenuItems: MenuItem[] = [
             { title: 'Proforma Invoice', url: '/dsoadmin-connect/invoices/proforma', icon: Receipt },
         ],
     },
-   {
+    {
         title: 'Prosthesis',
         url: '/dsoadmin-connect/prosthesis',
         icon: Sparkles,
@@ -108,7 +108,12 @@ export const dsoAdminMenuItems: MenuItem[] = [
     {
         title: 'Restoration',
         url: '/dsoadmin-connect/restoration',
-        icon:  RefreshCw,
+        icon: RefreshCw,
+    },
+    {
+        title: 'Scheme',
+        url: '/dsoadmin-connect/schema-list',
+        icon: RefreshCw,
     },
 ];
 
