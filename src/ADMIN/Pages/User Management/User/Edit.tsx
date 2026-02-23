@@ -22,7 +22,6 @@ const fields: Field[] = [
   { name: "rowbreak1",          rules: { type: "rowbreak", label: "" } },
   { name: "isActive",           rules: { type: "toggle",   label: "Active",                                              colWidth: 4 } },
   { name: "islocked",           rules: { type: "toggle",   label: "Locked",                                              colWidth: 4 } },
-  { name: "isDeleted",          rules: { type: "toggle",   label: "Deleted",                                             colWidth: 4 } },
 ];
 
 const authenticationTypeOptions = [
