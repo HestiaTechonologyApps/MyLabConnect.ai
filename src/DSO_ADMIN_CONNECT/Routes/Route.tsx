@@ -15,6 +15,7 @@ import DsoProductGroupList from '../Pages/Masters/Product Group/List';
 import DSOProsthesisTypeList from '../Pages/Prosthesis/List';
 import DSOSchemaList from '../Pages/Schema/List';
 import DSORestorationTypeList from '../Pages/Restoration/List';
+import DSOUserList from '../Pages/Setup/DSO - User Login/List';
 
 // ── Add more page imports here as you build them ──────────────────
 // import DsoLabList       from '../Pages/Masters/Lab/List';
@@ -40,7 +41,7 @@ export const dsoadminConnectRoutes = (
     {/* Setup */}
     <Route path="setup/zone-list" element={<DSOZoneList />} />
     <Route path="setup/practice-manager" element={<div><h5>Practice Manager Login</h5></div>} />
-    <Route path="setup/dso-user" element={<div><h5>DSO User Login</h5></div>} />
+    <Route path="setup/dso-user" element={<DSOUserList />} />
     <Route path="setup/lab-products-rate" element={<div><h5>Lab Products Rate</h5></div>} />
     <Route path="setup" element={<div><h5>Setup</h5></div>} />
 
