@@ -300,17 +300,22 @@
   border-radius    : 0.625rem !important;
 }
 
-/* Custom no-anchor menu */
+/* ──────────────────────────────────────────────────────────────
+   ACTIONS WRAPPER & CUSTOM DROPDOWN MENU
+   ────────────────────────────────────────────────────────────── */
+
 .kidu-actions-wrapper {
   position        : relative;
   display         : inline-flex;
   justify-content : center;
 }
 
+/* Default: opens downward */
 .kidu-actions-menu--custom {
   position         : absolute;
   right            : 0;
   top              : calc(100% + 4px);
+  bottom           : auto;
   z-index          : 1050;
   min-width        : 150px;
   padding          : 0.25rem;
@@ -320,6 +325,14 @@
   box-shadow       : 0 8px 24px rgba(0,0,0,.12);
   display          : flex;
   flex-direction   : column;
+}
+
+/* Flip upward when near bottom of viewport */
+.kidu-actions-menu--custom.kidu-menu-open-up {
+  top    : auto;
+  bottom : calc(100% + 4px);
+  /* Re-cast shadow upward */
+  box-shadow : 0 -6px 24px rgba(0,0,0,.12);
 }
 
 .kidu-actions-menu--custom .kidu-dropdown-item {
@@ -742,7 +755,7 @@
 
 
 /* ──────────────────────────────────────────────────────────────
-   FOOTER / PAGINATION  ★ Updated layout — Left | Center | Right
+   FOOTER / PAGINATION
    ────────────────────────────────────────────────────────────── */
 
 .kidu-footer {
@@ -846,7 +859,6 @@
   text-align       : center;
   outline          : none;
   transition       : border-color 0.15s, box-shadow 0.15s;
-  /* hide native number arrows */
   -moz-appearance  : textfield;
   appearance       : textfield;
 }

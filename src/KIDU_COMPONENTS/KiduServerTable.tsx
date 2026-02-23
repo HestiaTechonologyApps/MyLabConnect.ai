@@ -339,6 +339,8 @@ function KiduServerTable<T extends Record<string, any>>({
   const [isFullscreen,   setIsFullscreen]   = useState(false);
   // Track which row's action dropdown is open (only one at a time)
   const [openDropdownId, setOpenDropdownId] = useState<any>(null);
+  // Track whether the open dropdown should flip upward
+  const [dropdownUpward, setDropdownUpward] = useState(false);
 
   // ── CRUD modal ───────────────────────────────────────────────
   const [modal, setModal] = useState<ModalState<T>>({ kind: null, row: null, props: null });
@@ -472,8 +474,6 @@ function KiduServerTable<T extends Record<string, any>>({
   );
 
   // ── TanStack columns ─────────────────────────────────────────
-  // FIX: selectionEnabled, selectedRows, allSelected added to deps
-  // so the checkbox column is added/removed reactively
   const tableColumns = useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
 
@@ -534,22 +534,36 @@ function KiduServerTable<T extends Record<string, any>>({
               className="kidu-actions-wrapper"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Trigger — plain <button>, no <a>, no URL in status bar */}
+              {/* Trigger button */}
               <button
                 type="button"
                 className="kidu-action-toggle"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setOpenDropdownId(isOpen ? null : rowId);
+                  if (isOpen) {
+                    setOpenDropdownId(null);
+                  } else {
+                    // ── Smart flip: open upward if not enough space below ──
+                    const rect       = e.currentTarget.getBoundingClientRect();
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    setDropdownUpward(spaceBelow < 180);
+                    setOpenDropdownId(rowId);
+                  }
                 }}
               >
                 <FaEllipsisV />
               </button>
 
-              {/* Custom menu — pure <div> + <button> elements */}
+              {/* Dropdown menu — flips upward when near bottom */}
               {isOpen && (
-                <div className="kidu-actions-menu kidu-actions-menu--custom">
+                <div
+                  className={[
+                    "kidu-actions-menu",
+                    "kidu-actions-menu--custom",
+                    dropdownUpward ? "kidu-menu-open-up" : "",
+                  ].filter(Boolean).join(" ")}
+                >
                   {(viewModal || viewRoute || onViewClick) && (
                     <button
                       type="button"
@@ -598,9 +612,9 @@ function KiduServerTable<T extends Record<string, any>>({
     }
 
     return cols;
-  // FIX: include selectionEnabled, selectedRows, allSelected in deps
   }, [
-    columns, hasActions, selectionEnabled, selectedRows, allSelected, openDropdownId,
+    columns, hasActions, selectionEnabled, selectedRows, allSelected,
+    openDropdownId, dropdownUpward,
     editModal, editRoute, onEditClick,
     viewModal, viewRoute, onViewClick,
     onDeleteClick, showAudit,
