@@ -2,9 +2,9 @@ import React, { useState, useRef } from "react";
 import KiduServerTableList from "../../../../KIDU_COMPONENTS/KiduServerTableList";
 import type { KiduColumn } from "../../../../KIDU_COMPONENTS/KiduServerTable";
 import Swal from "sweetalert2";
+import LabSupportTypeService from "../../../Services/Masters/SupportTypes.services";
 import LabSupportTypeCreateModal from "./Create";
 import LabSupportTypeEditModal from "./Edit";
-import LabSupportTypeService from "../../../Services/Masters/SupportTypes.services";
 
 const columns: KiduColumn[] = [
   {
@@ -15,11 +15,12 @@ const columns: KiduColumn[] = [
     filterType: "text",
   },
   {
-    key: "labMasterName",
+    key: "labMasterId",
     label: "Lab",
     enableSorting: true,
     enableFiltering: true,
     filterType: "text",
+    render: (value, row) => <span>{row.labMasterName || `Lab #${value}`}</span>,
   },
   {
     key: "escalationDays",
@@ -112,6 +113,7 @@ const LabSupportTypeList: React.FC = () => {
         showColumnToggle={true}
         defaultRowsPerPage={10}
         highlightOnHover={true}
+        auditLogTableName="lab_support_type"
       />
 
       <LabSupportTypeCreateModal

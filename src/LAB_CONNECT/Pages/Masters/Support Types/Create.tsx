@@ -61,27 +61,6 @@ const LabSupportTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess })
           required: true,
           placeholder: "Enter Sub Type",
         },
-        {
-          key: "rolesResponsible",
-          label: "Roles Responsible",
-          type: "text",
-          required: false,
-          placeholder: "Roles responsible",
-        },
-        {
-          key: "rolesToNotify",
-          label: "Roles to Notify",
-          type: "text",
-          required: false,
-          placeholder: "Roles to notify",
-        },
-        {
-          key: "escalation",
-          label: "Escalation",
-          type: "text",
-          required: false,
-          placeholder: "Escalation",
-        },
       ],
     },
   ];
@@ -94,17 +73,21 @@ const LabSupportTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess })
     try {
       const { headerData, tabData } = data;
 
-      // 1. Create Lab Support Type first
+      console.log("Submit Data:", { headerData, tabData });
+
+      // 1. Create Lab Support Type first - matching your type definition
       const supportTypePayload: Partial<LabSupportType> = {
         labSupportTypeName: headerData.labSupportTypeName,
-        escalationDays: headerData.escalationDays ? Number(headerData.escalationDays) : undefined,
+        escalationDays: headerData.escalationDays ? Number(headerData.escalationDays) : 0,
         labMasterId: Number(headerData.labMasterId),
-        isActive: true, // From the toggle in modal
+        isActive: headerData.isActive ?? true,
+        // isDeleted defaults to false in service
       };
 
       const createResponse = await LabSupportTypeService.create(supportTypePayload);
+      console.log("Create Response:", createResponse);
       
-      // Get the newly created ID from response
+      // Get the newly created ID from response (handles different response formats)
       const newSupportTypeId = createResponse?.value?.id || createResponse?.id;
 
       // 2. Create Sub Types if any exist
@@ -115,17 +98,20 @@ const LabSupportTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess })
           (row) => row.labSupportSubTypeName && row.labSupportSubTypeName.trim() !== ""
         );
 
-        // Create each sub type
-        await Promise.all(
-          validSubTypes.map(async (subType) => {
-            const subTypePayload = {
-              labSupportSubTypeName: subType.labSupportSubTypeName,
-              labSupportTypeId: newSupportTypeId,
-              isActive: true,
-            };
-            return LabSupportSubTypeService.create(subTypePayload);
-          })
-        );
+        if (validSubTypes.length > 0) {
+          // Create each sub type
+          await Promise.all(
+            validSubTypes.map(async (subType) => {
+              const subTypePayload = {
+                labSupportSubTypeName: subType.labSupportSubTypeName,
+                labSupportTypeId: newSupportTypeId,
+                isActive: true,
+              };
+              console.log("SubType Payload:", subTypePayload);
+              return LabSupportSubTypeService.create(subTypePayload);
+            })
+          );
+        }
       }
 
       // Success

@@ -30,6 +30,7 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
       options: [
         { value: 1, label: "Lab 1" },
         { value: 2, label: "Lab 2" },
+        // This should come from an API/master data
       ],
       colWidth: 4,
     },
@@ -64,27 +65,6 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
           required: true,
           placeholder: "Enter Sub Type",
         },
-        {
-          key: "rolesResponsible",
-          label: "Roles Responsible",
-          type: "text",
-          required: false,
-          placeholder: "Roles responsible",
-        },
-        {
-          key: "rolesToNotify",
-          label: "Roles to Notify",
-          type: "text",
-          required: false,
-          placeholder: "Roles to notify",
-        },
-        {
-          key: "escalation",
-          label: "Escalation",
-          type: "text",
-          required: false,
-          placeholder: "Escalation",
-        },
       ],
     },
   ];
@@ -98,17 +78,22 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
       try {
         // 1. Fetch main Support Type
         const mainResponse = await LabSupportTypeService.getById(recordId);
+        console.log("Edit - Main Response:", mainResponse);
+        
         const mainData = mainResponse?.value || mainResponse;
 
         setInitialHeaderData({
           labMasterId: mainData.labMasterId,
           labSupportTypeName: mainData.labSupportTypeName,
           escalationDays: mainData.escalationDays,
+          isActive: mainData.isActive,
         });
 
         // 2. Fetch Sub Types for this Support Type
-        // You need to add this method to your service
+        // Note: You need to add this method to your service
         const subTypesResponse = await LabSupportSubTypeService.getBySupportTypeId(recordId);
+        console.log("Edit - SubTypes Response:", subTypesResponse);
+        
         const subTypes = subTypesResponse?.value || subTypesResponse || [];
 
         setInitialTabData({
@@ -135,15 +120,18 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
     try {
       const { headerData, tabData } = data;
 
+      console.log("Edit Submit Data:", { headerData, tabData });
+
       // 1. Update main Support Type
       const updatePayload: Partial<LabSupportType> = {
         id: recordId,
         labSupportTypeName: headerData.labSupportTypeName,
         escalationDays: headerData.escalationDays ? Number(headerData.escalationDays) : 0,
         labMasterId: Number(headerData.labMasterId),
-        isActive: true,
+        isActive: headerData.isActive ?? true,
       };
 
+      console.log("Update Payload:", updatePayload);
       await LabSupportTypeService.update(recordId, updatePayload);
 
       // 2. Handle Sub Types
@@ -152,11 +140,13 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
         (row) => row.labSupportSubTypeName && row.labSupportSubTypeName.trim() !== ""
       );
 
+      console.log("Valid SubTypes:", validSubTypes);
+
       // You need to implement sync logic based on your API requirements
       // Option 1: Delete all and recreate
       if (validSubTypes.length > 0) {
         // First delete existing sub types (you need to add this method)
-        await LabSupportSubTypeService.deleteBySupportTypeId(recordId);
+        // await LabSupportSubTypeService.deleteBySupportTypeId(recordId);
         
         // Then create new ones
         await Promise.all(
@@ -166,9 +156,13 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
               labSupportTypeId: recordId,
               isActive: true,
             };
+            console.log("SubType Payload:", subTypePayload);
             return LabSupportSubTypeService.create(subTypePayload);
           })
         );
+      } else {
+        // If no valid subTypes, you might want to delete all existing ones
+        // await LabSupportSubTypeService.deleteBySupportTypeId(recordId);
       }
 
       onSuccess();
@@ -178,7 +172,14 @@ const LabSupportTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, rec
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-center py-4">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-2 text-muted">Loading data...</p>
+      </div>
+    );
   }
 
   return (

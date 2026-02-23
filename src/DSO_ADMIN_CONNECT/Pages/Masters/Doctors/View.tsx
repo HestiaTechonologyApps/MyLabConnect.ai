@@ -20,8 +20,6 @@ const fields: ViewField[] = [
   { name: "address",     label: "Address",        colWidth: 12, isTextarea: true },
   { name: "info",        label: "Specialty/Info", colWidth: 12, isTextarea: true },
   { name: "isActive",    label: "Status",         colWidth: 6,  isToggle: true },
-  { name: "createdAt",   label: "Created At",     colWidth: 6,  isDate: true },
-  { name: "updatedAt",   label: "Updated At",     colWidth: 6,  isDate: true },
 ];
 
 const DSODoctorViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {

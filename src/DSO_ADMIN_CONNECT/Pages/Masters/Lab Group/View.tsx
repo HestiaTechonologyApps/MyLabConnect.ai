@@ -12,8 +12,6 @@ const fields: ViewField[] = [
   { name: "code",      label: "Code",            colWidth: 6 },
   { name: "name",      label: "Lab Group Name",   colWidth: 6 },
   { name: "isActive",  label: "Status",           colWidth: 6, isToggle: true },
-  { name: "createdAt", label: "Created At",       colWidth: 6, isDate: true },
-  { name: "updatedAt", label: "Updated At",       colWidth: 6, isDate: true },
 ];
 
 const LabGroupViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {

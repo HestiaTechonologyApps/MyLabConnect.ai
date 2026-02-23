@@ -5,78 +5,116 @@ import type { LabSupportType } from "../../Types/Masters/SupportTypes.types";
 
 export default class LabSupportTypeService {
 
- static async getPaginatedList(params: TableRequestParams): Promise<TableResponse<LabSupportType>> {
-  
-  // Map "Active"/"Inactive" select filter to showInactive boolean
-  let showInactive: boolean | undefined = undefined;
-  const statusFilter = params["isActive"];
-  if (statusFilter === "Active") showInactive = true;
-  if (statusFilter === "Inactive") showInactive = false;
+  static async getPaginatedList(params: TableRequestParams): Promise<TableResponse<LabSupportType>> {
+    
+    // Build query parameters - only include if they have values
+    const queryParams = new URLSearchParams();
+    
+    // Always include pagination params
+    queryParams.append('pageNumber', params.pageNumber.toString());
+    queryParams.append('pageSize', params.pageSize.toString());
+    
+    // Optional params - only append if they have values
+    if (params.searchTerm) {
+      queryParams.append('searchTerm', params.searchTerm);
+    }
+    
+    if (params.sortBy) {
+      queryParams.append('sortBy', params.sortBy);
+    }
+    
+    if (params.sortDescending !== undefined) {
+      queryParams.append('sortDescending', params.sortDescending.toString());
+    }
+    
+    // Always include showDeleted with default false
+    queryParams.append('showDeleted', 'false');
+    
+    // Handle status filter - map "Active"/"Inactive" to showInactive boolean
+    const statusFilter = params["isActive"];
+    if (statusFilter === "Active") {
+      queryParams.append('showInactive', 'false');
+    } else if (statusFilter === "Inactive") {
+      queryParams.append('showInactive', 'true');
+    }
+    
+    // Column filters - only append if they have values
+    if (params["labSupportTypeName"]) {
+      queryParams.append('labSupportTypeName', params["labSupportTypeName"]);
+    }
+    
+    if (params["labMasterId"]) {
+      queryParams.append('labMasterId', params["labMasterId"].toString());
+    }
 
-  // Build query parameters for GET request
-  const queryParams = new URLSearchParams({
-    pageNumber: params.pageNumber.toString(),
-    pageSize: params.pageSize.toString(),
-    searchTerm: params.searchTerm ?? "",
-    sortBy: params.sortBy ?? "",
-    sortDescending: params.sortDescending?.toString() ?? "false",
-    showDeleted: "false",
-    showInactive: showInactive?.toString() ?? "",
-    labSupportTypeName: params["labSupportTypeName"] ?? "",
-    labMasterId: params["labSupportTypeName"] ? params["labSupportTypeName"].toString() : "",
-  });
+    const url = `${API_ENDPOINTS.LAB_SUPPORT_TYPE.GET_PAGINATION}?${queryParams.toString()}`;
+    console.log("GET URL:", url);
 
-  const response = await HttpService.callApi<any>(
-    `${API_ENDPOINTS.LAB_SUPPORT_TYPE.GET_PAGINATION}?${queryParams}`,
-    "GET"  // Changed from POST to GET
-  );
+    const response = await HttpService.callApi<any>(
+      url,
+      "GET"
+    );
 
-  const result = response?.value ?? response;
+    console.log("Paginated Response:", response);
 
-  return {
-    data: result.data ?? result.items ?? [],
-    total: result.totalRecords ?? result.total ?? 0,
-    totalPages: result.totalPages,
-  };
-}
+    const result = response?.value ?? response;
+
+    return {
+      data: result.data ?? result.items ?? [],
+      total: result.totalRecords ?? result.total ?? 0,
+      totalPages: result.totalPages,
+    };
+  }
 
   static async getById(id: number): Promise<any> {
-    return await HttpService.callApi<any>(
+    const response = await HttpService.callApi<any>(
       API_ENDPOINTS.LAB_SUPPORT_TYPE.GET_BY_ID(id), 
       "GET"
     );
+    console.log("GetById Response:", response);
+    return response;
   }
 
   static async create(data: Partial<LabSupportType>): Promise<any> {
     const payload = {
       labSupportTypeName: data.labSupportTypeName,
-      escalationDays: data.escalationDays,
-      labMasterId: data.labMasterId,
+      escalationDays: data.escalationDays ? Number(data.escalationDays) : 0,
+      labMasterId: Number(data.labMasterId),
       isActive: data.isActive ?? true,
       isDeleted: false,
     };
     
-    return await HttpService.callApi<any>(
+    console.log("Create Payload:", payload);
+    
+    const response = await HttpService.callApi<any>(
       API_ENDPOINTS.LAB_SUPPORT_TYPE.CREATE, 
       "POST", 
       payload
     );
+    
+    console.log("Create Response:", response);
+    return response;
   }
 
   static async update(id: number, data: Partial<LabSupportType>): Promise<any> {
     const payload = {
       id,
       labSupportTypeName: data.labSupportTypeName,
-      escalationDays: data.escalationDays,
-      labMasterId: data.labMasterId,
+      escalationDays: data.escalationDays ? Number(data.escalationDays) : 0,
+      labMasterId: Number(data.labMasterId),
       isActive: data.isActive ?? true,
     };
     
-    return await HttpService.callApi<any>(
+    console.log("Update Payload:", payload);
+    
+    const response = await HttpService.callApi<any>(
       API_ENDPOINTS.LAB_SUPPORT_TYPE.UPDATE(id), 
       "PUT", 
       payload
     );
+    
+    console.log("Update Response:", response);
+    return response;
   }
 
   static async delete(id: number): Promise<void> {
@@ -84,5 +122,6 @@ export default class LabSupportTypeService {
       API_ENDPOINTS.LAB_SUPPORT_TYPE.DELETE(id), 
       "DELETE"
     );
+    console.log(`Deleted Lab Support Type with id ${id}`);
   }
 }

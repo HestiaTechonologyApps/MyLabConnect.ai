@@ -13,8 +13,6 @@ const fields: ViewField[] = [
   { name: "name",      label: "Name",       colWidth: 6 },
   { name: "dsoName",   label: "DSO Master", colWidth: 6 },
   { name: "isActive",  label: "Status",     colWidth: 6, isToggle: true },
-  { name: "createdAt", label: "Created At", colWidth: 6, isDate: true },
-  { name: "updatedAt", label: "Updated At", colWidth: 6, isDate: true },
 ];
 
 const DsoProductGroupViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
