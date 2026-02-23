@@ -25,7 +25,9 @@ import {
     Key,
     Sparkles,
     RefreshCw,
-    LucideMicroscope
+    LucideMicroscope,
+    Syringe,
+    Box
 } from 'lucide-react';
 import type { MenuItem } from '../../Types/KiduTypes/Sidebar.types';
 import type { UserProfile, NotificationItem, NavbarAction } from '../../Types/KiduTypes/Navbar.types';
@@ -55,11 +57,14 @@ export const dsoAdminMenuItems: MenuItem[] = [
         icon: Users,
         children: [
             { title: 'Lab', url: '/dsoadmin-connect/masters/lab-list', icon: Microscope },
-             { title: 'Lab Group', url: '/dsoadmin-connect/masters/labgroup-list', icon: LucideMicroscope },
+            { title: 'Lab Group', url: '/dsoadmin-connect/masters/labgroup-list', icon: LucideMicroscope },
             { title: 'Practice', url: '/dsoadmin-connect/masters/practice', icon: Building2 },
             { title: 'Doctor', url: '/dsoadmin-connect/masters/doctor-list', icon: UserCog },
             { title: 'Product Group', url: '/dsoadmin-connect/masters/productGroup-list', icon: Package },
             { title: 'User Role Creation', url: '/dsoadmin-connect/masters/user-roles', icon: UserPlus },
+            { title: 'Dental Office', url: '/dsoadmin-connect/masters/dentalOffice-list', icon: Syringe },
+            { title: 'Material', url: '/dsoadmin-connect/masters/material-list', icon: Box },
+
         ],
     },
     {
@@ -67,7 +72,7 @@ export const dsoAdminMenuItems: MenuItem[] = [
         icon: Settings,
         children: [
             { title: 'Practice Manager Login', url: '/dsoadmin-connect/setup/practice-manager', icon: UserCog },
-            { title: 'DSO – User Login', url: '/dsoadmin-connect/setup/dso-user', icon: Users },
+            { title: 'DSO - User Login', url: '/dsoadmin-connect/setup/dso-user', icon: Users },
             { title: 'Lab Products Rate', url: '/dsoadmin-connect/setup/lab-products-rate', icon: DollarSign },
             { title: 'Zone', url: '/dsoadmin-connect/setup/zone-list', icon: MapPin },
         ],

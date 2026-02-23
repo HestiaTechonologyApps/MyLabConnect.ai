@@ -45,6 +45,18 @@ const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
   // ── Fetch handler ─────────────────────────────────────────────────────────
   const handleFetch = async (id: string | number) => {
     const response = await DSODoctorService.getById(Number(id));
+    console.log("Fetch Response:", response);
+    
+    const data = response?.value || response;
+    
+    // Set the selected master from the fetched data
+    if (data?.dsoMasterId && data?.dsoName) {
+      setSelectedMaster({
+        id: data.dsoMasterId,
+        name: data.dsoName,
+      } as DSOmaster);
+    }
+    
     return response;
   };
 
