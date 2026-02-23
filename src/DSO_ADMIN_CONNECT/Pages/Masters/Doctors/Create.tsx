@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import KiduCreateModal, { type Field } from "../../../../KIDU_COMPONENTS/KiduCreateModal";
+import KiduCreateModal, {
+  type Field,
+  type PopupHandlers,
+} from "../../../../KIDU_COMPONENTS/KiduCreateModal";
 import DSODoctorService from "../../../Services/Masters/DsoDoctor.services";
 import type { DSODoctor } from "../../../Types/Masters/DsoDoctor.types";
-import type { DSOmaster } from '../../../../ADMIN/Types/Master/Master.types';
-import MasterPopup from "../../../../ADMIN/Pages/Master/MasterPopup";
+import type { DSOmaster } from "../../../../ADMIN/Types/Master/Master.types";
+import DSOmasterSelectPopup from "../../../../ADMIN/Pages/Master/PopUp"; // ← exact same import as zone
 
-interface Props {
-  show:      boolean;
-  onHide:    () => void;
-  onSuccess: () => void;
-}
+// ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
   { name: "firstName",   rules: { type: "text",     label: "First Name",     required: true,  maxLength: 50,  colWidth: 6 } },
@@ -21,19 +20,39 @@ const fields: Field[] = [
   { name: "address",     rules: { type: "textarea", label: "Address",        required: true,  maxLength: 200, colWidth: 12 } },
   { name: "info",        rules: { type: "textarea", label: "Specialty/Info", required: false, maxLength: 500, colWidth: 12 } },
   { name: "dsoMasterId", rules: { type: "popup",    label: "DSO Master",     required: true,  colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle",   label: "Active",         colWidth: 6 } },
+  { name: "isActive",    rules: { type: "toggle",   label: "Active",                          colWidth: 6 } },
 ];
 
+// ── Props ─────────────────────────────────────────────────────────────────────
+
+interface Props {
+  show:      boolean;
+  onHide:    () => void;
+  onSuccess: () => void;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 const DSODoctorCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
-  const [showMasterPopup, setShowMasterPopup] = useState(false);
   const [selectedMaster, setSelectedMaster] = useState<DSOmaster | null>(null);
+  const [masterOpen, setMasterOpen] = useState(false);
 
+  // ── Popup handlers wired into KiduCreateModal ─────────────────────────────
+  const popupHandlers: PopupHandlers = {
+    dsoMasterId: {
+      value:   selectedMaster?.name ?? "",
+      onOpen:  () => setMasterOpen(true),
+      onClear: () => setSelectedMaster(null),
+    },
+  };
+
+  // extraValues carries the actual ID merged at submit time
+  const extraValues = {
+    dsoMasterId: selectedMaster?.id ?? null,
+  };
+
+  // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async (formData: Record<string, any>) => {
-    // Validate selection
-    if (!selectedMaster) {
-      throw new Error("Please select a DSO Master");
-    }
-
     const payload: Partial<DSODoctor> = {
       firstName:   formData.firstName,
       lastName:    formData.lastName,
@@ -44,52 +63,42 @@ const DSODoctorCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
       phoneNumber: formData.phoneNumber,
       address:     formData.address,
       info:        formData.info,
-      dsoMasterId: selectedMaster.id, // Use the selected master's ID
+      dsoMasterId: Number(formData.dsoMasterId),
       isActive:    formData.isActive ?? true,
     };
 
     await DSODoctorService.create(payload);
   };
 
-  // Popup handlers must match the PopupFieldHandler interface
-  const popupHandlers = {
-    dsoMasterId: { // This must match the field name exactly
-      value: selectedMaster?.name || "",
-      onOpen: () => setShowMasterPopup(true),
-      onClear: () => {
-        setSelectedMaster(null);
-      }
-    }
-  };
-
-  // Extra values to be merged into formData at submit
-  const extraValues = {
-    dsoMasterId: selectedMaster?.id
+  // ── Reset local state when the modal closes ───────────────────────────────
+  const handleHide = () => {
+    setSelectedMaster(null);
+    onHide();
   };
 
   return (
     <>
       <KiduCreateModal
         show={show}
-        onHide={onHide}
+        onHide={handleHide}
         title="Create Doctor"
-        subtitle="Add new DSO Doctor"
+        subtitle="Add a new DSO Doctor"
         fields={fields}
         onSubmit={handleSubmit}
-        successMessage="Doctor created successfully!"
-        onSuccess={onSuccess}
         popupHandlers={popupHandlers}
         extraValues={extraValues}
+        successMessage="Doctor created successfully!"
+        onSuccess={onSuccess}
       />
-      
-      <MasterPopup
-        show={showMasterPopup}
-        handleClose={() => setShowMasterPopup(false)}
-        onSelect={(master: DSOmaster) => {
+
+      {/* Same DSOmasterSelectPopup as zone — gives the clean pill UI (Image 1) */}
+      <DSOmasterSelectPopup
+        show={masterOpen}
+        onClose={() => setMasterOpen(false)}
+        onSelect={(master) => {
           setSelectedMaster(master);
-          setShowMasterPopup(false);
+          setMasterOpen(false);
         }}
-        showAddButton={true}
       />
     </>
   );

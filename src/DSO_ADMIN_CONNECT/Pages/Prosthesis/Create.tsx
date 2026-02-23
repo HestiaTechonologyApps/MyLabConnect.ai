@@ -1,10 +1,22 @@
 import React, { useState } from "react";
-import type { Field } from "../../../KIDU_COMPONENTS/KiduCreateModal";
-import type { DSOmaster } from "../../../ADMIN/Types/Master/Master.types";
-import type { DSOProsthesisType } from "../../Types/Prosthesis/Prosthesis.types";
+import KiduCreateModal, {
+  type Field,
+  type PopupHandlers,
+} from "../../../KIDU_COMPONENTS/KiduCreateModal";
 import DSOProsthesisTypeService from "../../Services/Prosthesis/Prosthesis.services";
-import KiduCreateModal from "../../../KIDU_COMPONENTS/KiduCreateModal";
-import MasterPopup from "../../../ADMIN/Pages/Master/MasterPopup";
+import type { DSOProsthesisType } from "../../Types/Prosthesis/Prosthesis.types";
+import type { DSOmaster } from "../../../ADMIN/Types/Master/Master.types";
+import DSOmasterSelectPopup from "../../../ADMIN/Pages/Master/PopUp";
+
+// ── Field definitions ─────────────────────────────────────────────────────────
+
+const fields: Field[] = [
+  { name: "name",        rules: { type: "text",   label: "Prosthesis Type Name", required: true, maxLength: 100, colWidth: 12 } },
+  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master",           required: true, colWidth: 6 } },
+  { name: "isActive",    rules: { type: "toggle", label: "Active",                               colWidth: 6 } },
+];
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
   show:      boolean;
@@ -12,95 +24,65 @@ interface Props {
   onSuccess: () => void;
 }
 
-const fields: Field[] = [
-  { 
-    name: "name", 
-    rules: { 
-      type: "text", 
-      label: "Prosthesis Type Name", 
-      required: true, 
-      maxLength: 100, 
-      colWidth: 12 
-    } 
-  },
-  { 
-    name: "dsoMasterId", 
-    rules: { 
-      type: "popup", 
-      label: "DSO Master", 
-      required: true, 
-      colWidth: 6 
-    } 
-  },
-  { 
-    name: "isActive", 
-    rules: { 
-      type: "toggle", 
-      label: "Active", 
-      colWidth: 6 
-    } 
-  },
-];
+// ── Component ─────────────────────────────────────────────────────────────────
 
 const DSOProsthesisTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
-  const [showMasterPopup, setShowMasterPopup] = useState(false);
   const [selectedMaster, setSelectedMaster] = useState<DSOmaster | null>(null);
+  const [masterOpen, setMasterOpen] = useState(false);
 
+  // ── Popup handlers wired into KiduCreateModal ─────────────────────────────
+  const popupHandlers: PopupHandlers = {
+    dsoMasterId: {
+      value:   selectedMaster?.name ?? "",
+      onOpen:  () => setMasterOpen(true),
+      onClear: () => setSelectedMaster(null),
+    },
+  };
+
+  // extraValues carries the actual ID merged at submit time
+  const extraValues = {
+    dsoMasterId: selectedMaster?.id ?? null,
+  };
+
+  // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async (formData: Record<string, any>) => {
-    // Validate selection
-    if (!selectedMaster) {
-      throw new Error("Please select a DSO Master");
-    }
-
     const payload: Partial<DSOProsthesisType> = {
-      name: formData.name,
-      dsoMasterId: selectedMaster.id,
-      isActive: formData.isActive ?? true,
+      name:        formData.name,
+      dsoMasterId: Number(formData.dsoMasterId),
+      isActive:    formData.isActive ?? true,
     };
 
-    console.log("Create payload:", payload); // Debug log
     await DSOProsthesisTypeService.create(payload);
   };
 
-  // Popup handlers must match the PopupFieldHandler interface
-  const popupHandlers = {
-    dsoMasterId: {
-      value: selectedMaster?.name || "",
-      onOpen: () => setShowMasterPopup(true),
-      onClear: () => {
-        setSelectedMaster(null);
-      }
-    }
-  };
-
-  // Extra values to be merged into formData at submit
-  const extraValues = {
-    dsoMasterId: selectedMaster?.id
+  // ── Reset local state when the modal closes ───────────────────────────────
+  const handleHide = () => {
+    setSelectedMaster(null);
+    onHide();
   };
 
   return (
     <>
       <KiduCreateModal
         show={show}
-        onHide={onHide}
+        onHide={handleHide}
         title="Create Prosthesis Type"
-        subtitle="Add new DSO Prosthesis Type"
+        subtitle="Add a new DSO Prosthesis Type"
         fields={fields}
         onSubmit={handleSubmit}
-        successMessage="Prosthesis Type created successfully!"
-        onSuccess={onSuccess}
         popupHandlers={popupHandlers}
         extraValues={extraValues}
+        successMessage="Prosthesis Type created successfully!"
+        onSuccess={onSuccess}
       />
-      
-      <MasterPopup
-        show={showMasterPopup}
-        handleClose={() => setShowMasterPopup(false)}
-        onSelect={(master: DSOmaster) => {
+
+      <DSOmasterSelectPopup
+        show={masterOpen}
+        onClose={() => setMasterOpen(false)}
+        onSelect={(master) => {
           setSelectedMaster(master);
-          setShowMasterPopup(false);
+          setMasterOpen(false);
         }}
-        showAddButton={true}
       />
     </>
   );

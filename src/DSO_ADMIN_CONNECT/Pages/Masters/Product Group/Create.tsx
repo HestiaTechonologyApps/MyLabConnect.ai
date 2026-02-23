@@ -1,9 +1,23 @@
 import React, { useState } from "react";
-import KiduCreateModal, { type Field } from "../../../../KIDU_COMPONENTS/KiduCreateModal";
+import KiduCreateModal, {
+  type Field,
+  type PopupHandlers,
+} from "../../../../KIDU_COMPONENTS/KiduCreateModal";
 import DSOProductGroupService from "../../../Services/Masters/DsoProductGroup.services";
 import type { DSOProductGroup } from "../../../Types/Masters/DsoProductGroup.types";
-import type { DSOmaster } from '../../../../ADMIN/Types/Master/Master.types';
-import MasterPopup from "../../../../ADMIN/Pages/Master/MasterPopup";
+import type { DSOmaster } from "../../../../ADMIN/Types/Master/Master.types";
+import DSOmasterSelectPopup from "../../../../ADMIN/Pages/Master/PopUp";
+
+// ── Field definitions ─────────────────────────────────────────────────────────
+
+const fields: Field[] = [
+  { name: "code",        rules: { type: "text",   label: "Code",       required: true, maxLength: 20,  colWidth: 6 } },
+  { name: "name",        rules: { type: "text",   label: "Name",       required: true, maxLength: 100, colWidth: 6 } },
+  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master", required: true, colWidth: 6 } },
+  { name: "isActive",    rules: { type: "toggle", label: "Active",                     colWidth: 6 } },
+];
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
   show:      boolean;
@@ -11,71 +25,66 @@ interface Props {
   onSuccess: () => void;
 }
 
-const fields: Field[] = [
-  { name: "code",        rules: { type: "text",   label: "Code",       required: true, maxLength: 20,  colWidth: 6 } },
-  { name: "name",        rules: { type: "text",   label: "Name",       required: true, maxLength: 100, colWidth: 6 } },
-  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master", required: true, colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle", label: "Active",     colWidth: 6 } },
-];
+// ── Component ─────────────────────────────────────────────────────────────────
 
 const DsoProductGroupCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
-  const [showMasterPopup, setShowMasterPopup] = useState(false);
   const [selectedMaster, setSelectedMaster] = useState<DSOmaster | null>(null);
+  const [masterOpen, setMasterOpen] = useState(false);
 
+  // ── Popup handlers wired into KiduCreateModal ─────────────────────────────
+  const popupHandlers: PopupHandlers = {
+    dsoMasterId: {
+      value:   selectedMaster?.name ?? "",
+      onOpen:  () => setMasterOpen(true),
+      onClear: () => setSelectedMaster(null),
+    },
+  };
+
+  // extraValues carries the actual ID merged at submit time
+  const extraValues = {
+    dsoMasterId: selectedMaster?.id ?? null,
+  };
+
+  // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async (formData: Record<string, any>) => {
-    if (!selectedMaster) {
-      throw new Error("Please select a DSO Master");
-    }
-    
     const payload: Partial<DSOProductGroup> = {
       code:        formData.code,
       name:        formData.name,
-      dsoMasterId: selectedMaster.id, // Use selectedMaster.id directly
+      dsoMasterId: Number(formData.dsoMasterId),
       isActive:    formData.isActive ?? true,
     };
-    
+
     await DSOProductGroupService.create(payload);
   };
 
-  // Popup handlers must match the PopupFieldHandler interface
-  const popupHandlers = {
-    dsoMasterId: { // This must match the field name exactly
-      value: selectedMaster?.name || "",
-      onOpen: () => setShowMasterPopup(true),
-      onClear: () => {
-        setSelectedMaster(null);
-      }
-    }
-  };
-
-  // Extra values to be merged into formData at submit
-  const extraValues = {
-    dsoMasterId: selectedMaster?.id
+  // ── Reset local state when the modal closes ───────────────────────────────
+  const handleHide = () => {
+    setSelectedMaster(null);
+    onHide();
   };
 
   return (
     <>
       <KiduCreateModal
         show={show}
-        onHide={onHide}
+        onHide={handleHide}
         title="Create Product Group"
-        subtitle="Add new DSO Product Group"
+        subtitle="Add a new DSO Product Group"
         fields={fields}
         onSubmit={handleSubmit}
-        successMessage="Product group created successfully!"
-        onSuccess={onSuccess}
         popupHandlers={popupHandlers}
         extraValues={extraValues}
+        successMessage="Product group created successfully!"
+        onSuccess={onSuccess}
       />
-      
-      <MasterPopup
-        show={showMasterPopup}
-        handleClose={() => setShowMasterPopup(false)}
-        onSelect={(master: DSOmaster) => {
+
+      <DSOmasterSelectPopup
+        show={masterOpen}
+        onClose={() => setMasterOpen(false)}
+        onSelect={(master) => {
           setSelectedMaster(master);
-          setShowMasterPopup(false);
+          setMasterOpen(false);
         }}
-        showAddButton={true}
       />
     </>
   );

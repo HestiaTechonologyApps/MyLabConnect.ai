@@ -2,15 +2,10 @@ import React, { useState, useEffect } from "react";
 import KiduEditModal, { type Field } from "../../../../KIDU_COMPONENTS/KiduEditModal";
 import DSODoctorService from "../../../Services/Masters/DsoDoctor.services";
 import type { DSODoctor } from "../../../Types/Masters/DsoDoctor.types";
-import type { DSOmaster } from '../../../../ADMIN/Types/Master/Master.types';
-import MasterPopup from "../../../../ADMIN/Pages/Master/MasterPopup";
+import type { DSOmaster } from "../../../../ADMIN/Types/Master/Master.types";
+import DSOmasterSelectPopup from "../../../../ADMIN/Pages/Master/PopUp";
 
-interface Props {
-  show:      boolean;
-  onHide:    () => void;
-  onSuccess: () => void;
-  recordId:  string | number;
-}
+// ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
   { name: "firstName",   rules: { type: "text",     label: "First Name",     required: true,  maxLength: 50,  colWidth: 6 } },
@@ -22,12 +17,23 @@ const fields: Field[] = [
   { name: "address",     rules: { type: "textarea", label: "Address",        required: true,  maxLength: 200, colWidth: 12 } },
   { name: "info",        rules: { type: "textarea", label: "Specialty/Info", required: false, maxLength: 500, colWidth: 12 } },
   { name: "dsoMasterId", rules: { type: "popup",    label: "DSO Master",     required: true,  colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle",   label: "Active",         colWidth: 6 } },
+  { name: "isActive",    rules: { type: "toggle",   label: "Active",                          colWidth: 6 } },
 ];
 
+// ── Props ─────────────────────────────────────────────────────────────────────
+
+interface Props {
+  show:      boolean;
+  onHide:    () => void;
+  onSuccess: () => void;
+  recordId:  string | number;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
-  const [showMasterPopup, setShowMasterPopup] = useState(false);
   const [selectedMaster, setSelectedMaster] = useState<DSOmaster | null>(null);
+  const [masterOpen, setMasterOpen] = useState(false);
 
   // Reset selection when modal closes
   useEffect(() => {
@@ -36,28 +42,14 @@ const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
     }
   }, [show]);
 
+  // ── Fetch handler ─────────────────────────────────────────────────────────
   const handleFetch = async (id: string | number) => {
     const response = await DSODoctorService.getById(Number(id));
-    const doctor = response?.value || response?.data || response;
-    
-    // Fetch related master data if needed
-    if (doctor?.dsoMasterId) {
-      try {
-        // You might need to fetch the master details here
-        // This depends on your API structure
-      } catch (error) {
-        console.error("Error fetching master:", error);
-      }
-    }
-    
     return response;
   };
 
+  // ── Update handler ────────────────────────────────────────────────────────
   const handleUpdate = async (id: string | number, formData: Record<string, any>) => {
-    if (!selectedMaster) {
-      throw new Error("Please select a DSO Master");
-    }
-
     const payload: Partial<DSODoctor> = {
       id:          Number(id),
       firstName:   formData.firstName,
@@ -69,7 +61,8 @@ const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
       phoneNumber: formData.phoneNumber,
       address:     formData.address,
       info:        formData.info,
-      dsoMasterId: selectedMaster.id,
+      // KiduEditModal merges actualValue into submitData for popup fields
+      dsoMasterId: Number(formData.dsoMasterId),
       isActive:    formData.isActive ?? true,
     };
 
@@ -77,12 +70,17 @@ const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
     return { isSucess: true, value: payload };
   };
 
+  // ── Popup handlers ────────────────────────────────────────────────────────
+  // actualValue → the ID submitted at update time (merged by KiduEditModal)
+  // value       → the display name shown in the pill
+  // onClear     → required by KiduSelectInputPill interface
   const popupHandlers = {
     dsoMasterId: {
-      value: selectedMaster?.name || "",
+      value:       selectedMaster?.name ?? "",
       actualValue: selectedMaster?.id,
-      onOpen: () => setShowMasterPopup(true)
-    }
+      onOpen:      () => setMasterOpen(true),
+      onClear:     () => setSelectedMaster(null),
+    },
   };
 
   return (
@@ -96,20 +94,20 @@ const DSODoctorEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
         recordId={recordId}
         onFetch={handleFetch}
         onUpdate={handleUpdate}
+        popupHandlers={popupHandlers}
         successMessage="Doctor updated successfully!"
         onSuccess={onSuccess}
-        popupHandlers={popupHandlers}
         submitButtonText="Update Doctor"
       />
-      
-      <MasterPopup
-        show={showMasterPopup}
-        handleClose={() => setShowMasterPopup(false)}
+
+      {/* Same DSOmasterSelectPopup as create page — clean pill UI */}
+      <DSOmasterSelectPopup
+        show={masterOpen}
+        onClose={() => setMasterOpen(false)}
         onSelect={(master) => {
           setSelectedMaster(master);
-          setShowMasterPopup(false);
+          setMasterOpen(false);
         }}
-        showAddButton={true}
       />
     </>
   );
