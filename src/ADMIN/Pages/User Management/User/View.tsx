@@ -29,8 +29,6 @@ const fields: ViewField[] = [
   { name: "isActive",           label: "Active",              colWidth: 4, isToggle: true },
   { name: "islocked",           label: "Locked",              colWidth: 4, isToggle: true },
   { name: "isDeleted",          label: "Deleted",             colWidth: 4, isToggle: true },
-  { name: "createdAt",          label: "Created At",          colWidth: 6, isDate: true },
-  { name: "updatedAt",          label: "Updated At",          colWidth: 6, isDate: true },
 ];
 
 const UserViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {

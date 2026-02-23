@@ -23,8 +23,6 @@ const fields: ViewField[] = [
   { name: "country",       label: "Country",        colWidth: 6 },
   { name: "zipCode",       label: "Zip Code",       colWidth: 6 },
   { name: "isActive",      label: "Status",         colWidth: 6, isToggle: true },
-  { name: "createdAt",     label: "Created At",     colWidth: 6, isDate: true },
-  { name: "updatedAt",     label: "Updated At",     colWidth: 6, isDate: true },
 ];
 
 const CompanyViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {

@@ -18,8 +18,6 @@ const fields: ViewField[] = [
   { name: "isLabAddable",   label: "Lab Addable",    colWidth: 4, isToggle: true },
   { name: "isDoctorAddable",label: "Doctor Addable", colWidth: 4, isToggle: true },
   { name: "isPMAddable",    label: "PM Addable",     colWidth: 4, isToggle: true },
-  { name: "createdAt",      label: "Created At",     colWidth: 6, isDate: true },
-  { name: "updatedAt",      label: "Updated At",     colWidth: 6, isDate: true },
 ];
 
 const UserTypeViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {

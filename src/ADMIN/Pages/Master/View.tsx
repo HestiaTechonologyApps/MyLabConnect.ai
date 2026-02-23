@@ -14,8 +14,6 @@ const fields: ViewField[] = [
   { name: "description", label: "Description", colWidth: 12, isTextarea: true },
   { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
   { name: "isDeleted", label: "Deleted", colWidth: 6, isToggle: true },
-  { name: "createdAt", label: "Created At", colWidth: 6, isDate: true },
-  { name: "updatedAt", label: "Updated At", colWidth: 6, isDate: true },
 ];
 
 const DSOmasterViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
