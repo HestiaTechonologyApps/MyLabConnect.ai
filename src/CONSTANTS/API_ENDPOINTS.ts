@@ -205,7 +205,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOUser/${id}`,
     UPDATE: (id: number) => `${API_BASE_URL}/DSOUser/${id}`,
     DELETE: (id: number) => `${API_BASE_URL}/DSOUser/${id}`,
-    UPDATE_PAGINATION: `${API_BASE_URL}/DSOUser/getall-paginated`,
+    GET_PAGINATED: `${API_BASE_URL}/DSOUser/getall-paginated`,
   },
   LAB_GROUP: {
     GET_ALL: `${API_BASE_URL}/LabGroup`,
