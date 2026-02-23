@@ -8,18 +8,18 @@ import DSOmasterSelectPopup from "../../../ADMIN/Pages/Master/PopUp";
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
-  { name: "name",        rules: { type: "text",   label: "Prosthesis Type Name", required: true, maxLength: 100, colWidth: 12 } },
-  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master",           required: true,                 colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle", label: "Active",                                               colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Prosthesis Type Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
+  { name: "dsoMasterId", rules: { type: "popup", label: "DSO Master", required: true, colWidth: 6 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
-  show:      boolean;
-  onHide:    () => void;
+  show: boolean;
+  onHide: () => void;
   onSuccess: () => void;
-  recordId:  string | number;
+  recordId: string | number;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -48,10 +48,10 @@ const DSOProsthesisTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, 
   // ── Update handler ────────────────────────────────────────────────────────
   const handleUpdate = async (id: string | number, formData: Record<string, any>) => {
     const payload: Partial<DSOProsthesisType> = {
-      id:          Number(id),
-      name:        formData.name,
+      id: Number(id),
+      name: formData.name,
       dsoMasterId: Number(formData.dsoMasterId),
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     await DSOProsthesisTypeService.update(Number(id), payload);
@@ -61,10 +61,10 @@ const DSOProsthesisTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, 
   // ── Popup handlers ────────────────────────────────────────────────────────
   const popupHandlers = {
     dsoMasterId: {
-      value:       selectedMaster?.name ?? "",
+      value: selectedMaster?.name ?? "",
       actualValue: selectedMaster?.id,
-      onOpen:      () => setMasterOpen(true),
-      onClear:     () => setSelectedMaster(null),
+      onOpen: () => setMasterOpen(true),
+      onClear: () => setSelectedMaster(null),
     },
   };
 

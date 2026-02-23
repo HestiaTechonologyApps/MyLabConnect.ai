@@ -11,16 +11,16 @@ import DSOmasterSelectPopup from "../../../ADMIN/Pages/Master/PopUp";
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
-  { name: "name",        rules: { type: "text",   label: "Prosthesis Type Name", required: true, maxLength: 100, colWidth: 12 } },
-  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master",           required: true, colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle", label: "Active",                               colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Prosthesis Type Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
+  { name: "dsoMasterId", rules: { type: "popup", label: "DSO Master", required: true, colWidth: 6 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
-  show:      boolean;
-  onHide:    () => void;
+  show: boolean;
+  onHide: () => void;
   onSuccess: () => void;
 }
 
@@ -33,8 +33,8 @@ const DSOProsthesisTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess
   // ── Popup handlers wired into KiduCreateModal ─────────────────────────────
   const popupHandlers: PopupHandlers = {
     dsoMasterId: {
-      value:   selectedMaster?.name ?? "",
-      onOpen:  () => setMasterOpen(true),
+      value: selectedMaster?.name ?? "",
+      onOpen: () => setMasterOpen(true),
       onClear: () => setSelectedMaster(null),
     },
   };
@@ -47,9 +47,9 @@ const DSOProsthesisTypeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess
   // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async (formData: Record<string, any>) => {
     const payload: Partial<DSOProsthesisType> = {
-      name:        formData.name,
+      name: formData.name,
       dsoMasterId: Number(formData.dsoMasterId),
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     await DSOProsthesisTypeService.create(payload);
