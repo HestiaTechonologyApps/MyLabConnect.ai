@@ -6,12 +6,15 @@ import { Navigate, Route } from 'react-router-dom';
 import HomePage from '../Pages/Home/HomePage';
 
 // ── Masters ────────────────────────────────────────────────────────
+import LabGroupList from '../Pages/Masters/Lab Group/List';
+
 import DsoDoctorList from '../Pages/Masters/Doctors/List';
 
 // ── Setup ──────────────────────────────────────────────────────────
 import DSOZoneList from '../Pages/Setup/Zone/List';
 import { DsoUserLayout } from '../Layout/DsoUserLayout';
 import DsoProductGroupList from '../Pages/Masters/Product Group/List';
+
 import DSOProsthesisTypeList from '../Pages/Prosthesis/List';
 import DSOSchemaList from '../Pages/Schema/List';
 import DSORestorationTypeList from '../Pages/Restoration/List';
@@ -31,6 +34,7 @@ export const dsoadminConnectRoutes = (
     <Route path="analytics" element={<div><h5>Analytics</h5></div>} />
 
     {/* Masters */}
+    <Route path="masters/labgroup-list" element={<LabGroupList />} />
     <Route path="masters/doctor-list" element={<DsoDoctorList />} />
     <Route path="masters/productGroup-list" element={<DsoProductGroupList />} />
     <Route path="masters/lab" element={<div><h5>Lab</h5></div>} />

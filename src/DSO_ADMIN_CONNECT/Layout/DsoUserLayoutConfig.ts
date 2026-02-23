@@ -24,7 +24,8 @@ import {
     User,
     Key,
     Sparkles,
-    RefreshCw
+    RefreshCw,
+    LucideMicroscope
 } from 'lucide-react';
 import type { MenuItem } from '../../Types/KiduTypes/Sidebar.types';
 import type { UserProfile, NotificationItem, NavbarAction } from '../../Types/KiduTypes/Navbar.types';
@@ -54,6 +55,7 @@ export const dsoAdminMenuItems: MenuItem[] = [
         icon: Users,
         children: [
             { title: 'Lab', url: '/dsoadmin-connect/masters/lab', icon: Microscope },
+             { title: 'Lab Group', url: '/dsoadmin-connect/masters/labgroup-list', icon: LucideMicroscope },
             { title: 'Practice', url: '/dsoadmin-connect/masters/practice', icon: Building2 },
             { title: 'Doctor', url: '/dsoadmin-connect/masters/doctor-list', icon: UserCog },
             { title: 'Product Group', url: '/dsoadmin-connect/masters/productGroup-list', icon: Package },

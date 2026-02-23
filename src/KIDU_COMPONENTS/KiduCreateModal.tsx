@@ -6,6 +6,8 @@ import Swal from "sweetalert2";
 import "../Styles/KiduStyles/CreateModal.css";
 import KiduValidation from "./KiduValidation";
 import { KiduSelectInputPill } from "./KiduSelectPopup";
+import type { KiduDropdownOption } from "./KiduDropdownSelect";
+import KiduDropdownSelect from "./KiduDropdownSelect";
 
 // ==================== TYPES ====================
 
@@ -25,7 +27,8 @@ export interface FieldRule {
     | "toggle"
     | "rowbreak"
     | "dropdown"
-    | "file";
+    | "file"
+    | "dropdown";
   label: string;
   required?: boolean;
   minLength?: number;
@@ -72,6 +75,16 @@ export interface SelectOption {
  *     setFormExtra({ dsoMasterId: master.id });
  *   }}
  */
+
+export interface DropdownFieldHandler {
+  value: string | number;
+  options?: KiduDropdownOption[];
+  fetchEndpoint?: string;
+  mapResponse?: (item: any) => KiduDropdownOption;
+  onChange: (value: string | number) => void;
+  onClear: () => void;
+}
+
 export interface PopupFieldHandler {
   /** Display label shown in the pill input */
   value: string;
@@ -83,6 +96,8 @@ export interface PopupFieldHandler {
 
 /** Map of field name → PopupFieldHandler */
 export type PopupHandlers = Record<string, PopupFieldHandler>;
+export type DropdownHandlers = Record<string, DropdownFieldHandler>;
+
 
 export interface KiduCreateModalProps {
   show: boolean;
@@ -103,6 +118,7 @@ export interface KiduCreateModalProps {
    * Extra values that are controlled outside the modal (e.g. selected popup IDs).
    * Merged into formData at submit time so onSubmit receives them.
    */
+  dropdownHandlers?: DropdownHandlers;
   extraValues?: Record<string, any>;
   loadingState?: boolean;
   successMessage?: string;
@@ -126,6 +142,7 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
   cancelButtonText = "Cancel",
   options = {},
   popupHandlers = {},
+  dropdownHandlers = {},
   extraValues = {},
   loadingState = false,
   successMessage = "Created successfully!",
@@ -140,7 +157,7 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
     const values: Record<string, any> = {};
     const errs: Record<string, string> = {};
     fields.forEach((f) => {
-      if (f.rules.type === "rowbreak" || f.rules.type === "popup") return;
+      if (f.rules.type === "rowbreak" || f.rules.type === "popup" || f.rules.type === "dropdown") return;
       if (f.rules.type === "toggle" || f.rules.type === "checkbox") {
         values[f.name] = false;
       } else if (f.rules.type === "radio" && options[f.name]?.length) {
@@ -207,6 +224,14 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
       setErrors((prev) => ({ ...prev, [name]: "" }));
       return true;
     }
+    if (rule.type === "dropdown") {
+      if (rule.required && !dropdownHandlers[name]?.value) {
+        setErrors((prev) => ({ ...prev, [name]: `${rule.label} is required` }));
+        return false;
+      }
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+      return true;
+    }
 
     if ((rule.type === "toggle" || rule.type === "checkbox") && rule.required && !value) {
       setErrors((prev) => ({ ...prev, [name]: `${rule.label} is required` }));
@@ -232,6 +257,12 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
         if (required && !popupHandlers[f.name]?.value?.trim()) {
           newErrors[f.name] = `${label} is required`;
           isValid = false;
+        }
+        return;
+      }
+      if (type === "dropdown") {
+        if (required && !dropdownHandlers[f.name]?.value) {
+          newErrors[f.name] = `${label} is required`; isValid = false;
         }
         return;
       }
@@ -272,8 +303,13 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      // Auto-merge all kidu-dropdown values into submit data
+      const dropdownValues: Record<string, any> = {};
+      Object.entries(dropdownHandlers).forEach(([key, handler]) => {
+        dropdownValues[key] = handler.value !== "" ? handler.value : null;
+      });
       // Merge extra values (popup IDs etc.) into form data
-      const submitData = { ...formData, ...extraValues };
+      const submitData = { ...formData,...dropdownValues, ...extraValues };
       await onSubmit(submitData);
 
       onHide();
@@ -327,6 +363,32 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
             disabled={disabled}
             error={errors[name]}
             inputWidth="100%"
+          />
+        );
+      }
+
+      // ── KIDU-DROPDOWN (fetched or static options, pill display) ───────────
+      case "dropdown": {
+        const handler = dropdownHandlers[name];
+        return (
+          <KiduDropdownSelect
+            name={name}
+            value={handler?.value ?? ""}
+            options={handler?.options}
+            fetchEndpoint={handler?.fetchEndpoint}
+            mapResponse={handler?.mapResponse}
+            onChange={(val) => {
+              handler?.onChange(val);
+              if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+            }}
+            onClear={() => {
+              handler?.onClear();
+              if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+            }}
+            onBlur={() => handleBlur(name)}
+            placeholder={`Select ${rules.label}...`}
+            required={rules.required} disabled={disabled}
+            error={errors[name]} inputWidth="100%"
           />
         );
       }
@@ -521,7 +583,7 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
         {renderFormControl(field)}
 
         {/* Popup errors are rendered inside KiduSelectInputPill; skip duplicate */}
-        {rules.type !== "popup" && errors[name] && (
+        {rules.type !== "popup" && rules.type !== "dropdown" && errors[name] && (
           <div className="kidu-error-message">{errors[name]}</div>
         )}
       </Col>
