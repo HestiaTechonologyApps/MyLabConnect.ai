@@ -6,14 +6,22 @@ import {
     Settings,
     FileText,
     Package,
-    ClipboardList,
-    Microscope,
-    Truck,
-    FileBarChart,
-    DollarSign,
     Clock,
     User,
     Key,
+    MessageSquare,
+    Mail,
+    Globe,
+    Ticket,
+    Shield,
+    Users,
+    Sliders,
+    Scan,
+    FileSpreadsheet,
+    Camera,
+    CheckSquare,
+    AlertCircle,
+    Receipt,
 } from 'lucide-react';
 import type { MenuItem } from '../../Types/KiduTypes/Sidebar.types';
 import type { UserProfile, NotificationItem, NavbarAction } from '../../Types/KiduTypes/Navbar.types';
@@ -23,45 +31,58 @@ import AuthService from '../../Services/AuthServices/Auth.services';
 export const labMenuItems: MenuItem[] = [
     {
         title: 'Home',
+        url: '/lab-connect/home',
         icon: Home,
+    },
+    {
+        title: 'Case Communication',
+        icon: MessageSquare,
         children: [
-            { title: 'Dashboard', url: '/lab-connect', icon: Home },
-            { title: 'Active Orders', url: '/lab-connect/orders/active', icon: Package, badge: 15 },
-            { title: 'In Production', url: '/lab-connect/orders/in-production', icon: Microscope, badge: 8 },
-            { title: 'Ready to Ship', url: '/lab-connect/orders/ready', icon: Truck, badge: 3 },
+            { title: 'Internal', url: '/lab-connect/caseCommunication/internal', icon: Mail },
+            { title: 'External', url: '/lab-connect/caseCommunication/external', icon: Globe },
+            { title: 'Open Ticket for Action', url: '/lab-connect/caseCommunication/openTicketForAction', icon: Ticket },
         ],
     },
     {
-        title: 'Analytics',
-        url: '/lab-connect/analytics',
-        icon: BarChart3,
-    },
-    {
-        title: 'Orders',
-        url: '/lab-connect/orders',
-        icon: ClipboardList,
-    },
-    {
-        title: 'Production',
-        icon: Package,
+        title: 'Masters',
+        icon: Shield,
         children: [
-            { title: 'Queue', url: '/lab-connect/production/queue', icon: Clock },
-            { title: 'In Progress', url: '/lab-connect/production/progress', icon: Package },
-            { title: 'Quality Check', url: '/lab-connect/production/quality', icon: Microscope },
+            { title: 'Support Types', url: '/lab-connect/masters/supportTypes', icon: Settings },
+            { title: 'Query Types', url: '/lab-connect/masters/queryTypes', icon: AlertCircle },
+            { title: 'Case Rating Notification', url: '/lab-connect/masters/caseRatingNotification', icon: Clock },
+            { title: 'Lab Supply', url: '/lab-connect/masters/labSupply', icon: Package },
         ],
     },
     {
-        title: 'Reports',
-        icon: FileText,
+        title: 'User Management',
+        icon: Users,
         children: [
-            { title: 'Production Report', url: '/lab-connect/reports/production', icon: FileBarChart },
-            { title: 'Revenue Report', url: '/lab-connect/reports/revenue', icon: DollarSign },
+            { title: 'Lab Login', url: '/lab-connect/userManagement/labLogin', icon: User },
+            { title: 'Lab Control Setting', url: '/lab-connect/userManagement/labControlSetting', icon: Sliders },
         ],
     },
     {
-        title: 'Settings',
-        url: '/lab-connect/settings',
+        title: 'Utility',
         icon: Settings,
+        children: [
+            { title: 'Trios Order Creation', url: '/lab-connect/utility/triosOrderCreation', icon: Scan },
+        ],
+    },
+    {
+        title: 'Lab Reports',
+        icon: FileSpreadsheet,
+        children: [
+            { title: 'Case List', url: '/lab-connect/labReports/caseList', icon: FileText },
+            { title: 'IOS List', url: '/lab-connect/labReports/iosList', icon: Camera },
+            { title: 'Daily Scan QC', url: '/lab-connect/labReports/dailyScanqc', icon: CheckSquare },
+            { title: 'Case Rating', url: '/lab-connect/labReports/caseRating', icon: BarChart3 },
+            { title: 'Ticket Status', url: '/lab-connect/labReports/ticketStatus', icon: Ticket },
+        ],
+    },
+    {
+        title: 'Invoices',
+        url: '/lab-connect/invoices',
+        icon: Receipt,
     },
 ];
 
