@@ -64,6 +64,7 @@ export const dsoAdminMenuItems: MenuItem[] = [
             { title: 'User Role Creation', url: '/dsoadmin-connect/masters/user-roles', icon: UserPlus },
             { title: 'Dental Office', url: '/dsoadmin-connect/masters/dentalOffice-list', icon: Syringe },
             { title: 'Material', url: '/dsoadmin-connect/masters/material-list', icon: Box },
+            { title: 'Territory', url:'/dsoadmin-connect/masters/territory-list', icon: Box}
 
         ],
     },

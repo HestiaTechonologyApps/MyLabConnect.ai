@@ -24,6 +24,7 @@ import DSODentalOfficeList from '../Pages/Masters/Dental Office/List';
 import DSOMaterialList from '../Pages/Masters/Material/List';
 import DSORegionList from '../Pages/Setup/Region/List';
 import DSOSettingList from '../Pages/Setup/Settings/List';
+import DSOTerritoryList from '../Pages/Masters/Territory/List';
 
 // ── Add more page imports here as you build them ──────────────────
 // import DsoLabList       from '../Pages/Masters/Lab/List';
@@ -48,6 +49,7 @@ export const dsoadminConnectRoutes = (
     <Route path="masters/user-roles" element={<div><h5>User Role Creation</h5></div>} />
     <Route path="masters/dentalOffice-list" element={<DSODentalOfficeList />} />
     <Route path="masters/material-list" element={<DSOMaterialList/>} />
+    <Route path="masters/territory-list" element={<DSOTerritoryList/>}/>
 
 
     {/* Setup */}
