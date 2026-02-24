@@ -2,6 +2,11 @@ import {
   Home, BarChart3, Users, Settings, FileText,
   Building2, UserCog, UserPlus, FileBarChart,
   DollarSign, HelpCircle, Microscope, CalendarRange,
+  LucideMicroscope,
+  Package,
+  Syringe,
+  Box,
+  Building,
 } from 'lucide-react';
 import type { MenuItem } from '../../Types/KiduTypes/Sidebar.types';
 import type { UserProfile, NotificationItem } from '../../Types/KiduTypes/Navbar.types';
@@ -15,7 +20,7 @@ export const appAdminMenuItems: MenuItem[] = [
     title: 'Masters',
     icon: Microscope,
     children: [
-      { title: 'DSO Master List', url: '/appadmin-connect/masters/master-list', icon: Microscope },
+      { title: 'DSO List', url: '/appadmin-connect/masters/master-list', icon: Microscope },
     ],
   },
   {
@@ -24,6 +29,20 @@ export const appAdminMenuItems: MenuItem[] = [
     children: [
       { title: 'Users', url: '/appadmin-connect/users/user-list', icon: Users },
       { title: 'User Types', url: '/appadmin-connect/users/usertype-list', icon: UserPlus },
+    ],
+  },
+  {
+    title: 'DSO Management',
+    icon: Building,
+    children: [
+      { title: 'Lab Group', url: '/appadmin-connect/dso/labgroup-list', icon: LucideMicroscope },
+      { title: 'Lab', url: '/appadmin-connect/dso/lab-list', icon: Microscope },
+      { title: 'Practice', url: '/appadmin-connect/dso/practice-list', icon: Building2 },
+      { title: 'Doctor', url: '/appadmin-connect/dso/doctor-list', icon: UserCog },
+      { title: 'Product Group', url: '/appadmin-connect/dso/productGroup-list', icon: Package },
+      { title: 'User Role Creation', url: '/appadmin-connect/dso/user-roles', icon: UserPlus },
+      { title: 'Dental Office', url: '/appadmin-connect/dso/dentalOffice-list', icon: Syringe },
+      { title: 'Material', url: '/appadmin-connect/dso/material-list', icon: Box },
     ],
   },
   {
