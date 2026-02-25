@@ -1,4 +1,4 @@
-// src/DOCTOR_CONNECT/Pages/Home/HomePage.tsx
+// src/DOCTOR_CONNECT/Layout/HomePage.tsx
 
 import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';

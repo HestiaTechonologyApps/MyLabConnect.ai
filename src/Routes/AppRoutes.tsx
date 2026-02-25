@@ -13,8 +13,8 @@ import { dsoadminConnectRoutes }  from '../DSO_ADMIN_CONNECT/Routes/Route';
 import { labConnectRoutes }       from '../LAB_CONNECT/Routes/Route';
 import { practiceConnectRoutes }  from '../PRACTICE_CONNECT/Routes/Route';
 import { adminConnectRoutes } from '../ADMIN/Routes/Route';
-// import { doctorConnectRoutes }    from '../DOCTOR_CONNECT/Routes/Route';
-// import { integratorConnectRoutes } from '../INTEGRATOR_CONNECT/Routes/Route';
+import { doctorConnectRoutes }    from '../DOCTOR_CONNECT/Routes/Route';
+import { integratorConnectRoutes } from '../INTEGRATOR_CONNECT/Routes/Route';
 
 // ─── Unauthorized page ────────────────────────────────────────────
 // Simple page shown when a logged-in user tries to access the wrong portal
@@ -72,25 +72,25 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── Doctor Portal ─────────────────────────────────────────── */}
-    {/* <Route
+   {/* ── Doctor Portal ─────────────────────────────────────────── */}
+    <Route
       path="/doctor-connect/*"
       element={
         <ProtectedRoute allowedUserTypes={['Doctor']}>
           <Routes>{doctorConnectRoutes}</Routes>
         </ProtectedRoute>
       }
-    /> */}
+    />
 
     {/* ── Integrator Portal ─────────────────────────────────────── */}
-    {/* <Route
+    <Route
       path="/integrator-connect/*"
       element={
         <ProtectedRoute allowedUserTypes={['Integrator']}>
           <Routes>{integratorConnectRoutes}</Routes>
         </ProtectedRoute>
       }
-    /> */}
+    />
 
     {/* ── Unauthorized ──────────────────────────────────────────── */}
     <Route path="/unauthorized" element={<Unauthorized />} />

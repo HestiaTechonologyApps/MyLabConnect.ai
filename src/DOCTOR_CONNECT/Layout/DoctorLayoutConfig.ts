@@ -1,4 +1,4 @@
-// src/DOCTOR_CONNECT/Config/LayoutConfig.ts
+// src/DOCTOR_CONNECT/Layout/DoctorLayoutConfig.ts
 
 import {
     Home,
