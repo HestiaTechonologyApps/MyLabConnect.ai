@@ -1,6 +1,6 @@
 /* ============================================================
    CaseDashboard.css — MyLab Connect Dashboard layout
-   Colors via CSS custom properties from theme.css / _theme.scss
+   All colours via CSS custom properties from _theme.scss
    ============================================================ */
 
 /* ── Page body ── */
@@ -14,7 +14,7 @@
   font-family: 'Outfit', sans-serif;
 }
 
-/* ── Label bar (view title + action buttons) ── */
+/* ── Label bar ── */
 .dash-label-bar {
   display: flex;
   align-items: center;
@@ -28,6 +28,14 @@
   font-weight: 700;
   color: var(--theme-text-primary);
   letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dash-view-icon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .dash-label-actions {
@@ -46,6 +54,7 @@
   border-radius: 20px;
 }
 
+/* ── Action buttons ── */
 .dash-action-btn {
   padding: 6px 14px;
   border-radius: 8px;
@@ -64,7 +73,6 @@
   color: #fff;
   box-shadow: 0 3px 10px rgba(239, 13, 80, 0.28);
 }
-
 .dash-action-btn--primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 5px 16px rgba(239, 13, 80, 0.4);
@@ -75,23 +83,22 @@
   color: #3b82f6;
   border: 1px solid rgba(59, 130, 246, 0.25);
 }
-
 .dash-action-btn--info:hover {
   background: #3b82f6;
   color: #fff;
 }
 
-/* ── Cards scroll area ── */
+/* ── Cards area ── */
 .dash-cards-area {
   flex: 1;
 }
 
-/* ── Cards grid — responsive columns ── */
+/* ── Cards grid — responsive ── */
 .dash-cards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .dash-cards-grid.transitioning {
@@ -103,60 +110,131 @@
 .dash-empty {
   grid-column: 1 / -1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 72px 20px;
   color: var(--theme-text-secondary);
-  font-size: 0.82rem;
   text-align: center;
+  gap: 12px;
 }
 
-/* ── Responsive breakpoints ── */
+.dash-empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.35;
+}
 
-/* Large desktop: 4 columns (1280px+) — default above */
+.dash-empty p {
+  font-size: 0.82rem;
+  font-weight: 500;
+  opacity: 0.7;
+  margin: 0;
+}
 
-/* Standard desktop / large tablet: 3 columns */
+/* ── Skeleton card ── */
+.dash-skeleton-card {
+  border-radius: 16px;
+  background: var(--theme-bg-paper);
+  border: 1.5px solid var(--theme-border);
+  padding: 18px 15px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.skel-bar {
+  height: 3px;
+  border-radius: 3px;
+  margin: -18px -15px 2px;
+  background: linear-gradient(
+    90deg,
+    var(--theme-border) 25%,
+    rgba(255,255,255,0.1) 50%,
+    var(--theme-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s infinite;
+}
+
+.skel-line {
+  height: 10px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--theme-border) 25%,
+    rgba(255,255,255,0.1) 50%,
+    var(--theme-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s infinite;
+}
+
+.skel-line--title  { height: 14px; width: 70%; }
+.skel-line--short  { width: 55%; }
+.skel-line--xs     { width: 30%; height: 8px; }
+
+.skel-divider {
+  height: 1px;
+  background: var(--theme-border);
+  margin: 2px 0;
+}
+
+.skel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--theme-border);
+}
+
+.skel-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--theme-border) 25%,
+    rgba(255,255,255,0.1) 50%,
+    var(--theme-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s infinite;
+}
+
+@keyframes skelShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+[data-theme='dark'] .skel-line,
+[data-theme='dark'] .skel-bar,
+[data-theme='dark'] .skel-circle {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.06) 25%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s infinite;
+}
+
+/* ── Responsive ── */
 @media (max-width: 1280px) {
-  .dash-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
+  .dash-cards-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
 }
-
-/* Tablet landscape: 2 columns */
 @media (max-width: 1024px) {
-  .dash-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 13px;
-  }
-  .dash-page-body {
-    padding: 16px;
-  }
+  .dash-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 13px; }
+  .dash-page-body  { padding: 16px; }
 }
-
-/* Tablet portrait: 2 columns (tighter) */
 @media (max-width: 768px) {
-  .dash-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .dash-page-body {
-    padding: 14px;
-    gap: 12px;
-  }
+  .dash-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .dash-page-body  { padding: 14px; gap: 12px; }
 }
-
-/* Mobile: 1 column */
 @media (max-width: 540px) {
-  .dash-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .dash-page-body {
-    padding: 12px;
-    gap: 10px;
-  }
-  .dash-view-label {
-    font-size: 0.8rem;
-  }
+  .dash-cards-grid { grid-template-columns: 1fr; gap: 10px; }
+  .dash-page-body  { padding: 12px; gap: 10px; }
+  .dash-view-label { font-size: 0.8rem; }
 }

@@ -4,12 +4,12 @@
 
 import { Navigate, Route } from 'react-router-dom';
 import AppAdminLayout from '../Layout/AppAdminLayout';
-import HomePage from '../Layout/HomePage';
 import DSOmasterList from '../Pages/Master/List';
 import UserList from '../Pages/User Management/User/List';
 import UserTypeList from '../Pages/User Management/User Type/List';
 import CompanyList from '../Pages/Company/List';
 import FinancialYearList from '../Pages/Settings/Financial Year/List';
+import AdminIndexPage from '../Layout/IndexPage';
 
 // ── Add page imports here as you build them ────────────────────────
 // import DSOmasterList from '../Pages/Master/List';
@@ -18,7 +18,7 @@ import FinancialYearList from '../Pages/Settings/Financial Year/List';
 export const adminConnectRoutes = (
   <Route path="/" element={<AppAdminLayout />}>
 
-    <Route index element={<HomePage />} />
+    <Route index element={<AdminIndexPage />} />
 
     {/* Masters */}
     {/* <Route path="masters/master-list" element={<DSOmasterList />} /> */}

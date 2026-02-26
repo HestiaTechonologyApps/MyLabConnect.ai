@@ -1,6 +1,6 @@
 // src/APPADMIN_CONNECT/Pages/Home/HomePage.tsx
 
-import React, {  } from 'react';
+import React, { } from 'react';
 import { Container } from 'react-bootstrap';
 import {
   Users,
@@ -15,7 +15,6 @@ import {
 import AuthService from '../../Services/AuthServices/Auth.services';
 import type { StatCardProps } from '../../Types/KiduTypes/StatCard.types';
 import KiduStatsCardsGrid from '../../KIDU_COMPONENTS/KiduStatsCardsGrid';
-
 
 // ─── Recent Activity Item type ────────────────────────────────────
 interface ActivityItem {

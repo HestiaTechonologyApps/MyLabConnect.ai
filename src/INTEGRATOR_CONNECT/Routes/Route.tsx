@@ -2,13 +2,13 @@
 
 import { Navigate, Route } from 'react-router-dom';
 import IntegratorLayout from '../Layout/InegratorLayout';
-import HomePage from '../Layout/HomePage';
+import IntegratorIndexPage from '../Layout/IndexPage';
 
 export const integratorConnectRoutes = (
     <Route path="/" element={<IntegratorLayout />}>
 
         {/* Home / Dashboard */}
-        <Route index element={<HomePage />} />
+        <Route index element={<IntegratorIndexPage />} />
 
         {/* Analytics */}
         <Route path="analytics" element={<div><h5>Analytics</h5></div>} />
