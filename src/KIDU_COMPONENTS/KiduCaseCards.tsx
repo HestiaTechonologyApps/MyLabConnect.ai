@@ -1,25 +1,15 @@
 /* ============================================================
-   KiduCaseCards.tsx
-   MyLab Connect — Reusable Case Card component.
-
-   Card modes & buttons:
-   ┌─────────────┬─────────────────────────────────────────────┐
-   │ doctor      │ Chat + Status + Help                        │
-   │ practice    │ Chat + Support (+ Rush badge if isRush)     │
-   │ dso         │ View-only — no buttons                      │
-   │ lab         │ Update Status + Help                        │
-   │ admin       │ View-only — no buttons                      │
-   │ integrator  │ View-only — no buttons                      │
-   └─────────────┴─────────────────────────────────────────────┘
-
-   Rush cards: pulsing orange border + corner RUSH tag.
-   Rush cards in doctor/practice modes get an extra rush
-   action button in the footer for quick identification.
+   KiduCaseCards.tsx — updated
+   Clicking any card opens CaseDetailModal with that card's data.
+   No UI or CSS changes. All existing behaviour preserved.
    ============================================================ */
 
 import React, { useState } from 'react';
 import '.././Styles/KiduStyles/CaseCards.css';
 import QuickChatModal from './KiduQuickChatModal';
+import type { CaseDetailData, LoginRole } from './KiduCaseDetailModal';
+import CaseDetailModal from './KiduCaseDetailModal';
+// adjust import path to match your project
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -60,6 +50,11 @@ export interface CaseCardProps {
   isRush?: boolean;
   mode: CardMode;
   disableChat?: boolean;
+  /**
+   * Optional full or partial CaseDetailData to enrich the modal.
+   * Fields not provided will be inferred from the card's own props.
+   */
+  caseDetailData?: Partial<CaseDetailData>;
   onClick?: () => void;
   onStatusClick?: () => void;
   onSupportClick?: () => void;
@@ -68,7 +63,7 @@ export interface CaseCardProps {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SVG Icons
+// SVG Icons  (unchanged)
 // ─────────────────────────────────────────────────────────────
 
 const IconCopy = () => (
@@ -131,32 +126,104 @@ function getTypeBadgeClass(type: CaseType): string {
   return 'case-card__type-badge--analog';
 }
 
-/** Roles that show zero action buttons */
 const VIEW_ONLY_MODES: CardMode[] = ['dso', 'admin', 'integrator'];
+
+/** Map CardMode → LoginRole for the modal. */
+function mapModeToRole(mode: CardMode): LoginRole {
+  if (mode === 'integrator') return 'admin';
+  return mode as LoginRole;
+}
+
+/**
+ * Derive a 6-step progress array from the card's status.
+ * The first step always gets the card's date as a timestamp.
+ */
+function buildStepsFromStatus(status: CaseStatus, date: string) {
+  const LABELS = ['Booking', 'Submitted', 'Accepted', 'Production', 'Shipped', 'Arrival'];
+
+  // How many steps are "done" for each status
+  const doneCount: Record<CaseStatus, number> = {
+    submitted:  2,
+    hold:       2,
+    production: 4,
+    transit:    5,
+    recent:     6,
+    rejected:   1,
+  };
+
+  const done = doneCount[status] ?? 1;
+  const isHold = status === 'hold';
+
+  return LABELS.map((label, idx) => {
+    const stepDate = idx === 0 ? date : undefined;
+
+    if (isHold && idx === done - 1) {
+      // Last completed step is on hold
+      return { label, status: 'hold' as const, date: stepDate };
+    }
+    if (idx < done) {
+      return { label, status: 'done' as const, date: stepDate };
+    }
+    if (idx === done) {
+      return { label, status: 'active' as const };
+    }
+    return { label, status: 'pending' as const };
+  });
+}
+
+/** Merge card props + optional caseDetailData into a full CaseDetailData object. */
+function buildModalData(props: CaseCardProps): CaseDetailData {
+  const extra = props.caseDetailData ?? {};
+
+  return {
+    id:             props.caseId,
+    patientName:    props.patientName,
+    patientId:      props.patientId,
+    lab:            props.labName,
+    doctorName:     props.doctorName,
+    practiceName:   extra.practiceName,
+    doctorId:       extra.doctorId,
+    address:        extra.address,
+    status:         props.status,
+    statusNote:     extra.statusNote,
+    steps:          extra.steps ?? buildStepsFromStatus(props.status, props.date),
+    alertMessage:   extra.alertMessage,
+    restoration:    extra.restoration,
+    additionalInfo: extra.additionalInfo,
+    caseNotes:      extra.caseNotes,
+    iosRemarks:     extra.iosRemarks,
+    files:          extra.files        ?? [],
+    chatMessages:   extra.chatMessages ?? [],
+    history:        extra.history      ?? [],
+  };
+}
 
 // ─────────────────────────────────────────────────────────────
 // CaseCard Component
 // ─────────────────────────────────────────────────────────────
 
-const CaseCard: React.FC<CaseCardProps> = ({
-  patientName,
-  patientId,
-  caseId,
-  caseType,
-  doctorName,
-  labName,
-  date,
-  status,
-  isRush = false,
-  mode,
-  disableChat = false,
-  onClick,
-  onStatusClick,
-  onSupportClick,
-  onSendMessage,
-  animationDelay = 0,
-}) => {
-  const [chatOpen, setChatOpen] = useState(false);
+const CaseCard: React.FC<CaseCardProps> = (props) => {
+  const {
+    patientName,
+    patientId,
+    caseId,
+    caseType,
+    doctorName,
+    labName,
+    date,
+    status,
+    isRush = false,
+    mode,
+    disableChat = false,
+    onClick,
+    onStatusClick,
+    onSupportClick,
+    onSendMessage,
+    animationDelay = 0,
+  } = props;
+
+  const [chatOpen,  setChatOpen]  = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const cardClasses = [
     'case-card',
@@ -189,18 +256,19 @@ const CaseCard: React.FC<CaseCardProps> = ({
     </div>
   );
 
-  // ── Resolve buttons by mode ──
+  // ── Buttons by mode (unchanged logic) ──
   const renderActions = () => {
-    // view-only modes — no buttons
     if (VIEW_ONLY_MODES.includes(mode)) return null;
 
     if (mode === 'lab') {
       return (
         <>
-          <ActionBtn type="status" label="Update Status" onBtnClick={(e) => { stopProp(e); onStatusClick?.(); }}>
+          <ActionBtn type="status" label="Update Status"
+            onBtnClick={(e) => { stopProp(e); onStatusClick?.(); }}>
             <IconStatus />
           </ActionBtn>
-          <ActionBtn type="help" label="Help" onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
+          <ActionBtn type="help" label="Help"
+            onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
             <IconHelp />
           </ActionBtn>
         </>
@@ -210,13 +278,16 @@ const CaseCard: React.FC<CaseCardProps> = ({
     if (mode === 'doctor') {
       return (
         <>
-          <ActionBtn type="chat" label="Chat" onBtnClick={(e) => { stopProp(e); setChatOpen(true); }}>
+          <ActionBtn type="chat" label="Chat"
+            onBtnClick={(e) => { stopProp(e); setChatOpen(true); }}>
             <IconChat />
           </ActionBtn>
-          <ActionBtn type="status" label="Status" onBtnClick={(e) => { stopProp(e); onStatusClick?.(); }}>
+          <ActionBtn type="status" label="Status"
+            onBtnClick={(e) => { stopProp(e); onStatusClick?.(); }}>
             <IconStatus />
           </ActionBtn>
-          <ActionBtn type="help" label="Help" onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
+          <ActionBtn type="help" label="Help"
+            onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
             <IconHelp />
           </ActionBtn>
           {isRush && (
@@ -231,10 +302,12 @@ const CaseCard: React.FC<CaseCardProps> = ({
     if (mode === 'practice') {
       return (
         <>
-          <ActionBtn type="chat" label="Chat" onBtnClick={(e) => { stopProp(e); setChatOpen(true); }}>
+          <ActionBtn type="chat" label="Chat"
+            onBtnClick={(e) => { stopProp(e); setChatOpen(true); }}>
             <IconChat />
           </ActionBtn>
-          <ActionBtn type="support" label="Support" onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
+          <ActionBtn type="support" label="Support"
+            onBtnClick={(e) => { stopProp(e); onSupportClick?.(); }}>
             <IconSupport />
           </ActionBtn>
           {isRush && (
@@ -251,21 +324,31 @@ const CaseCard: React.FC<CaseCardProps> = ({
 
   const hasChatModal = mode === 'doctor' || mode === 'practice';
 
+  // ── Card click → open detail modal ──
+  const handleCardClick = () => {
+    setModalOpen(true);
+    onClick?.();
+  };
+
   return (
     <>
+      {/* ── Card shell (no visual changes) ── */}
       <div
         className={cardClasses}
         style={{ animationDelay: `${animationDelay}s` }}
-        onClick={onClick}
+        onClick={handleCardClick}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
         aria-label={`Case ${caseId} — ${patientName}`}
       >
-        {/* Accent top bar */}
         <div className="case-card__accent" aria-hidden="true" />
 
-        {/* Rush corner tag */}
         {isRush && (
           <div className="case-card__rush-tag" aria-label="Rush case">
             <IconRush />
@@ -274,15 +357,10 @@ const CaseCard: React.FC<CaseCardProps> = ({
         )}
 
         <div className="case-card__inner">
-          {/* Top: name + type badge */}
           <div className="case-card__top">
             <div className="case-card__name-block">
-              <span className="case-card__name">
-                {patientName}
-              </span>
-              {patientId && (
-                <span className="case-card__pid">({patientId})</span>
-              )}
+              <span className="case-card__name">{patientName}</span>
+              {patientId && <span className="case-card__pid">({patientId})</span>}
             </div>
             {!isRush && (
               <span className={`case-card__type-badge ${getTypeBadgeClass(caseType)}`}>
@@ -291,10 +369,8 @@ const CaseCard: React.FC<CaseCardProps> = ({
             )}
           </div>
 
-          {/* Divider */}
           <div className="case-card__divider" aria-hidden="true" />
 
-          {/* Meta */}
           <div className="case-card__meta">
             <div className="case-card__meta-row">
               <span className="case-card__meta-icon"><IconCopy /></span>
@@ -310,12 +386,11 @@ const CaseCard: React.FC<CaseCardProps> = ({
             </div>
           </div>
 
-          {/* Footer: date + actions */}
           <div className="case-card__footer">
             <div className="case-card__date">
-              <IconCalendar />
-              &nbsp;{date}
+              <IconCalendar />&nbsp;{date}
             </div>
+            {/* stopProp so action buttons don't trigger card click */}
             <div className="case-card__actions" onClick={stopProp}>
               {renderActions()}
             </div>
@@ -323,7 +398,18 @@ const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       </div>
 
-      {/* Quick Chat Modal */}
+      {/* ── Case Detail Modal ── */}
+      <CaseDetailModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        role={mapModeToRole(mode)}
+        data={buildModalData(props)}
+        onSendMessage={onSendMessage}
+        onUpdateStatus={() => { setModalOpen(false); onStatusClick?.(); }}
+        onAddRestoration={() => { /* hook in as needed */ }}
+      />
+
+      {/* ── Quick Chat Modal (chat action button only) ── */}
       {hasChatModal && (
         <QuickChatModal
           show={chatOpen}

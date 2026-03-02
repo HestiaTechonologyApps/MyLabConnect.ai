@@ -2,8 +2,8 @@
 
 import { Navigate, Route } from 'react-router-dom';
 import { DoctorLayout } from '../Layout/DoctorLayout';
-import HomePage from '../Layout/HomePage';
 import AddNewCase from '../Pages/Analog Case Prescription/Create';
+import DoctorIndexPage from '../Layout/IndexPage';
 
 // ── Add page imports here as you build them ───────────────────────
 // import ActiveCasesList   from '../Pages/Cases/Active/List';
@@ -14,7 +14,7 @@ export const doctorConnectRoutes = (
   <Route path="/" element={<DoctorLayout />}>
 
     {/* Home / Dashboard */}
-    <Route index element={<HomePage />} />
+    <Route index element={<DoctorIndexPage />} />
 
      <Route path="add-new-case" element={<AddNewCase/>} />
 
