@@ -21,7 +21,7 @@ export interface SelectOption {
   label: string;
 }
 
-export interface    ViewModalProps {
+export interface ViewModalProps {
   show: boolean;
   onHide: () => void;
   title: string;
@@ -239,7 +239,29 @@ const KiduViewModal: React.FC<ViewModalProps> = ({
         contentClassName="kidu-modal-content"
         dialogClassName="kidu-modal-dialog"
       >
-        <Modal.Header closeButton className="kidu-modal-header">
+        {/* ── Floating close button ── */}
+        <button
+          type="button"
+          className="kidu-modal-close-btn"
+          onClick={onHide}
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="11"
+            height="11"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          >
+            <line x1="1" y1="1" x2="11" y2="11" />
+            <line x1="11" y1="1" x2="1" y2="11" />
+          </svg>
+        </button>
+
+        <Modal.Header className="kidu-modal-header">
           <div className="d-flex align-items-center gap-2">
             <div>
               <div className="d-flex align-items-center gap-2">
@@ -247,8 +269,8 @@ const KiduViewModal: React.FC<ViewModalProps> = ({
                   {title}
                 </Modal.Title>
                 {showBadge && (
-                  <Badge 
-                    bg="danger" 
+                  <Badge
+                    bg="danger"
                     className="kidu-view-badge"
                     style={{ backgroundColor: themeColor }}
                   >

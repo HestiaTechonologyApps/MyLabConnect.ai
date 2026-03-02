@@ -5,14 +5,14 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import "../Styles/KiduStyles/EditModal.css";
 import KiduValidation from "./KiduValidation";
-import { KiduSelectInputPill } from "./KiduSelectPopup"; // ← added
+import { KiduSelectInputPill } from "./KiduSelectPopup";
 import type { KiduDropdownOption, KiduDropdownPaginatedParams, KiduDropdownPaginatedResult } from "./KiduDropdown";
 import type { DropdownHandlers } from "./KiduCreateModal";
 import KiduDropdown from "./KiduDropdown";
 
 // ==================== TYPES ====================
 export interface FieldRule {
-  type: "text" | "number" | "email" | "password" | "select" | "textarea" | "popup" | "date" | "radio" | "url" | "checkbox" | "toggle" | "rowbreak" | "dropdown"  | "smartdropdown"  | "file";
+  type: "text" | "number" | "email" | "password" | "select" | "textarea" | "popup" | "date" | "radio" | "url" | "checkbox" | "toggle" | "rowbreak" | "dropdown" | "smartdropdown" | "file";
   label: string;
   required?: boolean;
   minLength?: number;
@@ -36,31 +36,22 @@ export interface SelectOption {
 export interface PopupHandler {
   value: string;
   onOpen: () => void;
-  onClear: () => void; // ← added (was missing, needed by KiduSelectInputPill)
+  onClear: () => void;
   actualValue?: any;
 }
 export interface PopupFieldHandler {
-  /** Display label shown in the pill input */
   value: string;
-  /** Called when the user clicks the pill to open the picker */
   onOpen: () => void;
-  /** Called when the user clicks ✕ to clear the selection */
   onClear: () => void;
 }
 
 export interface KiduDropdownHandler {
-  /** Static options list (mutually exclusive with paginatedFetch) */
   staticOptions?: KiduDropdownOption[];
-  /** Async paginated fetch function */
   paginatedFetch?: (params: KiduDropdownPaginatedParams) => Promise<KiduDropdownPaginatedResult>;
-  /** Maps a raw API row to { value, label } */
   mapOption?: (row: any) => KiduDropdownOption;
-  /** Items per page for paginated fetch (default: 10) */
   pageSize?: number;
-  /** Custom placeholder override */
   placeholder?: string;
 }
-
 
 export interface KiduEditModalProps {
   show: boolean;
@@ -108,13 +99,11 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
   size = "lg",
   centered = true,
 }) => {
-  // Initialize form data and errors
   const initialValues: Record<string, any> = {};
   const initialErrors: Record<string, string> = {};
 
   fields.forEach(f => {
     if (f.rules.type === "rowbreak") return;
-
     if (f.rules.type === "toggle" || f.rules.type === "checkbox") {
       initialValues[f.name] = false;
     } else if (f.rules.type === "radio" && options[f.name]?.length) {
@@ -133,14 +122,11 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-  // ── smartdropdown selected values (value = the ID sent to backend) ────────
   const [dropdownValues, setDropdownValues] = useState<Record<string, any>>({});
   const [initialDropdownValues, setInitialDropdownValues] = useState<Record<string, any>>({});
 
-  // Check if form has changes
   const hasChanges = () => {
     const formDataChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
-
     let popupChanged = false;
     fields.forEach(f => {
       if (f.rules.type === "popup" && popupHandlers[f.name]) {
@@ -151,42 +137,32 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
         }
       }
     });
-
     const dropdownChanged = JSON.stringify(dropdownValues) !== JSON.stringify(initialDropdownValues);
-
     return formDataChanged || popupChanged || dropdownChanged;
   };
 
-  // Fetch data when modal opens
   useEffect(() => {
     const fetchData = async () => {
       if (!show || !recordId) return;
-
       try {
         setLoading(true);
         const response = await onFetch(recordId);
-
         if (!response || !response.isSucess) {
           throw new Error(response?.customMessage || response?.error || "Failed to load data");
         }
-
         const data = response.value;
-
         const formattedData: Record<string, any> = {};
         const preloadedDropdowns: Record<string, any> = {};
 
         fields.forEach(f => {
           if (f.rules.type === "rowbreak") return;
-
-           if (f.rules.type === "smartdropdown") {
-            // Pre-populate the dropdown with the saved ID from fetched data
+          if (f.rules.type === "smartdropdown") {
             const savedId = data[f.name];
             if (savedId !== undefined && savedId !== null) {
               preloadedDropdowns[f.name] = savedId;
             }
             return;
           }
-
           if (f.rules.type === "toggle" || f.rules.type === "checkbox") {
             const rawValue = data[f.name];
             if (typeof rawValue === 'boolean') {
@@ -215,7 +191,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
           }
         });
 
-        // Keep any additional data from response
         Object.keys(data).forEach(key => {
           if (!(key in formattedData)) {
             formattedData[key] = data[key];
@@ -224,9 +199,8 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
 
         setFormData(formattedData);
         setInitialData(formattedData);
-         setDropdownValues(preloadedDropdowns);
+        setDropdownValues(preloadedDropdowns);
         setInitialDropdownValues(preloadedDropdowns);
-
       } catch (error: any) {
         console.error("Failed to load data:", error);
         toast.error(`Error loading data: ${error.message}`);
@@ -235,17 +209,15 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
         setLoading(false);
       }
     };
-
     fetchData();
   }, [show, recordId]);
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!show) {
       setFormData(initialValues);
       setInitialData(initialValues);
       setErrors(initialErrors);
-       setDropdownValues({});
+      setDropdownValues({});
       setInitialDropdownValues({});
       setTouchedFields({});
       setIsSubmitting(false);
@@ -255,7 +227,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
   // ==================== HANDLERS ====================
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value, type, checked } = e.target;
-
     let updatedValue;
     if (type === "checkbox" || type === "switch") {
       updatedValue = checked;
@@ -264,9 +235,7 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
     } else {
       updatedValue = value;
     }
-
     setFormData(prev => ({ ...prev, [name]: updatedValue }));
-
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -283,8 +252,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
   const validateField = (name: string, value: any): boolean => {
     const rule = fields.find(f => f.name === name)?.rules;
     if (!rule) return true;
-
-    // Special handling for popup fields
     if (rule.type === "popup") {
       if (rule.required) {
         const popupValue = popupHandlers[name]?.value;
@@ -296,7 +263,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
       setErrors(prev => ({ ...prev, [name]: "" }));
       return true;
     }
-
     if (rule.type === "smartdropdown") {
       if (rule.required && (dropdownValues[name] === null || dropdownValues[name] === undefined || dropdownValues[name] === "")) {
         setErrors((prev) => ({ ...prev, [name]: `${rule.label} is required` }));
@@ -305,12 +271,10 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
       setErrors((prev) => ({ ...prev, [name]: "" }));
       return true;
     }
-
     if ((rule.type === "toggle" || rule.type === "checkbox") && rule.required && !value) {
       setErrors(prev => ({ ...prev, [name]: `${rule.label} is required` }));
       return false;
     }
-
     const result = KiduValidation.validate(value, rule as any);
     const errorMessage = result.isValid ? "" : (result.message || "");
     setErrors(prev => ({ ...prev, [name]: errorMessage }));
@@ -320,14 +284,10 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
   const validateForm = (): boolean => {
     let isValid = true;
     const newErrors: Record<string, string> = {};
-
     fields.forEach(f => {
       if (f.rules.type === "rowbreak") return;
-
       const rule = f.rules;
       const value = formData[f.name];
-
-      // Special handling for popup fields
       if (rule.type === "popup") {
         if (rule.required) {
           const popupValue = popupHandlers[f.name]?.value;
@@ -338,7 +298,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
         }
         return;
       }
-
       if (rule.required) {
         if ((rule.type === "toggle" || rule.type === "checkbox") && !value) {
           newErrors[f.name] = `${rule.label} is required`;
@@ -349,7 +308,6 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
           isValid = false;
         }
       }
-
       if (value !== "" && value !== null && value !== undefined && value !== false) {
         const result = KiduValidation.validate(value, rule as any);
         if (!result.isValid) {
@@ -358,82 +316,57 @@ const KiduEditModal: React.FC<KiduEditModalProps> = ({
         }
       }
     });
-
     setErrors(newErrors);
     return isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) {
       toast.error("Please fill all required fields");
       return;
     }
-
     if (!hasChanges()) {
       toast("No changes to update", { icon: "ℹ️" });
       return;
     }
-
     setIsSubmitting(true);
     try {
       const submitData = { ...formData };
-
-      // Include popup actual values
       fields.forEach(f => {
         if (f.rules.type === "popup" && popupHandlers[f.name]?.actualValue !== undefined) {
           submitData[f.name] = popupHandlers[f.name].actualValue;
         }
-         // Include smartdropdown values
         if (f.rules.type === "smartdropdown" && dropdownValues[f.name] !== undefined) {
           submitData[f.name] = dropdownValues[f.name];
         }
-      
       });
 
       const updateResult = await onUpdate(recordId, submitData);
-
       let updatedData = (updateResult && typeof updateResult === 'object') ? updateResult : submitData;
 
-      // Update initial data to reflect changes
       setInitialData(updatedData);
       setFormData(updatedData);
       setInitialDropdownValues({ ...dropdownValues });
 
-     // ✅ Fixed — close Bootstrap modal first, then show Swal
-onHide();
+      onHide();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: successMessage,
+        confirmButtonColor: themeColor,
+        timer: 2000,
+        showConfirmButton: true,
+        confirmButtonText: "OK"
+      });
 
-await new Promise((resolve) => setTimeout(resolve, 300));
-
-await Swal.fire({
-  icon: "success",
-  title: "Success!",
-  text: successMessage,
-  confirmButtonColor: themeColor,
-  timer: 2000,
-  showConfirmButton: true,
-  confirmButtonText: "OK"
-});
-
-if (onSuccess) {
-  onSuccess();
-}
-
-      // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
       }
-
-      // Close modal
-      onHide();
     } catch (err: any) {
       const errorMsg = err.message || errorMessage || "An error occurred";
-
-      // Show error toast
       toast.error(errorMsg);
-
-      // Also show SweetAlert for better visibility
       await Swal.fire({
         icon: "error",
         title: "Error!",
@@ -441,7 +374,6 @@ if (onSuccess) {
         confirmButtonColor: themeColor,
         confirmButtonText: "OK"
       });
-
       setIsSubmitting(false);
     }
   };
@@ -457,8 +389,6 @@ if (onSuccess) {
     const fieldPlaceholder = placeholder || `Enter ${rules.label.toLowerCase()}`;
 
     switch (type) {
-
-       // ── SMARTDROPDOWN ────────────────────────────────────────────────────
       case "smartdropdown": {
         const handler = dropdownHandlers[name];
         return (
@@ -480,7 +410,7 @@ if (onSuccess) {
           />
         );
       }
-      /* ---------- POPUP ← only this case changed ---------- */
+
       case "popup": {
         const handler = popupHandlers[name];
         return (
@@ -497,7 +427,6 @@ if (onSuccess) {
         );
       }
 
-      /* ---------- PASSWORD ---------- */
       case "password":
         return (
           <InputGroup className="kidu-input-group">
@@ -523,7 +452,6 @@ if (onSuccess) {
           </InputGroup>
         );
 
-      /* ---------- SELECT ---------- */
       case "select":
       case "dropdown": {
         const fieldOptions = options[name] || [];
@@ -551,7 +479,6 @@ if (onSuccess) {
         );
       }
 
-      /* ---------- TEXTAREA ---------- */
       case "textarea":
         return (
           <Form.Control
@@ -568,7 +495,6 @@ if (onSuccess) {
           />
         );
 
-      /* ---------- RADIO ---------- */
       case "radio": {
         const fieldOptions = options[name] || [];
         return (
@@ -593,7 +519,6 @@ if (onSuccess) {
         );
       }
 
-      /* ---------- CHECKBOX ---------- */
       case "checkbox":
         return (
           <Form.Check
@@ -606,7 +531,6 @@ if (onSuccess) {
           />
         );
 
-      /* ---------- TOGGLE ---------- */
       case "toggle":
         return (
           <Form.Check
@@ -619,7 +543,6 @@ if (onSuccess) {
           />
         );
 
-      /* ---------- DATE ---------- */
       case "date":
         return (
           <Form.Control
@@ -634,7 +557,6 @@ if (onSuccess) {
           />
         );
 
-      /* ---------- FILE ---------- */
       case "file":
         return (
           <Form.Control
@@ -649,7 +571,6 @@ if (onSuccess) {
           />
         );
 
-      /* ---------- DEFAULT ---------- */
       default:
         return (
           <Form.Control
@@ -669,29 +590,20 @@ if (onSuccess) {
     }
   };
 
-  // ==================== RENDER FIELD ← only label skip changed ====================
+  // ==================== RENDER FIELD ====================
   const renderField = (field: Field, index: number) => {
     const { name, rules } = field;
-
-    // Handle row break
     if (rules.type === "rowbreak") {
       return <div key={`rowbreak-${index}`} className="w-100"></div>;
     }
-
     const colWidth = rules.colWidth || 6;
-
     return (
       <Col md={colWidth} className="mb-3" key={name}>
-       
-          <Form.Label className="kidu-form-label">
-            {rules.label}
-            {rules.required && <span className="kidu-required-star">*</span>}
-          </Form.Label>
-      
-
+        <Form.Label className="kidu-form-label">
+          {rules.label}
+          {rules.required && <span className="kidu-required-star">*</span>}
+        </Form.Label>
         {renderFormControl(field)}
-
-        {/* Popup errors already shown inside KiduSelectInputPill */}
         {rules.type !== "popup" && rules.type !== "smartdropdown" && errors[name] && (
           <div className="kidu-error-message">{errors[name]}</div>
         )}
@@ -712,7 +624,29 @@ if (onSuccess) {
         contentClassName="kidu-modal-content"
         dialogClassName="kidu-modal-dialog"
       >
-        <Modal.Header closeButton className="kidu-modal-header">
+        {/* ── Floating close button ── */}
+        <button
+          type="button"
+          className="kidu-modal-close-btn"
+          onClick={onHide}
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="11"
+            height="11"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          >
+            <line x1="1" y1="1" x2="11" y2="11" />
+            <line x1="11" y1="1" x2="1" y2="11" />
+          </svg>
+        </button>
+
+        <Modal.Header className="kidu-modal-header">
           <div>
             <Modal.Title className="kidu-modal-title">
               {title}

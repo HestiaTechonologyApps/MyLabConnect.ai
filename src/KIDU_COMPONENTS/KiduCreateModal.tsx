@@ -13,22 +13,22 @@ import KiduDropdown from "./KiduDropdown";
 
 export interface FieldRule {
   type:
-    | "text"
-    | "number"
-    | "email"
-    | "password"
-    | "select"
-    | "textarea"
-    | "popup"
-    | "date"
-    | "radio"
-    | "url"
-    | "checkbox"
-    | "toggle"
-    | "rowbreak"
-    | "dropdown"
-    | "smartdropdown"
-    | "file";
+  | "text"
+  | "number"
+  | "email"
+  | "password"
+  | "select"
+  | "textarea"
+  | "popup"
+  | "date"
+  | "radio"
+  | "url"
+  | "checkbox"
+  | "toggle"
+  | "rowbreak"
+  | "dropdown"
+  | "smartdropdown"
+  | "file";
   label: string;
   required?: boolean;
   minLength?: number;
@@ -164,8 +164,8 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
       type === "checkbox" || type === "switch"
         ? checked
         : type === "tel"
-        ? value.replace(/[^0-9]/g, "")
-        : value;
+          ? value.replace(/[^0-9]/g, "")
+          : value;
 
     setFormData((prev) => ({ ...prev, [name]: updated }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -318,8 +318,8 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
         return (
           <KiduSelectInputPill
             value={handler?.value ?? ""}
-            onOpen={handler?.onOpen ?? (() => {})}
-            onClear={handler?.onClear ?? (() => {})}
+            onOpen={handler?.onOpen ?? (() => { })}
+            onClear={handler?.onClear ?? (() => { })}
             placeholder={`Select ${rules.label}...`}
             required={rules.required}
             disabled={disabled}
