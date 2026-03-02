@@ -25,15 +25,20 @@ export interface CaseDashboardProps {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Prescription SVG icon
+// Role → StatusBar button visibility
+//
+//   Prescription : doctor only
+//   Pickup       : doctor + practice
 // ─────────────────────────────────────────────────────────────
 
-const IcoClipboard = () => (
-  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
-    style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }}>
-    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-  </svg>
-);
+const ROLE_STATUSBAR: Record<LoginRole, { prescription: boolean; pickup: boolean }> = {
+  admin:       { prescription: false, pickup: false },
+  dso:         { prescription: false, pickup: false },
+  lab:         { prescription: false, pickup: false },
+  doctor:      { prescription: true,  pickup: true  },
+  practice:    { prescription: false, pickup: true  },
+  integrator:  { prescription: false, pickup: false },
+};
 
 // ─────────────────────────────────────────────────────────────
 // Skeleton card for loading state
@@ -63,10 +68,12 @@ const SkeletonCard = () => (
 
 const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = false }) => {
   const config = ROLE_CONFIG[role];
+  const barButtons = ROLE_STATUSBAR[role];
 
   // Initialise with role's default tab
   const [activeTab, setActiveTab] = useState<StatusKey>(config.defaultTab);
   const [gridTransitioning, setGridTransitioning] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   // ── Build StatusBar items from visible tabs + API counts ──
   const statusItems: StatusItem[] = config.visible.map((key) => ({
@@ -86,8 +93,24 @@ const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = fal
     }, 150);
   }, [activeTab]);
 
-  // ── Cases for current tab ──
-  const currentCases = data.cases[activeTab] ?? [];
+  // ── Search filter ──
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value);
+  }, []);
+
+  // ── Cases for current tab, filtered by search ──
+  const allCases = data.cases[activeTab] ?? [];
+  const currentCases = searchValue.trim()
+    ? allCases.filter((c) => {
+        const q = searchValue.toLowerCase();
+        return (
+          c.patientName?.toLowerCase().includes(q) ||
+          c.id?.toLowerCase().includes(q) ||
+          c.doctorName?.toLowerCase().includes(q) ||
+          c.labName?.toLowerCase().includes(q)
+        );
+      })
+    : allCases;
 
   // ── Tab label for heading ──
   const tabLabel = TAB_LABELS[activeTab];
@@ -100,6 +123,12 @@ const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = fal
       <StatusBar
         items={statusItems}
         onSelect={(key) => switchTab(key)}
+        showPrescription={barButtons.prescription}
+        showPickup={barButtons.pickup}
+        onPrescriptionClick={() => console.log('Prescription clicked')}
+        onPickupClick={() => console.log('Pickup clicked')}
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
       />
 
       {/* ── Label bar ── */}
@@ -112,24 +141,12 @@ const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = fal
           {!loading && (
             <span className="dash-case-count">{currentCases.length} cases</span>
           )}
-          {config.showPrescription && (
-            <button className="dash-action-btn dash-action-btn--primary">
-              <IcoClipboard />
-              Prescription
-            </button>
-          )}
-          {config.showPickup && (
-            <button className="dash-action-btn dash-action-btn--info">
-              Pickup
-            </button>
-          )}
         </div>
       </div>
 
       {/* ── Cards grid ── */}
       <div className="dash-cards-area">
         {loading ? (
-          /* Skeleton loaders */
           <div className="dash-cards-grid">
             {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
@@ -138,7 +155,11 @@ const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = fal
             {currentCases.length === 0 ? (
               <div className="dash-empty">
                 <div className="dash-empty-icon" aria-hidden="true">{tabIcon}</div>
-                <p>No {tabLabel.toLowerCase()} cases</p>
+                <p>
+                  {searchValue.trim()
+                    ? `No results for "${searchValue}"`
+                    : `No ${tabLabel.toLowerCase()} cases`}
+                </p>
               </div>
             ) : (
               currentCases.map((c, i) => (

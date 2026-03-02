@@ -1,7 +1,5 @@
 /* ============================================================
-   StatusBar.css — MyLab Connect Status Filter Bar
-   Matches the exact HTML .sbar / .spill / .sbadge pattern
-   Pills float directly on the background — no container box
+   CaseStatusBar.css — MyLab Connect Status Filter Bar
    ============================================================ */
 
 .status-bar-wrapper {
@@ -13,7 +11,7 @@
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid var(--theme-border, rgba(180,210,225,0.4));
   border-radius: 13px;
-  padding: 7px 12px;
+  padding: 7px 10px;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -32,7 +30,16 @@
   border-color: var(--theme-border, rgba(255,255,255,0.09));
 }
 
-/* ── Pill — inactive: icon + label + number, no background ── */
+/* ── Spacer pushes right-side controls to the far right ── */
+.status-bar-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
+/* ════════════════════════════════════════════
+   Pills
+   ════════════════════════════════════════════ */
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -48,10 +55,11 @@
   color: var(--theme-text-secondary, #475569);
   font-family: 'Outfit', sans-serif;
   transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
+  flex-shrink: 0;
 }
 
 .status-pill:hover {
-  background: rgba(239,13,80,0.06);
+  background: rgba(100,116,139,0.08);
   color: var(--theme-text-primary, #0f172a);
   transform: translateY(-1px);
 }
@@ -65,14 +73,13 @@
   color: var(--theme-text-primary, #f1f5f9);
 }
 
-/* ── Pill icon / emoji ── */
-.status-pill > span:first-child {
-  font-size: 0.75rem;
-  line-height: 1;
+.pill-icon {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
+  line-height: 1;
 }
 
-/* ── Count badge — plain number, no pill background by default ── */
 .status-badge {
   font-size: 0.68rem;
   font-weight: 600;
@@ -86,14 +93,13 @@
   color: var(--theme-text-secondary, #94a3b8);
 }
 
-/* ── ACTIVE: pill becomes filled gradient capsule ── */
+/* ── ACTIVE pill ── */
 .status-pill.active {
   color: #fff !important;
   font-weight: 700;
 }
 
 .status-pill.active .status-badge {
-  /* badge becomes a small white rounded number inside the pill */
   background: rgba(255,255,255,0.25);
   color: #fff;
   border-radius: 10px;
@@ -101,66 +107,202 @@
   font-size: 0.63rem;
 }
 
-/* Per-status active gradients — exact match to HTML */
+.status-pill.active .pill-icon { color: #fff; }
+
+/* Per-status active gradients */
 .status-pill.hold.active {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   box-shadow: 0 3px 10px rgba(239,68,68,0.35);
-  border-color: transparent;
 }
 .status-pill.transit.active {
   background: linear-gradient(135deg, #f59e0b, #d97706);
   box-shadow: 0 3px 10px rgba(245,158,11,0.35);
-  border-color: transparent;
 }
 .status-pill.production.active {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
   box-shadow: 0 3px 10px rgba(139,92,246,0.35);
-  border-color: transparent;
 }
 .status-pill.submitted.active {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   box-shadow: 0 3px 10px rgba(59,130,246,0.35);
-  border-color: transparent;
 }
 .status-pill.recent.active {
   background: linear-gradient(135deg, #10b981, #059669);
   box-shadow: 0 3px 10px rgba(16,185,129,0.35);
-  border-color: transparent;
 }
 .status-pill.rejected.active {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  box-shadow: 0 3px 10px rgba(249,115,22,0.35);
-  border-color: transparent;
+  background: linear-gradient(135deg, #ef0d50, #c9003e);
+  box-shadow: 0 3px 10px rgba(239,13,80,0.35);
 }
 
-/* ── Divider between pills ── */
+/* ── Divider ── */
 .status-divider {
   width: 1px;
   height: 18px;
   background: var(--theme-border, rgba(180,210,225,0.4));
   flex-shrink: 0;
-  margin: 0 3px;
+  margin: 0 2px;
 }
 
 [data-theme='dark'] .status-divider {
-  background: var(--theme-border, rgba(255,255,255,0.09));
+  background: rgba(255,255,255,0.09);
 }
 
-/* ── Responsive ── */
+/* ════════════════════════════════════════════
+   Action buttons — Prescription & Pickup
+   ════════════════════════════════════════════ */
+
+.sbar-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: none;
+  outline: none;
+  transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+
+.sbar-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.sbar-action-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Prescription — solid primary (matches image 1) */
+.sbar-btn--prescription {
+  background: linear-gradient(135deg, #ef0d50, #c9003e);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(239,13,80,0.3);
+}
+
+.sbar-btn--prescription:hover {
+  box-shadow: 0 4px 14px rgba(239,13,80,0.4);
+}
+
+/* Pickup — light blue tint (matches image 1 & 2) */
+.sbar-btn--pickup {
+  background: rgba(14,165,233,0.1);
+  color: #0284c7;
+  border: 1px solid rgba(14,165,233,0.25);
+}
+
+.sbar-btn--pickup:hover {
+  background: rgba(14,165,233,0.18);
+  border-color: rgba(14,165,233,0.45);
+}
+
+[data-theme='dark'] .sbar-btn--pickup {
+  background: rgba(14,165,233,0.12);
+  color: #38bdf8;
+  border-color: rgba(56,189,248,0.2);
+}
+
+[data-theme='dark'] .sbar-btn--pickup:hover {
+  background: rgba(56,189,248,0.18);
+}
+
+/* ════════════════════════════════════════════
+   Search input
+   ════════════════════════════════════════════ */
+
+.sbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sbar-search-icon {
+  position: absolute;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  color: var(--theme-text-muted, #94a3b8);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sbar-search-input {
+  width: 190px;
+  padding: 6px 12px 6px 30px;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border, rgba(180,210,225,0.5));
+  background: var(--theme-bg-input, rgba(248,250,252,0.9));
+  color: var(--theme-text-primary, #0f172a);
+  font-size: 0.72rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 400;
+  outline: none;
+  transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+
+.sbar-search-input::placeholder {
+  color: var(--theme-text-muted, #94a3b8);
+  font-weight: 400;
+}
+
+.sbar-search-input:focus {
+  border-color: rgba(239,13,80,0.4);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(239,13,80,0.08);
+  width: 220px;
+}
+
+/* Remove native search input X button */
+.sbar-search-input::-webkit-search-cancel-button { display: none; }
+.sbar-search-input::-webkit-search-decoration { display: none; }
+
+[data-theme='dark'] .sbar-search-input {
+  background: rgba(30,41,59,0.9);
+  border-color: rgba(255,255,255,0.1);
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .sbar-search-input:focus {
+  background: rgba(30,41,59,1);
+  border-color: rgba(239,13,80,0.5);
+  box-shadow: 0 0 0 3px rgba(239,13,80,0.12);
+}
+
+/* ════════════════════════════════════════════
+   Responsive
+   ════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+  .sbar-search-input { width: 160px; }
+  .sbar-search-input:focus { width: 180px; }
+}
+
 @media (max-width: 1024px) {
-  .status-bar-wrapper { padding: 6px 10px; gap: 3px; }
+  .status-bar-wrapper { padding: 6px 8px; gap: 3px; }
   .status-pill { font-size: 0.65rem; padding: 4px 9px; }
+  .sbar-action-btn { font-size: 0.68rem; padding: 5px 11px; }
 }
 
 @media (max-width: 768px) {
   .status-bar-wrapper { border-radius: 10px; }
-  /* On mobile, hide label — show only icon + count */
+  /* On mobile hide text label — show only icon + count */
   .pill-label { display: none; }
   .status-pill { padding: 5px 8px; gap: 4px; }
   .status-badge { min-width: 14px; font-size: 0.62rem; }
+  /* Hide button labels on mobile — icon only */
+  .sbar-btn-label { display: none; }
+  .sbar-action-btn { padding: 6px 9px; gap: 0; }
+  .sbar-search-input { width: 130px; }
+  .sbar-search-input:focus { width: 150px; }
 }
 
 @media (max-width: 480px) {
   .status-divider { display: none; }
   .status-pill { padding: 4px 7px; }
+  .sbar-search-input { width: 110px; font-size: 0.68rem; }
 }
