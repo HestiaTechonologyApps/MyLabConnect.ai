@@ -24,6 +24,7 @@ import DSORegionList from '../Pages/Setup/Region/List';
 import DSOSettingList from '../Pages/Setup/Settings/List';
 import DSOTerritoryList from '../Pages/Masters/Territory/List';
 import DsoIndexPage from '../Layout/IndexPage';
+import HomePage from '../Pages/Home/HomePage';
 
 // ── Add more page imports here as you build them ──────────────────
 // import DsoLabList       from '../Pages/Masters/Lab/List';
@@ -36,7 +37,7 @@ export const dsoadminConnectRoutes = (
     <Route index element={<DsoIndexPage />} />
 
     {/* Analytics */}
-    <Route path="analytics" element={<div><h5>Analytics</h5></div>} />
+    <Route path="analytics" element={<HomePage/>} />
 
     {/* Masters */}
     <Route path="masters/labgroup-list" element={<LabGroupList />} />
