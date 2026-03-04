@@ -5,7 +5,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../Auth/ProtectedRoute';
 import LoginPage from '../Auth/LoginPage';
 import ForceChangePassword from '../Auth/ForceChangePassword';
-import OtpVerifyPage from '../Auth/OtpVerifyPage';
 
 import { dsoadminConnectRoutes }   from '../DSO_ADMIN_CONNECT/Routes/Route';
 import { labConnectRoutes }        from '../LAB_CONNECT/Routes/Route';
@@ -25,17 +24,15 @@ const Unauthorized: React.FC = () => (
 const AppRoutes: React.FC = () => (
   <Routes>
 
-    {/* ── Public: Login ──────────────────────────────────────────── */}
+    {/* ── Public: Login (also handles 2FA modal inline) ───────────── */}
     <Route path="/" element={<LoginPage />} />
 
-    {/* ── NOT wrapped in ProtectedRoute — guarded internally        */}
-    {/* by hasTempToken() check inside each component.              */}
-    {/* ProtectedRoute requires a FULL token; these pages only      */}
-    {/* have a TEMP token at this point.                            */}
-    <Route path="/verify-otp"           element={<OtpVerifyPage />} />
+    {/* ── AC2: Forced password change ─────────────────────────────── */}
+    {/* Not wrapped in ProtectedRoute — only has a temp token here.   */}
+    {/* Guarded internally by hasTempToken() check in the component.  */}
     <Route path="/force-change-password" element={<ForceChangePassword />} />
 
-    {/* ── AppAdmin Portal ────────────────────────────────────────── */}
+    {/* ── AppAdmin Portal ─────────────────────────────────────────── */}
     <Route
       path="/appadmin-connect/*"
       element={
@@ -45,7 +42,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── DSO Portal ─────────────────────────────────────────────── */}
+    {/* ── DSO Portal ──────────────────────────────────────────────── */}
     <Route
       path="/dsoadmin-connect/*"
       element={
@@ -55,7 +52,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── Lab Portal ─────────────────────────────────────────────── */}
+    {/* ── Lab Portal ──────────────────────────────────────────────── */}
     <Route
       path="/lab-connect/*"
       element={
@@ -65,7 +62,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── Practice Portal ────────────────────────────────────────── */}
+    {/* ── Practice Portal ─────────────────────────────────────────── */}
     <Route
       path="/practice-connect/*"
       element={
@@ -75,7 +72,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── Doctor Portal ──────────────────────────────────────────── */}
+    {/* ── Doctor Portal ───────────────────────────────────────────── */}
     <Route
       path="/doctor-connect/*"
       element={
@@ -85,7 +82,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    {/* ── Integrator Portal ──────────────────────────────────────── */}
+    {/* ── Integrator Portal ───────────────────────────────────────── */}
     <Route
       path="/integrator-connect/*"
       element={
