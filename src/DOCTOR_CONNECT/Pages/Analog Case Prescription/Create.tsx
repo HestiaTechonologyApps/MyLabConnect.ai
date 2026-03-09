@@ -434,9 +434,10 @@ const AddNewCase: React.FC = () => {
 
           {/* ── Saved restorations list ── */}
           {restorations.length === 0 ? (
-            <div className="anc-restoration-empty">
-              No restorations added yet. Click &ldquo;Add Restoration&rdquo; to begin.
-            </div>
+            
+          <div style={{ minHeight: 28, color: 'var(--theme-text-disabled)', fontSize: '0.75rem', textAlign: 'center', padding: '8px 0' }}>
+            No restorations added yet. Click "Add Restoration" to begin.
+          </div>
           ) : (
             <div className="anc-restoration-list">
               {restorations.map((r, idx) => (
