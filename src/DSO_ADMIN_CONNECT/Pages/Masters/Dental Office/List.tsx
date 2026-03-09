@@ -51,13 +51,13 @@ const columns: KiduColumn[] = [
       </span>
     ),
   },
-  {
-    key: "createdAt",
-    label: "Created Date",
-    type: "date",
-    enableSorting: true,
-    enableFiltering: false,
-  },
+  // {
+  //   key: "createdAt",
+  //   label: "Created Date",
+  //   type: "date",
+  //   enableSorting: true,
+  //   enableFiltering: false,
+  // },
 ];
 
 const DSODentalOfficeList: React.FC = () => {

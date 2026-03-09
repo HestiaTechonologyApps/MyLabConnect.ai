@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import toast from "react-hot-toast";                          // ← ADDED
-import Swal from "sweetalert2";                               // ← ADDED
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import "../Styles/KiduStyles/KiduTabbedFormModal.css";
 
 // ==================== TYPES ====================
@@ -14,6 +14,8 @@ export interface ViewHeaderField {
   isToggle?: boolean;
   isTextarea?: boolean;
   formatter?: (value: any) => string;
+  // For popup fields, we might want to show display value
+  displayName?: string; // The field that contains the display value
 }
 
 export interface ViewTabConfig {
@@ -22,6 +24,9 @@ export interface ViewTabConfig {
   columns: {
     key: string;
     label: string;
+    // For popup fields in tables
+    displayKey?: string; // The field that contains the display value
+    formatter?: (value: any, row: any) => string;
   }[];
 }
 
@@ -71,7 +76,6 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
         const response = await onFetch(recordId);
 
         if (!response || !response.isSucess) {
-          // ── CHANGED: was just console.error + onHide() ──────────────────
           const msg = response?.customMessage || response?.error || "Failed to load record.";
           toast.error(msg, { duration: 5000 });
           await Swal.fire({
@@ -86,6 +90,7 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
         }
 
         const data = response.value;
+        console.log("View modal data:", data); // Debug log
 
         // ── Map header fields ──────────────────────────────────────────────
         const formattedHeader: Record<string, any> = {};
@@ -102,8 +107,13 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
               ? new Date(dateVal).toISOString().split("T")[0]
               : "";
           } else {
-            formattedHeader[f.name] =
-              data[f.name] !== undefined && data[f.name] !== null ? data[f.name] : "";
+            // Check if there's a display field for popup values
+            if (f.displayName && data[f.displayName]) {
+              formattedHeader[f.name] = data[f.displayName];
+            } else {
+              formattedHeader[f.name] =
+                data[f.name] !== undefined && data[f.name] !== null ? data[f.name] : "";
+            }
           }
         });
         setHeaderData(formattedHeader);
@@ -120,7 +130,6 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
           setTabData(mapped);
         }
       } catch (error: any) {
-        // ── CHANGED: was just console.error + onHide() ──────────────────
         const msg = error?.message ?? "An unexpected error occurred.";
         toast.error(msg, { duration: 5000 });
         await Swal.fire({
@@ -232,6 +241,9 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
                     style={{
                       flex: field.colWidth === 3  ? "0 0 25%"    :
                             field.colWidth === 4  ? "0 0 33.33%" :
+                            field.colWidth === 6  ? "0 0 50%"    :
+                            field.colWidth === 8  ? "0 0 66.67%" :
+                            field.colWidth === 10 ? "0 0 83.33%" :
                             field.colWidth === 12 ? "0 0 100%"   : "1 1 0",
                     }}
                   >
@@ -300,16 +312,35 @@ const KiduTabbedFormViewModal: React.FC<KiduTabbedFormViewModalProps> = ({
                       <tbody>
                         {currentRows.map((row, rowIdx) => (
                           <tr key={rowIdx} className="ktf-tr">
-                            {currentTab.columns.map((col) => (
-                              <td key={col.key} className="ktf-td">
-                                <input
-                                  type="text"
-                                  className="ktf-input ktf-input--sm ktf-view-readonly"
-                                  value={row[col.key] ?? "—"}
-                                  readOnly
-                                />
-                              </td>
-                            ))}
+                            {currentTab.columns.map((col) => {
+                              // Get the value to display
+                              let displayValue = "—";
+                              
+                              // If there's a displayKey, use that first
+                              if (col.displayKey && row[col.displayKey]) {
+                                displayValue = String(row[col.displayKey]);
+                              } 
+                              // Otherwise use the regular key
+                              else if (row[col.key] !== undefined && row[col.key] !== null && row[col.key] !== "") {
+                                displayValue = String(row[col.key]);
+                              }
+                              
+                              // Apply formatter if provided
+                              if (col.formatter) {
+                                displayValue = col.formatter(row[col.key], row);
+                              }
+                              
+                              return (
+                                <td key={col.key} className="ktf-td">
+                                  <input
+                                    type="text"
+                                    className="ktf-input ktf-input--sm ktf-view-readonly"
+                                    value={displayValue}
+                                    readOnly
+                                  />
+                                </td>
+                              );
+                            })}
                           </tr>
                         ))}
                       </tbody>
