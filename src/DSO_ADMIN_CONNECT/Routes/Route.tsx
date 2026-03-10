@@ -29,6 +29,7 @@ import DSOShadeList from '../Pages/Shade/List';
 // ── New Pages ──────────────────────────────────────────────────────
 import CaseFlowSLA from '../Pages/CaseFlowSLA/CaseFlowSLA';
 import DSOIndicationList from '../Pages/Indication/List';
+import DSOProductList from '../Pages/Masters/Product/List';
 
 export const dsoadminConnectRoutes = (
   <Route path="/" element={<DsoUserLayout />}>
@@ -45,6 +46,7 @@ export const dsoadminConnectRoutes = (
     <Route path="masters/practice-list" element={<DSODentalOfficeList />} />
     <Route path="masters/doctor-list" element={<DsoDoctorList />} />
     <Route path="masters/productGroup-list" element={<DsoProductGroupList />} />
+    <Route path="masters/product-list" element={<DSOProductList />} />
     <Route path="masters/user-role-creation-list" element={<div><h5>User Role Creation</h5></div>} />
     <Route path="masters/lab" element={<div><h5>Lab</h5></div>} />
     <Route path="masters/practice" element={<div><h5>Practice</h5></div>} />
@@ -67,8 +69,8 @@ export const dsoadminConnectRoutes = (
     <Route path="prosthesis" element={<DSOProsthesisTypeList />} />
     <Route path="Restoration" element={<DSORestorationTypeList />} />
     <Route path="schema-list" element={<DSOSchemaList />} />
-    <Route path="indication-list" element={<DSOIndicationList/>} />
-    <Route path="materialName-list" element={<DSOMaterialList/>} />
+    <Route path="indication-list" element={<DSOIndicationList />} />
+    <Route path="materialName-list" element={<DSOMaterialList />} />
     <Route path="shadeGuide-list" element={<div><h5>Shade Guide</h5></div>} />
     <Route path="shade-list" element={<DSOShadeList />} />
 
