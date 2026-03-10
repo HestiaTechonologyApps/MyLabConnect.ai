@@ -4,11 +4,9 @@ import type { KiduColumn } from "../../../KIDU_COMPONENTS/KiduServerTable";
 import Swal from "sweetalert2";
 
 import DSOIndicationCreateModal from "./Create";
-// DSOIndicationEditModal from "./Edit";
-//import DSOIndicationViewModal from "./View";
+import DSOIndicationEditModal from "./Edit";
+import DSOIndicationViewModal from "./View";
 import DSOIndicationService from "../../Services/Setup/DSOIndication.services";
-
-
 
 const columns: KiduColumn[] = [
   {
@@ -18,14 +16,14 @@ const columns: KiduColumn[] = [
     enableFiltering: true,
     filterType: "text",
   },
-    {
+  {
     key: "dsoProthesisTypeId",
-    label: "Prothesis Type",
+    label: "Prosthesis Type", // Fixed spelling: "Prosthesis" not "Prothesis"
     enableSorting: true,
     enableFiltering: true,
     filterType: "text",
     render: (value, row) => (
-      <span>{row.dsoProthesisname || `Type #${value}`}</span>
+      <span>{row.dsoProthesisname || row.prosthesisTypeName || `Type #${value}`}</span>
     ),
   },
   {
@@ -52,7 +50,6 @@ const columns: KiduColumn[] = [
 ];
 
 const DSOIndicationList: React.FC = () => {
-
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showView, setShowView] = useState(false);
@@ -77,7 +74,6 @@ const DSOIndicationList: React.FC = () => {
   };
 
   const handleDeleteClick = async (row: any) => {
-
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "This indication will be permanently deleted.",
@@ -90,17 +86,12 @@ const DSOIndicationList: React.FC = () => {
 
     if (result.isConfirmed) {
       try {
-
         await DSOIndicationService.delete(row.id);
-
         refreshTable();
-
         Swal.fire("Deleted!", "Indication has been deleted.", "success");
-
       } catch (error) {
-
+        console.error("Delete error:", error);
         Swal.fire("Error!", "Failed to delete indication.", "error");
-
       }
     }
   };
@@ -137,9 +128,9 @@ const DSOIndicationList: React.FC = () => {
           setShowCreate(false);
           refreshTable();
         }}
-      /> 
+      />
 
-   {/*  {recordId > 0 && (
+      {recordId > 0 && (
         <>
           <DSOIndicationEditModal
             show={showEdit}
@@ -155,10 +146,10 @@ const DSOIndicationList: React.FC = () => {
             show={showView}
             onHide={() => setShowView(false)}
             recordId={recordId}
-          />  
+          />
         </>
-      )} */}
-    </> 
+      )}
+    </>
   );
 };
 

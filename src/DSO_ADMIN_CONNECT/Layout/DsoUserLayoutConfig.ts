@@ -30,7 +30,7 @@ import {
     Shield,
     Calendar,
     Eye,
-    Palette,
+    //Palette,
     Droplet,
     Layers,
     MapMinus
@@ -86,7 +86,7 @@ export const dsoAdminMenuItems: MenuItem[] = [
             { title: 'Restoration', url: '/dsoadmin-connect/Restoration', icon: RefreshCw, },
             { title: 'Indication', url: '/dsoadmin-connect/indication-list', icon: Eye, },
             { title: 'Material Name', url: '/dsoadmin-connect/materialName-list', icon: Layers, },
-            { title: 'Shade Guide', url: '/dsoadmin-connect/shadeGuide-list', icon: Palette, },
+           // { title: 'Shade Guide', url: '/dsoadmin-connect/shadeGuide-list', icon: Palette, },
             { title: 'Shade', url: '/dsoadmin-connect/shade-list', icon: Droplet, },
             { title: 'Product Group', url: '/dsoadmin-connect/masters/productGroup-list', icon: Package },
             { title: 'Products', url: '/dsoadmin-connect/masters/product-list', icon: FaProductHunt },
