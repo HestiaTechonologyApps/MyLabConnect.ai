@@ -254,7 +254,14 @@ export const API_ENDPOINTS = {
     UPDATE_PAGINATION: `${API_BASE_URL}/LabSetting/getall-paginated`,
   },
 
-
+  DSO_SHADE:{
+    GET_ALL: `${API_BASE_URL}/`,
+    CREATE: `${API_BASE_URL}/DSOShade`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/DSOShade/getall-paginated`,
+  },
 
 };
 

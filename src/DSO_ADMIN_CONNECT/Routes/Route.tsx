@@ -24,6 +24,7 @@ import DSOSettingList from '../Pages/Setup/Settings/List';
 import DSOTerritoryList from '../Pages/Masters/Territory/List';
 import DsoIndexPage from '../Layout/IndexPage';
 import HomePage from '../Pages/Home/HomePage';
+import DSOShadeList from '../Pages/Shade/List';
 
 // ── New Pages ──────────────────────────────────────────────────────
 import CaseFlowSLA from '../Pages/CaseFlowSLA/CaseFlowSLA';
@@ -68,7 +69,7 @@ export const dsoadminConnectRoutes = (
     <Route path="indication-list" element={<div><h5>Indication</h5></div>} />
     <Route path="materialName-list" element={<div><h5>Material Name</h5></div>} />
     <Route path="shadeGuide-list" element={<div><h5>Shade Guide</h5></div>} />
-    <Route path="shade-list" element={<div><h5>Shade</h5></div>} />
+    <Route path="shade-list" element={<DSOShadeList />} />
 
     {/* Invoice & Payment */}
     <Route path="invoices-list" element={<div><h5>Invoices</h5></div>} />
