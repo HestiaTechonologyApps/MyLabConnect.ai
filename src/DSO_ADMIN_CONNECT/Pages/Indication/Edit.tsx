@@ -10,9 +10,9 @@ import toast from "react-hot-toast";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Indication Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
-  { name: "dsoProthesisTypeId", rules: { type: "popup", label: "Prosthesis Type", required: true, colWidth: 6 } },
-  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
+  { name: "name",               rules: { type: "text",   label: "Indication Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
+  { name: "dsoProthesisTypeId", rules: { type: "popup",  label: "Prosthesis Type", required: true, colWidth: 6 } },
+  { name: "isActive",           rules: { type: "toggle", label: "Active",          colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -26,11 +26,11 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
   const [selectedProsthesis, setSelectedProsthesis] = useState<DSOProsthesisType | null>(null);
-  const [prosthesisOpen, setProsthesisOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [prosthesisOpen, setProsthesisOpen]         = useState(false);
+  // ← REMOVED: isSubmitting
 
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
-  const { requireDSOMasterId } = useCurrentUser();
+  const { requireDSOMasterId }               = useCurrentUser();
 
   useEffect(() => {
     if (!show) {
@@ -48,7 +48,7 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
 
       if (data?.dsoProthesisTypeId) {
         setSelectedProsthesis({
-          id: data.dsoProthesisTypeId,
+          id:   data.dsoProthesisTypeId,
           name: data.dsoProthesisname || `Prosthesis #${data.dsoProthesisTypeId}`,
         } as DSOProsthesisType);
       }
@@ -70,8 +70,6 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
       throw new Error("No prosthesis selected");
     }
 
-    setIsSubmitting(true);
-
     try {
       let dsoMasterId: number;
       try {
@@ -80,16 +78,15 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
       } catch (err) {
         console.error("Failed to get DSO Master ID:", err);
         await handleApiError(err, "session");
-        setIsSubmitting(false);
         throw err;
       }
 
       const payload: Partial<DSOIndication> = {
-        id: Number(id),
-        name: formData.name,
+        id:                 Number(id),
+        name:               formData.name,
         dsoProthesisTypeId: Number(selectedProsthesis.id),
-        isActive: formData.isActive ?? true,
-        dsoMasterId: dsoMasterId,
+        isActive:           formData.isActive ?? true,
+        dsoMasterId:        dsoMasterId,
       };
 
       console.log("Update payload:", payload);
@@ -107,18 +104,16 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
     } catch (err: any) {
       console.error("Error in handleUpdate:", err);
       throw err;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   // ── Popup handlers ────────────────────────────────────────────────────────
   const popupHandlers = {
     dsoProthesisTypeId: {
-      value: selectedProsthesis?.name ?? "",
+      value:       selectedProsthesis?.name ?? "",
       actualValue: selectedProsthesis?.id,
-      onOpen: () => setProsthesisOpen(true),
-      onClear: () => setSelectedProsthesis(null),
+      onOpen:      () => setProsthesisOpen(true),
+      onClear:     () => setSelectedProsthesis(null),
     },
   };
 

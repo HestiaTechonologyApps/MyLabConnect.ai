@@ -12,8 +12,7 @@ interface Props {
 const fields: ViewField[] = [
   { name: "name", label: "Shade Name",  colWidth: 12 },
   { name: "isActive",       label: "Status",      colWidth: 6, isToggle: true },
-  { name: "createdAt",      label: "Created At",  colWidth: 6, isDate: true },
-  { name: "updatedAt",      label: "Updated At",  colWidth: 6, isDate: true },
+  
 ];
 
 const DSOShadeViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
