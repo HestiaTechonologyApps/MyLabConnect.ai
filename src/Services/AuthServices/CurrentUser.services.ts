@@ -19,26 +19,26 @@ export interface CurrentUserContext {
   user: AuthUser | null;
 
   /** Shorthand fields used across DSO pages */
-  userId:      number | null;
-  userName:    string | null;
-  userEmail:   string | null;
-  userTypeId:  number | null;
+  userId: number | null;
+  userName: string | null;
+  userEmail: string | null;
+  userTypeId: number | null;
   userTypeName: string | null;
 
   /** DSO-specific context — null if user is not a DSO type */
   dsoMasterId: number | null;
-  dsoName:     string | null;
+  dsoName: string | null;
 
   /** Lab-specific context — null if user is not a Lab type */
   labMasterId: number | null;
-  labName:     string | null;
+  labName: string | null;
 
   /** Auth state helpers */
   isAuthenticated: boolean;
-  isDSOUser:       boolean;
-  isLabUser:       boolean;
-  isAppAdmin:      boolean;
-  isDoctor:        boolean;
+  isDSOUser: boolean;
+  isLabUser: boolean;
+  isAppAdmin: boolean;
+  isDoctor: boolean;
 
   /**
    * Asserts dsoMasterId is present and throws a user-friendly error if not.
@@ -67,26 +67,26 @@ export function useCurrentUser(): CurrentUserContext {
       user,
 
       // ── Identity ─────────────────────────────────────────────────────────
-      userId:       user?.id           ?? null,
-      userName:     user?.userName     ?? null,
-      userEmail:    user?.userEmail    ?? null,
-      userTypeId:   user?.userTypeId   ?? null,
+      userId: user?.id ?? null,
+      userName: user?.userName ?? null,
+      userEmail: user?.userEmail ?? null,
+      userTypeId: user?.userTypeId ?? null,
       userTypeName: user?.userTypeName ?? null,
 
       // ── DSO context ───────────────────────────────────────────────────────
       dsoMasterId: user?.dsoMasterId ?? null,
-      dsoName:     user?.dsoName     ?? null,
+      dsoName: user?.dsoName ?? null,
 
       // ── Lab context ───────────────────────────────────────────────────────
       labMasterId: user?.labMasterId ?? null,
-      labName:     user?.labName     ?? null,
+      labName: user?.labName ?? null,
 
       // ── Auth state helpers ────────────────────────────────────────────────
       isAuthenticated: AuthService.isAuthenticated(),
-      isDSOUser:       userTypeName === "dso" || userTypeName === "dso admin",
-      isLabUser:       userTypeName === "lab" || userTypeName === "lab technician",
-      isAppAdmin:      userTypeName === "app admin" || userTypeName === "super admin",
-      isDoctor:        userTypeName === "doctor"    || userTypeName === "dentist",
+      isDSOUser: userTypeName === "dso" || userTypeName === "dso admin",
+      isLabUser: userTypeName === "lab" || userTypeName === "lab technician",
+      isAppAdmin: userTypeName === "app admin" || userTypeName === "super admin",
+      isDoctor: userTypeName === "doctor" || userTypeName === "dentist",
 
       // ── Assert helpers ────────────────────────────────────────────────────
       requireDSOMasterId(): number {
