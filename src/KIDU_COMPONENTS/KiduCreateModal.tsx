@@ -535,7 +535,10 @@ const KiduCreateModal: React.FC<KiduCreateModalProps> = ({
 
         {renderFormControl(field)}
 
-        {rules.type !== "popup" && errors[name] && (
+        {/* {rules.type !== "popup" && errors[name] && (
+          <div className="kidu-error-message">{errors[name]}</div>
+        )} */}
+        {rules.type !== "popup" && rules.type !== "smartdropdown" && errors[name] && (
           <div className="kidu-error-message">{errors[name]}</div>
         )}
       </Col>
