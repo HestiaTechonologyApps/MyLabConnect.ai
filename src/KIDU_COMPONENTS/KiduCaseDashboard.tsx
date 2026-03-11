@@ -129,7 +129,7 @@ const CaseDashboard: React.FC<CaseDashboardProps> = ({ role, data, loading = fal
         showPrescription={barButtons.prescription}
         showPickup={barButtons.pickup}
         onPrescriptionClick={() => navigate('add-new-case')}
-        onPickupClick={() => navigate('add-pickup')}
+        onPickupClick={() => navigate('add-new-pickup')}
         searchValue={searchValue}
         onSearchChange={handleSearchChange}
       />

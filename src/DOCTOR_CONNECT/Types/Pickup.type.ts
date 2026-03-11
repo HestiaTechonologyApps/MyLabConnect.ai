@@ -1,32 +1,31 @@
-import type { AuditTrails } from "../../Types/Auditlog.types";
+// src/Types/CasePickup/CasePickup.types.ts
 
-export interface CasePickUp {
-
-  // Core Identity Fields
+export interface CasePickup {
+  // Core Fields
   id?: number;
-
-  // Pickup Details
+  labMasterId?: number;
+  labName?: string;
   pickUpDate?: string;
   pickUpEarliestTime?: string;
   pickUpLateTime?: string;
-  pickUpAddress?: string;
+  pickUpAddress?: string;           // display label
+  pickUpAddressId?: number;
+  practiceName?: string;
+  practiceEmail?: string;
+  practiceMobile?: string;
+  caseRegistrationMasterIds?: number[];
+  caseLabels?: string[];            // display labels aligned with ids
   trackingNum?: string;
 
-  // Lab Relationship
-  labMasterId?: number;
-  labMasterName?: string;
-
-  // Case Registration Relationship
-  caseRegistrationMasterId?: number;
-  caseRegistrationMasterName?: string;
-
-  // Audit Fields
-  createdAt?: string;
-  updatedAt?: string | null;
-  isDeleted?: boolean;
+  // Status Fields
   isActive?: boolean;
+  isDeleted?: boolean;
 
-  // Pagination / Filtering Fields
+  // Timestamps
+  createdAt?: string;
+  updatedAt?: string;
+
+  // Pagination / Filtering
   pageNumber?: number;
   pageSize?: number;
   searchTerm?: string;
@@ -34,7 +33,30 @@ export interface CasePickUp {
   sortDescending?: boolean;
   showDeleted?: boolean;
   showInactive?: boolean;
+}
 
-  // Optional Audit Trail
-  auditlog?: AuditTrails[];
+/** Shape returned by GET /CasePickUp/:id — may include nested address info */
+export interface CasePickupDetail extends CasePickup {
+  addressLine?: string;
+  email?: string;
+  mobileNo?: string;
+  cases?: { id: number | string; label: string }[];
+}
+
+/** Payload sent to POST /CasePickUp */
+export interface CasePickupCreatePayload {
+  labMasterId: number;
+  pickUpDate: string;
+  pickUpEarliestTime: string;
+  pickUpLateTime: string;
+  pickUpAddress: string | number;
+  caseRegistrationMasterIds: (string | number)[];
+  trackingNum?: string;
+}
+
+/** Payload sent to PUT /CasePickUp/:id */
+export interface CasePickupUpdatePayload {
+  id: number;
+  caseRegistrationMasterIds: (string | number)[];
+  trackingNum: string;
 }
