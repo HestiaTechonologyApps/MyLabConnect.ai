@@ -1,18 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// KiduSelectPopup.tsx
-// Reusable popup selector — pill/tag display
-//
-// Features:
-//   ✅ Column filters (text / select) — collapsible, with "Clear All"
-//   ✅ Rows-per-page selector (5 / 10 / 20 / 50) in footer
-//   ✅ Row checkboxes + select-all — staged, confirmed via button (multiSelect)
-//   ✅ No auto-close on row click when multiSelect={true}
-//   ✅ KiduSelectInputPill style props: inputHeight / inputWidth / inputStyle / triggerClassName
-//   ✅ ALL styles live in KiduSelectPopup.css — nothing inline in any Create/Edit page
-//
-// Place in:  src/KIDU_COMPONENTS/KiduSelectPopup.tsx
-// CSS file:  src/Styles/KiduStyles/KiduSelectPopup.css
-// ─────────────────────────────────────────────────────────────────────────────
+// src/KIDU_COMPONENTS/KiduSelectPopup.tsx
 
 import React, {
   useState, useEffect, useCallback, useRef,
@@ -22,18 +8,13 @@ import { Modal } from "react-bootstrap";
 import HttpService from "../Services/Common/HttpService";
 import "../Styles/KiduStyles/PopUp.css";
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // Types
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 export interface KiduSelectColumn<T> {
   key: keyof T;
   label: string;
-  /**
-   * Enables a per-column filter beneath the search bar.
-   * "text"   → free-text input
-   * "select" → dropdown (requires filterOptions)
-   */
   filterType?: "text" | "select";
   filterOptions?: string[];
   render?: (value: any, row: T) => React.ReactNode;
@@ -45,33 +26,34 @@ export interface KiduSelectPopupProps<T extends Record<string, any>> {
   title: string;
   subtitle?: string;
 
-  fetchEndpoint: string;
-  columns: KiduSelectColumn<T>[];
+  /**
+   * MODE 1 — Pre-loaded: pass `data` directly (no internal fetch).
+   * Use when the parent already fetched the list.
+   */
+  data?: T[];
 
   /**
-   * Fired when a row is confirmed.
-   * Single-select → called once on row click, modal closes immediately.
-   * Multi-select  → called once per selected row when "Confirm" is clicked.
+   * MODE 2 — Fetch on open: pass `fetchEndpoint` (GET request).
+   * Required when `data` is NOT provided.
    */
+  fetchEndpoint?: string;
+
+  /**
+   * External loading flag (MODE 1).
+   * Shows skeleton while the parent is still fetching.
+   */
+  loading?: boolean;
+
+  columns: KiduSelectColumn<T>[];
   onSelect: (item: T) => void;
 
   idKey?: keyof T;
-  /** Field value shown as the pill label after selection */
   labelKey: keyof T;
-  /** Keys searched by the global search bar (defaults to all column keys) */
   searchKeys?: (keyof T)[];
 
-  /** Default rows per page. Default: 10 */
   rowsPerPage?: number;
-  /** Options shown in the footer rows-per-page selector. Default: [5, 10, 20, 50] */
   rowsPerPageOptions?: number[];
-
   themeColor?: string;
-
-  /**
-   * true  → checkboxes + "Confirm (N)" button; modal stays open until confirmed.
-   * false → single row click fires onSelect and closes immediately. (default)
-   */
   multiSelect?: boolean;
 
   AddModalComponent?: React.ComponentType<{
@@ -83,32 +65,9 @@ export interface KiduSelectPopupProps<T extends Record<string, any>> {
   addButtonLabel?: string;
 }
 
-
-// ═════════════════════════════════════════════════════════════════════════════
-// KiduSelectInputPill — trigger field
-//
-// Drop into any form in place of a plain input.
-// Style props (all optional):
-//
-//   inputHeight      → min-height of the trigger box   (default: "40px")
-//   inputWidth       → width of the trigger box         (default: "100%")
-//   inputStyle       → extra CSSProperties on the trigger box
-//   triggerClassName → extra className on the trigger box div
-//
-// Example:
-//   <KiduSelectInputPill
-//     label="DSO Master"
-//     required
-//     value={selectedMaster?.name ?? ""}
-//     onOpen={() => setOpen(true)}
-//     onClear={() => setSelectedMaster(null)}
-//     error={touched ? errors.dsoMaster : undefined}
-//     inputHeight={44}
-//     inputWidth="100%"
-//     inputStyle={{ borderRadius: 14 }}
-//     triggerClassName="my-custom-trigger"
-//   />
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// KiduSelectInputPill
+// ═══════════════════════════════════════════════════════════
 
 export interface KiduSelectInputPillProps {
   label?: string;
@@ -118,17 +77,11 @@ export interface KiduSelectInputPillProps {
   required?: boolean;
   error?: string;
   disabled?: boolean;
-  themeColor?: string;      // kept for per-instance accent override if ever needed
+  themeColor?: string;
   placeholder?: string;
-
-  // ── Style customisation props ──────────────────────────────────────────
-  /** Override min-height. Number → px. Default: "40px" */
   inputHeight?: string | number;
-  /** Override width. Number → px. Default: "100%" */
   inputWidth?: string | number;
-  /** Any extra inline CSSProperties on the trigger box */
   inputStyle?: CSSProperties;
-  /** Extra className on the trigger box div */
   triggerClassName?: string;
 }
 
@@ -156,7 +109,6 @@ export const KiduSelectInputPill: React.FC<KiduSelectInputPillProps> = ({
           {label}{required && <span className="req">*</span>}
         </span>
       )}
-
       <div
         className={[
           "ksp-pill-trigger",
@@ -185,35 +137,29 @@ export const KiduSelectInputPill: React.FC<KiduSelectInputPillProps> = ({
         ) : (
           <span className="ksp-pill-placeholder">{placeholder}</span>
         )}
-
-        {/* Search icon */}
-        <svg
-          className="ksp-pill-search-ico"
-          viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2"
-          width="15" height="15"
-        >
+        <svg className="ksp-pill-search-ico" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" width="15" height="15">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
       </div>
-
       {error && <span className="ksp-pill-error-msg">{error}</span>}
     </div>
   );
 };
 
-
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // KiduSelectPopup
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 function KiduSelectPopup<T extends Record<string, any>>({
   show,
   onClose,
   title,
   subtitle,
+  data: externalData,
   fetchEndpoint,
+  loading: externalLoading = false,
   columns,
   onSelect,
   idKey = "id" as keyof T,
@@ -227,33 +173,30 @@ function KiduSelectPopup<T extends Record<string, any>>({
   addButtonLabel = "Add New",
 }: KiduSelectPopupProps<T>) {
 
-  // ── Data ──────────────────────────────────────────────────────────────────
-  const [allData, setAllData] = useState<T[]>([]);
-  const [filtered, setFiltered] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [allData, setAllData]     = useState<T[]>([]);
+  const [filtered, setFiltered]   = useState<T[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(false);
 
-  // ── Search + column filters ───────────────────────────────────────────────
-  const [search, setSearch] = useState("");
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [search, setSearch]               = useState("");
+  const [filtersOpen, setFiltersOpen]     = useState(false);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const activeFilterCount = Object.values(columnFilters).filter(Boolean).length;
 
-  // ── Pagination ────────────────────────────────────────────────────────────
-  const [page, setPage] = useState(1);
+  const [page, setPage]       = useState(1);
   const [perPage, setPerPage] = useState(rowsPerPage);
 
-  // ── Row selection ─────────────────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<any>>(new Set());
-
-  // ── Add modal ─────────────────────────────────────────────────────────────
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd]         = useState(false);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // ── Fetch on open ─────────────────────────────────────────────────────────
+  // Combined loading flag
+  const isLoading = fetchLoading || externalLoading;
+
+  // ── Fetch / sync data on open ────────────────────────────────────────────
   useEffect(() => {
     if (!show) return;
-    setLoading(true);
+
     setSearch("");
     setColumnFilters({});
     setSelectedIds(new Set());
@@ -261,26 +204,43 @@ function KiduSelectPopup<T extends Record<string, any>>({
     setFiltersOpen(false);
     setPerPage(rowsPerPage);
 
+    // MODE 1: pre-loaded data via prop
+    if (externalData !== undefined) {
+      setAllData(externalData);
+      setFiltered(externalData);
+      setTimeout(() => searchRef.current?.focus(), 120);
+      return;
+    }
+
+    // MODE 2: fetch from endpoint
+    if (!fetchEndpoint) return;
+    setFetchLoading(true);
     HttpService.callApi<any>(fetchEndpoint, "GET")
       .then((res) => {
-        const data: T[] =
-          Array.isArray(res) ? res :
-            Array.isArray(res?.value) ? res.value :
-              Array.isArray(res?.data) ? res.data : [];
-        setAllData(data);
-        setFiltered(data);
+        const items: T[] =
+          Array.isArray(res)         ? res         :
+          Array.isArray(res?.value)  ? res.value   :
+          Array.isArray(res?.data)   ? res.data    : [];
+        setAllData(items);
+        setFiltered(items);
       })
       .catch(() => { setAllData([]); setFiltered([]); })
       .finally(() => {
-        setLoading(false);
+        setFetchLoading(false);
         setTimeout(() => searchRef.current?.focus(), 120);
       });
-  }, [show, fetchEndpoint, rowsPerPage]);
+  }, [show, fetchEndpoint, rowsPerPage, externalData]);
 
-  // ── Combined filter ───────────────────────────────────────────────────────
+  // ── When external data changes while open (e.g. parent finishes loading) ─
+  useEffect(() => {
+    if (!show || externalData === undefined) return;
+    setAllData(externalData);
+    setFiltered(externalData);
+  }, [externalData, show]);
+
+  // ── Combined filter ──────────────────────────────────────────────────────
   useEffect(() => {
     let result = allData;
-
     const q = search.toLowerCase().trim();
     if (q) {
       const keys = searchKeys ?? columns.map((c) => c.key);
@@ -288,24 +248,22 @@ function KiduSelectPopup<T extends Record<string, any>>({
         keys.some((k) => String(row[k] ?? "").toLowerCase().includes(q))
       );
     }
-
     Object.entries(columnFilters).forEach(([key, val]) => {
       if (!val) return;
       result = result.filter((row) =>
         String(row[key] ?? "").toLowerCase().includes(val.toLowerCase())
       );
     });
-
     setFiltered(result);
     setPage(1);
   }, [search, columnFilters, allData, searchKeys, columns]);
 
-  // ── Pagination derived ────────────────────────────────────────────────────
+  // ── Pagination ───────────────────────────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const pageData = filtered.slice((page - 1) * perPage, page * perPage);
+  const pageData   = filtered.slice((page - 1) * perPage, page * perPage);
 
-  // ── Selection helpers ─────────────────────────────────────────────────────
-  const allPageSelected = pageData.length > 0 && pageData.every((r) => selectedIds.has(r[idKey]));
+  // ── Selection ────────────────────────────────────────────────────────────
+  const allPageSelected  = pageData.length > 0 && pageData.every((r) => selectedIds.has(r[idKey]));
   const somePageSelected = pageData.some((r) => selectedIds.has(r[idKey]));
 
   const toggleRowId = (id: any) => {
@@ -325,39 +283,33 @@ function KiduSelectPopup<T extends Record<string, any>>({
     });
   };
 
-  // ── Single select: fire + close immediately ───────────────────────────────
   const handleSingleSelect = useCallback((item: T) => {
     onSelect(item);
     onClose();
   }, [onSelect, onClose]);
 
-  // ── Multi-select confirm ──────────────────────────────────────────────────
   const handleConfirmMulti = useCallback(() => {
     allData.filter((r) => selectedIds.has(r[idKey])).forEach((r) => onSelect(r));
     onClose();
   }, [allData, selectedIds, idKey, onSelect, onClose]);
 
-  // ── Add modal ─────────────────────────────────────────────────────────────
   const handleAdded = useCallback((item: T) => {
     setAllData((prev) => [item, ...prev]);
     setShowAdd(false);
   }, []);
 
-  // ── Text highlight ────────────────────────────────────────────────────────
+  // ── Highlight ────────────────────────────────────────────────────────────
   const highlight = (text: string) => {
     if (!search.trim()) return <>{text}</>;
-    const q = search.toLowerCase();
+    const q   = search.toLowerCase();
     const idx = text.toLowerCase().indexOf(q);
     if (idx === -1) return <>{text}</>;
     return (
       <>
         {text.slice(0, idx)}
         <mark style={{
-          background: `${themeColor}28`,
-          color: themeColor,
-          padding: "0 2px",
-          borderRadius: 3,
-          fontWeight: 700,
+          background: `${themeColor}28`, color: themeColor,
+          padding: "0 2px", borderRadius: 3, fontWeight: 700,
         }}>
           {text.slice(idx, idx + search.length)}
         </mark>
@@ -366,7 +318,6 @@ function KiduSelectPopup<T extends Record<string, any>>({
     );
   };
 
-  // ── Visible page numbers (max 5) ──────────────────────────────────────────
   const visiblePages = () => {
     const count = Math.min(totalPages, 5);
     let start = 1;
@@ -380,18 +331,12 @@ function KiduSelectPopup<T extends Record<string, any>>({
 
   const filterableCols = columns.filter((c) => !!c.filterType);
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <>
-      <Modal
-        show={show}
-        onHide={onClose}
-        size="lg"
-        centered
-        className="ksp-modal"
-        backdrop="static"
-      >
-        {/* ── Header ── */}
+      <Modal show={show} onHide={onClose} size="lg" centered
+        className="ksp-modal" backdrop="static">
+
         <Modal.Header closeButton>
           <div>
             <p className="ksp-title">{title}</p>
@@ -399,7 +344,7 @@ function KiduSelectPopup<T extends Record<string, any>>({
           </div>
         </Modal.Header>
 
-        {/* ── Search + Filter toggle ── */}
+        {/* Search + Filter toggle */}
         <div className="ksp-search-zone">
           <div className="ksp-search-wrap">
             <svg className="ksp-search-svg" viewBox="0 0 24 24" fill="none"
@@ -413,7 +358,7 @@ function KiduSelectPopup<T extends Record<string, any>>({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            {!loading && (
+            {!isLoading && (
               <span className="ksp-result-badge">
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""}
               </span>
@@ -438,7 +383,7 @@ function KiduSelectPopup<T extends Record<string, any>>({
           )}
         </div>
 
-        {/* ── Column filter row ── */}
+        {/* Column filters */}
         {filtersOpen && filterableCols.length > 0 && (
           <div className="ksp-filter-row">
             {filterableCols.map((col) => (
@@ -470,17 +415,14 @@ function KiduSelectPopup<T extends Record<string, any>>({
                 )}
               </div>
             ))}
-            <button
-              className="ksp-filter-clear-btn"
-              type="button"
-              onClick={() => setColumnFilters({})}
-            >
+            <button className="ksp-filter-clear-btn" type="button"
+              onClick={() => setColumnFilters({})}>
               Clear All
             </button>
           </div>
         )}
 
-        {/* ── Selection count banner (multi-select mode) ── */}
+        {/* Multi-select count banner */}
         {multiSelect && selectedIds.size > 0 && (
           <div className="ksp-sel-bar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -488,17 +430,14 @@ function KiduSelectPopup<T extends Record<string, any>>({
               <polyline points="20 6 9 17 4 12" />
             </svg>
             {selectedIds.size} row{selectedIds.size !== 1 ? "s" : ""} selected
-            <button
-              className="ksp-sel-bar-clear"
-              type="button"
-              onClick={() => setSelectedIds(new Set())}
-            >Clear</button>
+            <button className="ksp-sel-bar-clear" type="button"
+              onClick={() => setSelectedIds(new Set())}>Clear</button>
           </div>
         )}
 
-        {/* ── Table body ── */}
+        {/* Table body */}
         <div className="ksp-body">
-          {loading ? (
+          {isLoading ? (
             <table className="ksp-tbl">
               <tbody>
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -529,9 +468,7 @@ function KiduSelectPopup<T extends Record<string, any>>({
                 <tr>
                   {multiSelect && (
                     <th className="ksp-th-check">
-                      <input
-                        type="checkbox"
-                        className="ksp-checkbox"
+                      <input type="checkbox" className="ksp-checkbox"
                         checked={allPageSelected}
                         ref={(el) => {
                           if (el) el.indeterminate = somePageSelected && !allPageSelected;
@@ -548,11 +485,10 @@ function KiduSelectPopup<T extends Record<string, any>>({
               </thead>
               <tbody>
                 {pageData.map((row) => {
-                  const id = row[idKey];
+                  const id         = row[idKey];
                   const isSelected = selectedIds.has(id);
                   return (
-                    <tr
-                      key={String(id)}
+                    <tr key={String(id)}
                       className={isSelected ? "ksp-row-selected" : ""}
                       onClick={() => {
                         if (multiSelect) toggleRowId(id);
@@ -561,31 +497,21 @@ function KiduSelectPopup<T extends Record<string, any>>({
                     >
                       {multiSelect && (
                         <td onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            className="ksp-checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleRowId(id)}
-                          />
+                          <input type="checkbox" className="ksp-checkbox"
+                            checked={isSelected} onChange={() => toggleRowId(id)} />
                         </td>
                       )}
-
                       {columns.map((col) => (
                         <td key={String(col.key)}>
                           {col.render
                             ? col.render(row[col.key], row)
-                            : highlight(String(row[col.key] ?? "—"))
-                          }
+                            : highlight(String(row[col.key] ?? "—"))}
                         </td>
                       ))}
-
                       {!multiSelect && (
                         <td style={{ textAlign: "right" }}>
-                          <button
-                            className="ksp-row-pill"
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); handleSingleSelect(row); }}
-                          >
+                          <button className="ksp-row-pill" type="button"
+                            onClick={(e) => { e.stopPropagation(); handleSingleSelect(row); }}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                               strokeWidth="3" width="10" height="10">
                               <polyline points="20 6 9 17 4 12" />
@@ -602,10 +528,8 @@ function KiduSelectPopup<T extends Record<string, any>>({
           )}
         </div>
 
-        {/* ── Footer ── */}
+        {/* Footer */}
         <div className="ksp-footer">
-
-          {/* Left: Add + rows-per-page */}
           <div className="ksp-footer-left">
             {showAddButton && AddModalComponent && (
               <button className="ksp-add-btn" type="button" onClick={() => setShowAdd(true)}>
@@ -616,14 +540,10 @@ function KiduSelectPopup<T extends Record<string, any>>({
                 {addButtonLabel}
               </button>
             )}
-
             <div className="ksp-rpp-wrap">
               <span className="ksp-rpp-label">Rows per page</span>
-              <select
-                className="ksp-rpp-select"
-                value={perPage}
-                onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-              >
+              <select className="ksp-rpp-select" value={perPage}
+                onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>
                 {rowsPerPageOptions.map((n) => (
                   <option key={n} value={n}>{n}</option>
                 ))}
@@ -631,7 +551,6 @@ function KiduSelectPopup<T extends Record<string, any>>({
             </div>
           </div>
 
-          {/* Right: Pagination + Confirm */}
           <div className="ksp-footer-right">
             {totalPages > 1 && (
               <>
@@ -640,25 +559,18 @@ function KiduSelectPopup<T extends Record<string, any>>({
                   <button className="ksp-pg-btn" disabled={page === 1}
                     onClick={() => setPage((p) => p - 1)}>‹</button>
                   {visiblePages().map((n) => (
-                    <button
-                      key={n}
+                    <button key={n}
                       className={`ksp-pg-btn${n === page ? " active" : ""}`}
-                      onClick={() => setPage(n)}
-                    >{n}</button>
+                      onClick={() => setPage(n)}>{n}</button>
                   ))}
                   <button className="ksp-pg-btn" disabled={page === totalPages}
                     onClick={() => setPage((p) => p + 1)}>›</button>
                 </div>
               </>
             )}
-
             {multiSelect && (
-              <button
-                className="ksp-confirm-btn"
-                type="button"
-                disabled={selectedIds.size === 0}
-                onClick={handleConfirmMulti}
-              >
+              <button className="ksp-confirm-btn" type="button"
+                disabled={selectedIds.size === 0} onClick={handleConfirmMulti}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2.5" width="13" height="13">
                   <polyline points="20 6 9 17 4 12" />

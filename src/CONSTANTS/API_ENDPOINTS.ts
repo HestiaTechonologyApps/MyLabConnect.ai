@@ -1,4 +1,4 @@
-// src/constants/apiEndpoints.ts
+// src/CONSTANTS/API_ENDPOINTS.ts
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mylabconnectapi.hestiatechnology.com/api';
 
@@ -25,11 +25,19 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (attachmentId: number) => `${API_BASE_URL}/Attachment/${attachmentId}`,
     UPLOAD: `${API_BASE_URL}/Attachment/upload`,
     DELETE: (attachmentId: number) => `${API_BASE_URL}/Attachment/${attachmentId}`,
-    //GET: `${API_BASE_URL}/Attachment`,
     DOWNLOAD: (attachmentId: number) => `${API_BASE_URL}/Attachment/download/${attachmentId}`,
     UPDATE: (id: number) => `${API_BASE_URL}/Attachment/${id}`
   },
-  //-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------ADMIN-------//
+
+  // ── Lookup controller — used by popup selectors ────────────────────────────
+  LOOKUP: {
+    GET: (entityName: string, recordId?: number) =>
+      recordId !== undefined
+        ? `${API_BASE_URL}/LookUp?entityName=${entityName}&recordId=${recordId}`
+        : `${API_BASE_URL}/LookUp?entityName=${entityName}`,
+  },
+
+  //-------ADMIN-------//
   COMPANY: {
     GET_ALL: `${API_BASE_URL}/Company/GetAll/admin-getall-company`,
     GET_LOOKUP: `${API_BASE_URL}/Company/GetCompanyLookup/admin-lookup-company`,
@@ -71,7 +79,8 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/UserType/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/UserType/getall-paginated`,
   },
-  //-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------DSO-ADMIN-------//
+
+  //-------DSO-ADMIN-------//
   DSO_DOCTOR: {
     GET_ALL: `${API_BASE_URL}/DSODoctor`,
     CREATE: `${API_BASE_URL}/DSODoctor`,
@@ -120,39 +129,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSOSchema/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSOSchema/getall-paginated`,
   },
-  //-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------LAB-CONNECT-------//
-  LAB_SUPPORT_SUB_TYPE: {
-    GET: `${API_BASE_URL}/LabSupportSubType`,
-    CREATE: `${API_BASE_URL}/LabSupportSubType`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
-    GET_PAGINATION: `${API_BASE_URL}/LabSupportSubType/getall-pagination`
-  },
-  LAB_SUPPORT_TYPE: {
-    GET: `${API_BASE_URL}/LabSupportType`,
-    CREATE: `${API_BASE_URL}/LabSupportType`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
-    GET_PAGINATION: `${API_BASE_URL}/LabSupportType/getall-paginated`
-  },
-
-
-
-  COMMENT: {
-    //GET_ALL:`${API_BASE_URL}/Comment/${tableName}/${recordId}`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/Comment/${id}`,
-    //DELETE:(id:number)=>`${API_BASE_URL}/Comment/${CommentId}`,
-    CREATE: `${API_BASE_URL}/Comment/AddComment`,
-  },
-  CUSTOMER: {
-    GET_ALL: `${API_BASE_URL}/Customer`,
-    CREATE: `${API_BASE_URL}/Customer`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/Customer/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/Customer/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/Customer/${id}`,
-  },
   DSO_DENTAL_OFFICE: {
     GET_ALL: `${API_BASE_URL}/DSODentalOffice`,
     CREATE: `${API_BASE_URL}/DSODentalOffice`,
@@ -161,7 +137,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSODentalOffice/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSODentalOffice/getall-paginated`,
   },
-
   DSO_DOCTOR_DENTAL_OFFICE: {
     GET_ALL: `${API_BASE_URL}/DSODoctorDentalOffice`,
     CREATE: `${API_BASE_URL}/DSODoctorDentalOffice`,
@@ -194,7 +169,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSOProduct/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSOProduct/getall-paginated`,
   },
-
   DSO_REGION: {
     GET_ALL: `${API_BASE_URL}/DSORegion`,
     CREATE: `${API_BASE_URL}/DSORegion`,
@@ -203,8 +177,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: number) => `${API_BASE_URL}/DSORegion/${id}`,
     UPDATE_PAGINATION: `${API_BASE_URL}/DSORegion/getall-paginated`,
   },
-
-
   DSO_SETTING: {
     GET_ALL: `${API_BASE_URL}/DSOSetting`,
     CREATE: `${API_BASE_URL}/DSOSetting`,
@@ -228,6 +200,45 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `${API_BASE_URL}/DSOUser/${id}`,
     DELETE: (id: number) => `${API_BASE_URL}/DSOUser/${id}`,
     GET_PAGINATED: `${API_BASE_URL}/DSOUser/getall-paginated`,
+  },
+  DSO_SHADE: {
+    GET_ALL: `${API_BASE_URL}/DSOShade`,
+    CREATE: `${API_BASE_URL}/DSOShade`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/DSOShade/getall-paginated`,
+  },
+  DSO_ADDITIONAL_SERVICE: {
+    GET_ALL: `${API_BASE_URL}/DSOAdditionalService`,
+    CREATE: `${API_BASE_URL}/DSOAdditionalService`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOAdditionalService/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/DSOAdditionalService/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/DSOAdditionalService/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/DSOAdditionalService/getall-paginated`,
+  },
+  CASE_STATUS_MASTER: {
+    GET_ALL: `${API_BASE_URL}/CaseStatusMaster`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/CaseStatusMaster/${id}`,
+    UPDATE_PAGINATION: `${API_BASE_URL}/CaseStatusMaster/getall-paginated`,
+  },
+
+  //-------LAB-CONNECT-------//
+  LAB_SUPPORT_SUB_TYPE: {
+    GET: `${API_BASE_URL}/LabSupportSubType`,
+    CREATE: `${API_BASE_URL}/LabSupportSubType`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/LabSupportSubType/${id}`,
+    GET_PAGINATION: `${API_BASE_URL}/LabSupportSubType/getall-pagination`
+  },
+  LAB_SUPPORT_TYPE: {
+    GET: `${API_BASE_URL}/LabSupportType`,
+    CREATE: `${API_BASE_URL}/LabSupportType`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/LabSupportType/${id}`,
+    GET_PAGINATION: `${API_BASE_URL}/LabSupportType/getall-paginated`
   },
   LAB_GROUP: {
     GET_ALL: `${API_BASE_URL}/LabGroup`,
@@ -254,72 +265,67 @@ export const API_ENDPOINTS = {
     UPDATE_PAGINATION: `${API_BASE_URL}/LabSetting/getall-paginated`,
   },
 
-  DSO_SHADE:{
-    GET_ALL: `${API_BASE_URL}/`,
-    CREATE: `${API_BASE_URL}/DSOShade`,
-    GET_BY_ID: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
-    UPDATE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
-    DELETE: (id: number) => `${API_BASE_URL}/DSOShade/${id}`,
-    UPDATE_PAGINATION: `${API_BASE_URL}/DSOShade/getall-paginated`,
+  //-------CASE-------//
+  CASE_REGISTRATION: {
+    GET_ALL: `${API_BASE_URL}/CaseRegistrationMaster`,
+    CREATE: `${API_BASE_URL}/CaseRegistrationMaster`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/CaseRegistrationMaster/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/CaseRegistrationMaster/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/CaseRegistrationMaster/${id}`,
+    GET_PAGINATED: `${API_BASE_URL}/CaseRegistrationMaster/getall-paginated`,
+
+    // ── Sub-resource endpoints (map to controller action routes) ─────────────
+    CHANGE_STATUS: (id: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${id}/status`,
+    ADD_PRODUCT: (caseId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/products`,
+    UPDATE_PRODUCT: (caseId: number, productId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/products/${productId}`,
+    REMOVE_PRODUCT: (caseId: number, productId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/products/${productId}`,
+    ADD_DOCUMENT: (caseId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/documents`,
+    REMOVE_DOCUMENT: (caseId: number, docId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/documents/${docId}`,
+    ADD_SERVICE: (caseId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/services`,
+    UPDATE_SERVICE: (caseId: number, svcId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/services/${svcId}`,
+    REMOVE_SERVICE: (caseId: number, svcId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/services/${svcId}`,
+    ADD_PICKUP: (caseId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/pickups`,
+    UPDATE_PICKUP: (caseId: number, pickupId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/pickups/${pickupId}`,
+    REMOVE_PICKUP: (caseId: number, pickupId: number) =>
+      `${API_BASE_URL}/CaseRegistrationMaster/${caseId}/pickups/${pickupId}`,
   },
 
+  //-------MISC-------//
+  COMMENT: {
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/Comment/${id}`,
+    CREATE: `${API_BASE_URL}/Comment/AddComment`,
+  },
+  CUSTOMER: {
+    GET_ALL: `${API_BASE_URL}/Customer`,
+    CREATE: `${API_BASE_URL}/Customer`,
+    GET_BY_ID: (id: number) => `${API_BASE_URL}/Customer/${id}`,
+    UPDATE: (id: number) => `${API_BASE_URL}/Customer/${id}`,
+    DELETE: (id: number) => `${API_BASE_URL}/Customer/${id}`,
+  },
 };
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-// ✅ Helper function to get full image URL - FIXED VERSION
 export const getFullImageUrl = (imagePath: string | null | undefined): string => {
-  console.log('getFullImageUrl called with:', imagePath);
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  if (imagePath.startsWith('blob:')) return imagePath;
+  if (imagePath.includes('placeholder') || imagePath.includes('/assets/') || imagePath.includes('/Assets/')) return imagePath;
 
-  if (!imagePath) {
-    console.log('No image path provided');
-    return '';
-  }
-
-  // If already a complete URL, return as is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    console.log('Already a full URL:', imagePath);
-    return imagePath;
-  }
-
-  // If it's a blob URL (from file upload preview), return as is
-  if (imagePath.startsWith('blob:')) {
-    console.log('Blob URL detected:', imagePath);
-    return imagePath;
-  }
-
-  // If it's a placeholder URL pattern or local asset
-  if (imagePath.includes('placeholder') || imagePath.includes('/assets/') || imagePath.includes('/Assets/')) {
-    console.log('Placeholder or asset URL detected:', imagePath);
-    return imagePath;
-  }
-
-  // ✅ FIXED: Always use the backend server URL directly
   const backendUrl = 'http://sreenathganga-001-site16.jtempurl.com';
-  console.log('Backend URL:', backendUrl);
-
-  // Ensure proper path construction - remove leading slash from imagePath if present
   const cleanPath = imagePath.replace(/^\/+/, '');
-  const fullUrl = `${backendUrl}/${cleanPath}`;
-
-  console.log('Final full URL:', fullUrl);
-  return fullUrl;
+  return `${backendUrl}/${cleanPath}`;
 };
 
-// ✅ Get base website URL (without /api)
-export const getBaseWebsiteUrl = (): string => {
-  const baseUrl = API_BASE_URL.replace('/api', '');
-  return baseUrl;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
+export const getBaseWebsiteUrl = (): string => API_BASE_URL.replace('/api', '');

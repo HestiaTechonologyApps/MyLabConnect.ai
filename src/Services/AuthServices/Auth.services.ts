@@ -1,26 +1,4 @@
 // src/Services/AuthServices/Auth.services.ts
-//
-// ─── Auth Flow ────────────────────────────────────────────────────────────────
-//
-// LOGIN FLOW:
-//   POST /Auth/login → { authState, token, redirectPortal? }
-//
-//   SUCCESS           → decode JWT claims to get user (no extra /me call needed)
-//   REQUIRES_2FA      → store temp token, navigate to /verify-otp
-//   REQUIRES_PWD_CHANGE → store temp token, navigate to /force-change-password
-//
-//   POST /Auth/verify-otp → { authState: "SUCCESS", token, redirectPortal }
-//     → same: decode JWT → store session
-//
-//   POST /Auth/change-default-password → { authState: "SUCCESS", token, ... }
-//     → same: decode JWT → store session
-//
-// WHY decode instead of calling /me:
-//   The backend's GenerateToken() embeds all needed claims (uid, username, email,
-//   companyId, userTypeName, dsoMasterId, etc.) directly in the JWT payload.
-//   Decoding avoids an extra network round-trip and removes the failure mode
-//   where /me returns 404 if the token isn't in the Authorization header yet.
-// ─────────────────────────────────────────────────────────────────────────────
 
 import { API_ENDPOINTS } from '../../CONSTANTS/API_ENDPOINTS';
 import HttpService from '../Common/HttpService';
@@ -66,12 +44,10 @@ let _cache: AuthCache = {
 };
 
 // ─── JWT Decoder ──────────────────────────────────────────────────
-// Safely decode the base64url JWT payload without any library.
 function decodeJwtPayload(token: string): Record<string, any> | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
-    // Base64url → base64 → decode
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
     const json = decodeURIComponent(
       atob(base64)
@@ -85,28 +61,44 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
   }
 }
 
+// ─── Safe claim extractor ─────────────────────────────────────────
+// The JWT has BOTH JwtRegisteredClaimNames.Email AND a custom "email" claim,
+// both with the same key "email". When decoded, duplicate keys become an array.
+// This helper ALWAYS returns the first string value safely — never an array.
+function claim(p: Record<string, any>, key: string): string {
+  const val = p[key];
+  if (Array.isArray(val)) return String(val[0] ?? '');
+  if (val === null || val === undefined) return '';
+  return String(val);
+}
+
 // ─── Build AuthUser from JWT claims ───────────────────────────────
-// Claim names must match JwtService.GenerateToken() exactly.
 function buildUserFromToken(token: string): AuthUser | null {
   const p = decodeJwtPayload(token);
   if (!p) return null;
 
-  // sub / uid both hold userId
-  const id = parseInt(p['uid'] ?? p['sub'] ?? '0', 10);
-  const userTypeName = p['userTypeName'] ?? '';
+  const id           = parseInt(claim(p, 'uid') || claim(p, 'sub') || '0', 10);
+  const userTypeName = claim(p, 'userTypeName');
 
   if (!id || !isValidUserTypeName(userTypeName)) return null;
 
+  const dsoMasterIdRaw = claim(p, 'dsoMasterId');
+  const labMasterIdRaw = claim(p, 'labMasterId');
+
+  // ── FIX: email claim is always extracted via claim() which already handles
+  //         the Array(2) edge-case — val[0] is returned safely as a string.
+  const userEmail = claim(p, 'email');
+
   return {
     id,
-    userName:          p['username']          ?? '',
-    userEmail:         p['email']             ?? '',
-    phoneNumber:       p['phone']             ?? '',
+    userName:          claim(p, 'username'),
+    userEmail,                              // always string, never array
+    phoneNumber:       claim(p, 'phone'),
     address:           '',
-    islocked:          p['isLocked'] === 'True' || p['isLocked'] === true,
-    companyId:         parseInt(p['companyId'] ?? '0', 10),
-    companyName:       '',           // not in token; populated via /me if needed
-    userTypeId:        parseInt(p['userTypeId'] ?? '0', 10),
+    islocked:          claim(p, 'isLocked') === 'True',
+    companyId:         parseInt(claim(p, 'companyId')  || '0', 10),
+    companyName:       '',
+    userTypeId:        parseInt(claim(p, 'userTypeId') || '0', 10),
     userTypeName,
     lastlogin:         '',
     lastloginString:   '',
@@ -115,12 +107,24 @@ function buildUserFromToken(token: string): AuthUser | null {
     updatedAt:         '',
     isDeleted:         false,
     isActive:          true,
-    isDefaultPassword: false,        // already changed by this point for SUCCESS
-    dsoMasterId:       p['dsoMasterId'] ? parseInt(p['dsoMasterId'], 10) : null,
-    dsoName:           p['dsoName']    ?? '',
-    labMasterId:       p['labMasterId'] ? parseInt(p['labMasterId'], 10) : null,
-    labName:           p['labName']    ?? '',
+    isDefaultPassword: false,
+    dsoMasterId:       dsoMasterIdRaw ? parseInt(dsoMasterIdRaw, 10) : null,
+    dsoName:           claim(p, 'dsoName'),
+    labMasterId:       labMasterIdRaw ? parseInt(labMasterIdRaw, 10) : null,
+    labName:           claim(p, 'labName'),
   };
+}
+
+// ─── Sanitise a stored AuthUser ───────────────────────────────────
+// Old cached users might have userEmail as an array (before this fix).
+// This ensures the user loaded from storage is always safe.
+function sanitiseUser(user: AuthUser | null): AuthUser | null {
+  if (!user) return null;
+  const email = user.userEmail;
+  if (Array.isArray(email)) {
+    return { ...user, userEmail: String(email[0] ?? '') };
+  }
+  return user;
 }
 
 // ─── Persist helpers ──────────────────────────────────────────────
@@ -146,7 +150,6 @@ async function persistTempToken(token: string) {
 function completeSessionFromToken(token: string, portal: string | null): boolean {
   const user = buildUserFromToken(token);
   if (!user) return false;
-  // Fire-and-forget persist (synchronous cache update is what matters for navigation)
   persistFullSession(token, user, portal);
   return true;
 }
@@ -154,7 +157,6 @@ function completeSessionFromToken(token: string, portal: string | null): boolean
 // ─── AuthService ──────────────────────────────────────────────────
 class AuthService {
 
-  // ── init ──────────────────────────────────────────────────────────
   static async init(): Promise<void> {
     try {
       const [token, tempToken, user, userType, expiresAt, portal] = await Promise.all([
@@ -165,19 +167,19 @@ class AuthService {
         KiduSecureStorage.getItem<string>(KEYS.EXPIRES_AT),
         KiduSecureStorage.getItem<string>(KEYS.PORTAL),
       ]);
-      _cache = { token, tempToken, user, userType, expiresAt, portal };
+      // ── FIX: sanitise stored user to fix any stale Array email ──
+      _cache = { token, tempToken, user: sanitiseUser(user), userType, expiresAt, portal };
     } catch {
       _cache = { token: null, tempToken: null, user: null, userType: null, expiresAt: null, portal: null };
     }
   }
 
-  // ── Login ─────────────────────────────────────────────────────────
   static async login(credentials: LoginRequest): Promise<LoginApiResponse> {
     const response = await HttpService.callApi<LoginApiResponse>(
       API_ENDPOINTS.AUTH.LOGIN,
       'POST',
       credentials,
-      true // public — no auth header
+      true
     );
 
     if (response.isSucess && response.value) {
@@ -189,7 +191,6 @@ class AuthService {
       };
 
       if (dto.authState === 'SUCCESS' && dto.token) {
-        // ✅ Decode JWT — no /me call needed
         const ok = completeSessionFromToken(dto.token, dto.redirectPortal ?? null);
         if (!ok) {
           return {
@@ -203,7 +204,6 @@ class AuthService {
         (dto.authState === 'REQUIRES_2FA' || dto.authState === 'REQUIRES_PWD_CHANGE') &&
         dto.token
       ) {
-        // Store temp token — NO /me call, user not fully authenticated yet
         await persistTempToken(dto.token);
       }
     }
@@ -211,13 +211,12 @@ class AuthService {
     return response;
   }
 
-  // ── Verify OTP (2FA) ──────────────────────────────────────────────
   static async verifyOtp(data: VerifyOtpRequest): Promise<LoginApiResponse> {
     const response = await HttpService.callApi<LoginApiResponse>(
       API_ENDPOINTS.AUTH.VERIFY_OTP,
       'POST',
       data,
-      false // sends temp MFA token via Authorization header
+      false
     );
 
     if (response.isSucess && response.value) {
@@ -234,7 +233,6 @@ class AuthService {
     return response;
   }
 
-  // ── Resend OTP ────────────────────────────────────────────────────
   static async resendOtp(): Promise<LoginApiResponse> {
     return HttpService.callApi<LoginApiResponse>(
       API_ENDPOINTS.AUTH.RESEND_OTP,
@@ -244,13 +242,12 @@ class AuthService {
     );
   }
 
-  // ── Change Default Password (forced) ─────────────────────────────
   static async changeDefaultPassword(data: ChangeDefaultPasswordRequest): Promise<LoginApiResponse> {
     const response = await HttpService.callApi<LoginApiResponse>(
       API_ENDPOINTS.AUTH.CHANGE_DEFAULT_PASSWORD,
       'POST',
       data,
-      false // sends temp PasswordReset token
+      false
     );
 
     if (response.isSucess && response.value) {
@@ -267,7 +264,6 @@ class AuthService {
     return response;
   }
 
-  // ── Register ──────────────────────────────────────────────────────
   static async register(data: RegisterRequest): Promise<RegisterApiResponse> {
     const response = await HttpService.callApi<RegisterApiResponse>(
       API_ENDPOINTS.AUTH.REGISTER,
@@ -286,7 +282,6 @@ class AuthService {
     return response;
   }
 
-  // ── Forgot / Reset / Change Password ──────────────────────────────
   static async forgotPassword(data: ForgotPasswordRequest) {
     return HttpService.callApi(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, 'POST', data, true);
   }
@@ -299,15 +294,11 @@ class AuthService {
     return HttpService.callApi(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, 'POST', data, false);
   }
 
-  // ── Logout ────────────────────────────────────────────────────────
   static logout(): void {
     _cache = { token: null, tempToken: null, user: null, userType: null, expiresAt: null, portal: null };
     Object.values(KEYS).forEach(key => KiduSecureStorage.removeItem(key));
   }
 
-  // ── Getters ───────────────────────────────────────────────────────
-
-  /** Returns full token if authenticated, temp token if mid-2FA/pwd-change */
   static getToken(): string | null {
     return _cache.token ?? _cache.tempToken;
   }

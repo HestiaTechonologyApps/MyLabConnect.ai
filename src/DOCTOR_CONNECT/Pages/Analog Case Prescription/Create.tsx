@@ -1,21 +1,37 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Row, Col, Modal, Button } from 'react-bootstrap';
-import '../../../Styles/Pages/Prescription.css';
-import KiduValidation from '../../../KIDU_COMPONENTS/KiduValidation';
-import KiduDropdown from '../../../KIDU_COMPONENTS/KiduDropdown';
-import type { RestorationFormData } from '../../../KIDU_COMPONENTS/Case/RestorationFormPanel';
-import RestorationModal from '../../../KIDU_COMPONENTS/Case/RestorationModal';
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/DOCTOR_CONNECT/Pages/Analog Case Prescription/AddNewCase.tsx
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Restoration modal & its exported type ──────────────────────
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Row, Col, Modal, Button } from "react-bootstrap";
+import type { DentalOfficeItem } from "./DentalOfficePopup";
+import PrescriptionService from "../../Service/Prescription/Prescription.services";
+import AuthService from "../../../Services/AuthServices/Auth.services";
+import KiduValidation from "../../../KIDU_COMPONENTS/KiduValidation";
+import type { LabMasterItem } from "./LabmasterPopup";
+import type { CaseRegistrationCreateDTO } from "../../Types/Case.types";
+import LabMasterPopup from "./LabmasterPopup";
+import DentalOfficePopup from "./DentalOfficePopup";
+import KiduDropdown from "../../../KIDU_COMPONENTS/KiduDropdown";
+import RestorationModal from "../../../KIDU_COMPONENTS/Case/RestorationModal";
+import type { RestorationFormData } from "../../../KIDU_COMPONENTS/Case/RestorationFormPanel";
+import "../../../Styles/Doctor/prescription.additions.css";
+import CaseService from "../../Service/Prescription/Case.services";
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface FormState {
-  orderTo: string | number | null;
-  orderFrom: string | number | null;
+  orderToId: number | null;
+  orderToLabel: string;
+  orderFromId: number | null;
+  orderFromLabel: string;
   shipTo: string;
+  dsoMasterId: number | null;
+  dsoSchemaId: number | null;
+  dsoSchemaName: string;
+  dsoDoctorId: number | null;
   patientId: string;
   firstName: string;
   lastName: string;
@@ -36,16 +52,6 @@ interface FormErrors {
   caseNotes?: string;
 }
 
-interface AdditionalService {
-  serviceName: string | number | null;
-  generalComments: string;
-}
-
-interface AdditionalServiceErrors {
-  serviceName?: string;
-}
-
-/** A persisted restoration entry shown in the Restoration Details card */
 interface RestorationEntry {
   id: string;
   selectedTeeth: number[];
@@ -58,24 +64,41 @@ interface RestorationEntry {
   generalComments: string;
 }
 
-// ─────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────
+interface AdditionalService {
+  serviceId: number | null;
+  serviceName: string;
+  generalComments: string;
+}
 
-const FILE_TYPE_OPTIONS = ['IOS scan', 'CBCT/CT Scan', 'Photograph', 'Others'];
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FILE_TYPE_OPTIONS = ["IOS scan", "CBCT/CT Scan", "Photograph", "Others"];
 
 const INITIAL_FORM: FormState = {
-  orderTo: null, orderFrom: null, shipTo: '',
-  patientId: '', firstName: '', lastName: '',
-  dueDate: '', caseNotes: '', fileType: '',
-  remake: false, rush: false,
+  orderToId: null,
+  orderToLabel: "",
+  orderFromId: null,
+  orderFromLabel: "",
+  shipTo: "",
+  dsoMasterId: null,
+  dsoSchemaId: null,
+  dsoSchemaName: "",
+  dsoDoctorId: null,
+  patientId: "",
+  firstName: "",
+  lastName: "",
+  dueDate: "",
+  caseNotes: "",
+  fileType: "",
+  remake: false,
+  rush: false,
 };
 
-const INITIAL_SERVICE: AdditionalService = { serviceName: null, generalComments: '' };
-
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 const UploadIcon = () => (
   <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -86,106 +109,230 @@ const UploadIcon = () => (
 );
 
 const restorationLabel = (r: RestorationEntry): string =>
-  [r.prosthesis, r.restoration, r.indication].filter(Boolean).join(' · ');
+  [r.prosthesis, r.restoration, r.indication].filter(Boolean).join(" · ");
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Component
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 const AddNewCase: React.FC = () => {
+  // ── Form state ──────────────────────────────────────────────────────────────
+  const [form, setForm]           = useState<FormState>(INITIAL_FORM);
+  const [errors, setErrors]       = useState<FormErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // ── Main form ──────────────────────────────
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  // ── File upload ────────────────────────────
-  const [files, setFiles] = useState<File[]>([]);
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // ── Additional Services modal ──────────────
-  const [showServiceModal, setShowServiceModal] = useState(false);
-  const [service, setService] = useState<AdditionalService>(INITIAL_SERVICE);
-  const [serviceErrors, setServiceErrors] = useState<AdditionalServiceErrors>({});
-
-  // ── Restoration modal ──────────────────────
+  // ── Popup visibility ────────────────────────────────────────────────────────
+  const [showLabPopup, setShowLabPopup]       = useState(false);
+  const [showOfficePopup, setShowOfficePopup] = useState(false);
   const [showRestorationModal, setShowRestorationModal] = useState(false);
+
+  // ── Doctor's offices (loaded once on mount) ─────────────────────────────────
+  const [myOffices, setMyOffices]       = useState<DentalOfficeItem[]>([]);
+  const [officesLoading, setOfficesLoading] = useState(false);
+  const [officesError, setOfficesError]   = useState<string | null>(null);
+
+  // ── File upload ─────────────────────────────────────────────────────────────
+  const [files, setFiles]     = useState<File[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef            = useRef<HTMLInputElement>(null);
+
+  // ── Additional Services modal ───────────────────────────────────────────────
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [serviceNameVal, setServiceNameVal]     = useState<string | number | null>(null);
+  const [serviceComments, setServiceComments]   = useState("");
+  const [serviceNameError, setServiceNameError] = useState("");
+
+  // ── Restoration entries ─────────────────────────────────────────────────────
   const [restorations, setRestorations] = useState<RestorationEntry[]>([]);
 
-  // ─────────────────────────────────────────────
-  // Validation
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
+  // On mount: resolve the doctor and load their offices
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  const validateField = useCallback((name: keyof FormErrors, value: any): string => {
-    const rules: Record<keyof FormErrors, any> = {
-      orderTo:   { type: 'select',   required: true, label: 'Order To' },
-      orderFrom: { type: 'select',   required: true, label: 'Order From' },
-      patientId: { type: 'text',     required: true, label: 'Patient ID',  minLength: 2 },
-      firstName: { type: 'text',     required: true, label: 'First Name',  minLength: 2 },
-      lastName:  { type: 'text',     required: true, label: 'Last Name',   minLength: 2 },
-      dueDate:   { type: 'date',     required: true, label: 'Due Date' },
-      caseNotes: { type: 'textarea', required: true, label: 'Case Notes',  minLength: 5 },
+  useEffect(() => {
+    const bootstrap = async () => {
+      setOfficesLoading(true);
+      setOfficesError(null);
+      try {
+        // 1. Find the DSODoctor entity ID that matches this user's email
+        const doctorId = await PrescriptionService.getMyDoctorId();
+
+        if (!doctorId) {
+          setOfficesError(
+            "Could not find your doctor profile. Please contact your administrator."
+          );
+          return;
+        }
+
+        // 2. Store doctorId + dsoMasterId in form state
+        const user        = AuthService.getUser();
+        const dsoMasterId = user?.dsoMasterId ?? null;
+
+        setForm((prev) => ({
+          ...prev,
+          dsoDoctorId: doctorId,
+          dsoMasterId,
+        }));
+
+        // 3. Load offices mapped to this doctor
+        const offices = await PrescriptionService.getMyOffices(doctorId);
+        setMyOffices(offices);
+
+        if (offices.length === 0) {
+          setOfficesError(
+            "No practice locations found for your account. Please contact your administrator."
+          );
+        }
+      } catch (err) {
+        console.error("Failed to bootstrap doctor context:", err);
+        setOfficesError("Failed to load practice data. Please refresh and try again.");
+      } finally {
+        setOfficesLoading(false);
+      }
     };
-    const result = KiduValidation.validate(value, rules[name]);
-    return result.isValid ? '' : result.message ?? '';
+
+    bootstrap();
   }, []);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Validation
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const validateField = useCallback(
+    (name: keyof FormErrors, value: any): string => {
+      const rules: Record<keyof FormErrors, any> = {
+        orderTo:   { type: "select",   required: true, label: "Order To"   },
+        orderFrom: { type: "select",   required: true, label: "Order From" },
+        patientId: { type: "text",     required: true, label: "Patient ID",  minLength: 2 },
+        firstName: { type: "text",     required: true, label: "First Name",  minLength: 2 },
+        lastName:  { type: "text",     required: true, label: "Last Name",   minLength: 2 },
+        dueDate:   { type: "date",     required: true, label: "Due Date"    },
+        caseNotes: { type: "textarea", required: true, label: "Case Notes", minLength: 5  },
+      };
+      const result = KiduValidation.validate(value, rules[name]);
+      return result.isValid ? "" : result.message ?? "";
+    },
+    []
+  );
 
   const validateAll = (): boolean => {
     const newErrors: FormErrors = {
-      orderTo:   validateField('orderTo',   form.orderTo),
-      orderFrom: validateField('orderFrom', form.orderFrom),
-      patientId: validateField('patientId', form.patientId),
-      firstName: validateField('firstName', form.firstName),
-      lastName:  validateField('lastName',  form.lastName),
-      dueDate:   validateField('dueDate',   form.dueDate),
-      caseNotes: validateField('caseNotes', form.caseNotes),
+      orderTo:   validateField("orderTo",   form.orderToId),
+      orderFrom: validateField("orderFrom", form.orderFromId),
+      patientId: validateField("patientId", form.patientId),
+      firstName: validateField("firstName", form.firstName),
+      lastName:  validateField("lastName",  form.lastName),
+      dueDate:   validateField("dueDate",   form.dueDate),
+      caseNotes: validateField("caseNotes", form.caseNotes),
     };
     setErrors(newErrors);
-    return Object.values(newErrors).every(e => !e);
+    return Object.values(newErrors).every((e) => !e);
   };
 
-  // ─────────────────────────────────────────────
-  // Form handlers
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Handlers — text inputs
+  // ─────────────────────────────────────────────────────────────────────────────
 
   const handleText = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value }));
-    if (errors[name as keyof FormErrors])
-      setErrors(p => ({ ...p, [name]: validateField(name as keyof FormErrors, value) }));
-  };
-
-  const handleCheck = (name: 'remake' | 'rush') =>
-    setForm(p => ({ ...p, [name]: !p[name] }));
-
-  const handleDropdownChange = (
-    name: 'orderTo' | 'orderFrom',
-    val: string | number | null,
-  ) => {
-    if (name === 'orderFrom' && val) {
-      setForm(p => ({
-        ...p,
-        orderFrom: val,
-        shipTo: 'Cotgrave, 21 West Furlong, Nottingham, Nottinghamshire, NG12 3NL',
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: validateField(name as keyof FormErrors, value),
       }));
-    } else {
-      setForm(p => ({ ...p, [name]: val }));
     }
-    if (errors[name]) setErrors(p => ({ ...p, [name]: validateField(name, val) }));
   };
 
-  // ─────────────────────────────────────────────
-  // File handlers
-  // ─────────────────────────────────────────────
+  const handleCheck = (name: "remake" | "rush") =>
+    setForm((prev) => ({ ...prev, [name]: !prev[name] }));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Handlers — Lab selection (Order To)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const handleLabSelect = useCallback((lab: LabMasterItem) => {
+    setForm((prev) => ({
+      ...prev,
+      orderToId:    lab.id,
+      orderToLabel: lab.labName,
+    }));
+    setErrors((prev) => ({ ...prev, orderTo: "" }));
+    setShowLabPopup(false);
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Handlers — Office selection (Order From)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const handleOfficeSelect = useCallback(
+    async (office: DentalOfficeItem) => {
+      let schemaId: number | null = null;
+      let schemaName = "";
+
+      if (form.dsoMasterId) {
+        const schema = await PrescriptionService.getFirstSchema(form.dsoMasterId);
+        if (schema) {
+          schemaId   = schema.id;
+          schemaName = schema.name;
+        }
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        orderFromId:    office.id,
+        orderFromLabel: office.officeName,
+        shipTo:         PrescriptionService.buildShipTo(office),
+        dsoSchemaId:    schemaId,
+        dsoSchemaName:  schemaName,
+      }));
+      setErrors((prev) => ({ ...prev, orderFrom: "" }));
+      setShowOfficePopup(false);
+    },
+    [form.dsoMasterId]
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Handlers — Restoration
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const handleRestorationSave = useCallback(
+    (data: RestorationFormData & { selectedTeeth: number[] }) => {
+      setRestorations((prev) => [
+        ...prev,
+        {
+          id:              crypto.randomUUID(),
+          selectedTeeth:   data.selectedTeeth,
+          prosthesis:      data.prosthesis,
+          restoration:     data.restoration,
+          indication:      data.indication,
+          material:        data.material,
+          shadeGuide:      data.shadeGuide,
+          shadeComments:   data.shadeComments,
+          generalComments: data.generalComments,
+        },
+      ]);
+    },
+    []
+  );
+
+  const handleRemoveRestoration = (id: string) =>
+    setRestorations((prev) => prev.filter((r) => r.id !== id));
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Handlers — File upload
+  // ─────────────────────────────────────────────────────────────────────────────
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    setFiles(p => [...p, ...Array.from(incoming)]);
+    setFiles((prev) => [...prev, ...Array.from(incoming)]);
   };
 
-  const removeFile = (idx: number) => setFiles(p => p.filter((_, i) => i !== idx));
+  const removeFile = (idx: number) =>
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -193,93 +340,112 @@ const AddNewCase: React.FC = () => {
     addFiles(e.dataTransfer.files);
   };
 
-  // ─────────────────────────────────────────────
-  // Submit / Draft / Reset
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Additional Services modal
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  const handleSubmit = () => {
+  const closeServiceModal = () => {
+    setShowServiceModal(false);
+    setServiceNameVal(null);
+    setServiceComments("");
+    setServiceNameError("");
+  };
+
+  const saveService = () => {
+    if (!serviceNameVal) {
+      setServiceNameError("Service Name is required");
+      return;
+    }
+    console.log("Additional service saved:", { serviceName: serviceNameVal, comments: serviceComments });
+    closeServiceModal();
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Submit / Draft / Reset
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const buildPayload = (): CaseRegistrationCreateDTO | null => {
+    if (!form.orderToId || !form.orderFromId || !form.dsoMasterId) return null;
+
+    return {
+      caseNo:            "",
+      shipTo:            form.shipTo,
+      patientFirstName:  form.firstName,
+      patientLastName:   form.lastName,
+      patientId:         form.patientId,
+      caseStatusMasterId: 1,
+      dueDate:           form.dueDate || undefined,
+      caseNotes:         form.caseNotes,
+      dSOMasterId:       form.dsoMasterId,
+      dSODentalOfficeId: form.orderFromId,
+      dSODoctorId:       form.dsoDoctorId ?? 0,
+      dSOSchemaId:       form.dsoSchemaId ?? 0,
+      labMasterId:       form.orderToId,
+      isActive:          true,
+      products:          [],
+      documents:         [],
+      additionalServices: [],
+      pickUps:           [],
+    };
+  };
+
+  const handleSubmit = async () => {
+    setSubmitError(null);
     if (!validateAll()) return;
-    console.log('Submit payload:', { ...form, files, restorations });
-    // TODO: API call
+
+    const payload = buildPayload();
+    if (!payload) {
+      setSubmitError("Missing required context. Please re-select Order To and Order From.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await CaseService.create(payload);
+      if (result?.isSucess) {
+        alert(`Case created successfully! Case No: ${result.value?.caseNo ?? ""}`);
+        handleReset();
+      } else {
+        setSubmitError(result?.customMessage ?? result?.error ?? "Failed to create case.");
+      }
+    } catch (err: any) {
+      setSubmitError(err?.message ?? "An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDraft = () => {
-    console.log('Draft payload:', { ...form, files, restorations });
+    const payload = buildPayload();
+    console.log("Draft payload:", { ...payload, files, restorations });
   };
 
   const handleReset = () => {
-    setForm(INITIAL_FORM);
+    setForm((prev) => ({
+      ...INITIAL_FORM,
+      dsoDoctorId: prev.dsoDoctorId,
+      dsoMasterId: prev.dsoMasterId,
+    }));
     setErrors({});
     setFiles([]);
     setRestorations([]);
+    setSubmitError(null);
   };
 
-  // ─────────────────────────────────────────────
-  // Additional Services modal handlers
-  // ─────────────────────────────────────────────
-
-  const handleServiceModalClose = () => {
-    setShowServiceModal(false);
-    setService(INITIAL_SERVICE);
-    setServiceErrors({});
-  };
-
-  const handleServiceSave = () => {
-    const err = KiduValidation.validate(service.serviceName, {
-      type: 'select',
-      required: true,
-      label: 'Service Name',
-    });
-    if (!err.isValid) {
-      setServiceErrors({ serviceName: err.message });
-      return;
-    }
-    console.log('Additional service saved:', service);
-    handleServiceModalClose();
-  };
-
-  // ─────────────────────────────────────────────
-  // Restoration modal handlers
-  // ─────────────────────────────────────────────
-
-  /** Receives the completed restoration data from RestorationModal and adds it to the list */
-  const handleRestorationSave = useCallback(
-    (data: RestorationFormData & { selectedTeeth: number[] }) => {
-      setRestorations(prev => [
-        ...prev,
-        {
-          id: `rest-${Date.now()}`,
-          selectedTeeth: data.selectedTeeth,
-          prosthesis: data.prosthesis,
-          restoration: data.restoration,
-          indication: data.indication,
-          material: data.material,
-          shadeGuide: data.shadeGuide,
-          shadeComments: data.shadeComments,
-          generalComments: data.generalComments,
-        },
-      ]);
-    },
-    [],
-  );
-
-  const handleRemoveRestoration = (id: string) =>
-    setRestorations(prev => prev.filter(r => r.id !== id));
-
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
   // Render
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="anc-page">
       <div className="anc-body">
 
-        {/* ── Page header ── */}
+        {/* ── Page header ─────────────────────────────────────────────────── */}
         <div className="anc-header">
           <span className="anc-page-title">Add New Case</span>
           <div className="anc-header-right">
             <div className="anc-check-group">
-              {(['remake', 'rush'] as const).map(key => (
+              {(["remake", "rush"] as const).map((key) => (
                 <label key={key} className="anc-check-item">
                   <input
                     type="checkbox"
@@ -293,97 +459,235 @@ const AddNewCase: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Order info card ── */}
+        {/* ── Offices error banner ─────────────────────────────────────────── */}
+        {officesError && (
+          <div style={{
+            background: "#fff3cd", border: "1px solid #ffc107",
+            borderRadius: 8, padding: "10px 16px", marginBottom: 12,
+            fontSize: "0.82rem", color: "#856404",
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <svg width="15" height="15" fill="none" stroke="currentColor"
+              strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
+            {officesError}
+          </div>
+        )}
+
+        {/* ── Submit error banner ───────────────────────────────────────────── */}
+        {submitError && (
+          <div style={{
+            background: "#fde8ef", border: "1px solid #ef0d50",
+            borderRadius: 8, padding: "10px 16px", marginBottom: 12,
+            fontSize: "0.82rem", color: "#8b0029",
+          }}>
+            {submitError}
+          </div>
+        )}
+
+        {/* ── Order info card ─────────────────────────────────────────────── */}
         <div className="anc-card">
           <Row className="g-3">
 
+            {/* Order To */}
             <Col xs={12} md={4}>
-              <label className="anc-label">Order To <span className="anc-required">*</span></label>
-              <KiduDropdown
-                value={form.orderTo}
-                onChange={val => handleDropdownChange('orderTo', val)}
-                placeholder="Select Lab..."
-                error={errors.orderTo}
-                inputWidth="100%"
-              />
+              <label className="anc-label">
+                Order To <span className="anc-required">*</span>
+              </label>
+              <button
+                type="button"
+                className={[
+                  "anc-select-btn",
+                  errors.orderTo ? "is-invalid" : "",
+                  form.orderToId ? "anc-select-btn--selected" : "",
+                ].filter(Boolean).join(" ")}
+                onClick={() => setShowLabPopup(true)}
+              >
+                <span className={form.orderToLabel ? "anc-select-btn__value" : "anc-select-btn__placeholder"}>
+                  {form.orderToLabel || "Select Lab..."}
+                </span>
+                {form.orderToId ? (
+                  <span
+                    className="anc-select-btn__clear"
+                    role="button"
+                    aria-label="Clear"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setForm((prev) => ({ ...prev, orderToId: null, orderToLabel: "" }));
+                    }}
+                  >
+                    <svg width="11" height="11" fill="none" stroke="currentColor"
+                      strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span className="anc-select-btn__icon">
+                    <svg width="13" height="13" fill="none" stroke="currentColor"
+                      strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+              {errors.orderTo && <div className="anc-error">{errors.orderTo}</div>}
             </Col>
 
+            {/* Order From */}
             <Col xs={12} md={4}>
-              <label className="anc-label">Order From <span className="anc-required">*</span></label>
-              <KiduDropdown
-                value={form.orderFrom}
-                onChange={val => handleDropdownChange('orderFrom', val)}
-                placeholder="Select Practice / Doctor..."
-                error={errors.orderFrom}
-                inputWidth="100%"
-              />
+              <label className="anc-label">
+                Order From <span className="anc-required">*</span>
+              </label>
+              <button
+                type="button"
+                className={[
+                  "anc-select-btn",
+                  errors.orderFrom ? "is-invalid" : "",
+                  form.orderFromId ? "anc-select-btn--selected" : "",
+                ].filter(Boolean).join(" ")}
+                onClick={() => !officesLoading && setShowOfficePopup(true)}
+                disabled={officesLoading}
+              >
+                <span className={form.orderFromLabel ? "anc-select-btn__value" : "anc-select-btn__placeholder"}>
+                  {officesLoading
+                    ? "Loading practices..."
+                    : form.orderFromLabel || "Select Practice / Office..."}
+                </span>
+                {form.orderFromId ? (
+                  <span
+                    className="anc-select-btn__clear"
+                    role="button"
+                    aria-label="Clear"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setForm((prev) => ({
+                        ...prev,
+                        orderFromId: null, orderFromLabel: "",
+                        shipTo: "", dsoSchemaId: null, dsoSchemaName: "",
+                      }));
+                    }}
+                  >
+                    <svg width="11" height="11" fill="none" stroke="currentColor"
+                      strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span className="anc-select-btn__icon">
+                    {officesLoading ? (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+                          strokeLinecap="round"
+                          style={{ animation: "spin 1s linear infinite" }} />
+                      </svg>
+                    ) : (
+                      <svg width="13" height="13" fill="none" stroke="currentColor"
+                        strokeWidth="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
+                    )}
+                  </span>
+                )}
+              </button>
+              {errors.orderFrom && <div className="anc-error">{errors.orderFrom}</div>}
             </Col>
 
+            {/* Ship To (read-only) */}
             <Col xs={12} md={4}>
               <label className="anc-label">Ship To</label>
               <input
                 className="anc-input anc-input-readonly"
                 value={form.shipTo}
-                placeholder="Auto-filled on Order From selection"
+                placeholder="Auto-filled from selected practice"
                 readOnly
+                title={form.shipTo}
               />
             </Col>
 
+            {/* Patient ID */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">Patient ID <span className="anc-required">*</span></label>
+              <label className="anc-label">
+                Patient ID <span className="anc-required">*</span>
+              </label>
               <input
-                className={`anc-input${errors.patientId ? ' is-invalid' : ''}`}
+                className={`anc-input${errors.patientId ? " is-invalid" : ""}`}
                 name="patientId"
                 placeholder="Enter Patient ID"
                 value={form.patientId}
                 onChange={handleText}
-                onBlur={e =>
-                  setErrors(p => ({ ...p, patientId: validateField('patientId', e.target.value) }))
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    patientId: validateField("patientId", e.target.value),
+                  }))
                 }
               />
               {errors.patientId && <div className="anc-error">{errors.patientId}</div>}
             </Col>
 
+            {/* First Name */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">First Name <span className="anc-required">*</span></label>
+              <label className="anc-label">
+                First Name <span className="anc-required">*</span>
+              </label>
               <input
-                className={`anc-input${errors.firstName ? ' is-invalid' : ''}`}
+                className={`anc-input${errors.firstName ? " is-invalid" : ""}`}
                 name="firstName"
                 placeholder="Enter First Name"
                 value={form.firstName}
                 onChange={handleText}
-                onBlur={e =>
-                  setErrors(p => ({ ...p, firstName: validateField('firstName', e.target.value) }))
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    firstName: validateField("firstName", e.target.value),
+                  }))
                 }
               />
               {errors.firstName && <div className="anc-error">{errors.firstName}</div>}
             </Col>
 
+            {/* Last Name */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">Last Name <span className="anc-required">*</span></label>
+              <label className="anc-label">
+                Last Name <span className="anc-required">*</span>
+              </label>
               <input
-                className={`anc-input${errors.lastName ? ' is-invalid' : ''}`}
+                className={`anc-input${errors.lastName ? " is-invalid" : ""}`}
                 name="lastName"
                 placeholder="Enter Last Name"
                 value={form.lastName}
                 onChange={handleText}
-                onBlur={e =>
-                  setErrors(p => ({ ...p, lastName: validateField('lastName', e.target.value) }))
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    lastName: validateField("lastName", e.target.value),
+                  }))
                 }
               />
               {errors.lastName && <div className="anc-error">{errors.lastName}</div>}
             </Col>
 
+            {/* Due Date */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">Due Date <span className="anc-required">*</span></label>
+              <label className="anc-label">
+                Due Date <span className="anc-required">*</span>
+              </label>
               <input
                 type="date"
-                className={`anc-input${errors.dueDate ? ' is-invalid' : ''}`}
+                className={`anc-input${errors.dueDate ? " is-invalid" : ""}`}
                 name="dueDate"
                 value={form.dueDate}
                 onChange={handleText}
-                onBlur={e =>
-                  setErrors(p => ({ ...p, dueDate: validateField('dueDate', e.target.value) }))
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    dueDate: validateField("dueDate", e.target.value),
+                  }))
                 }
               />
               {errors.dueDate && <div className="anc-error">{errors.dueDate}</div>}
@@ -392,7 +696,7 @@ const AddNewCase: React.FC = () => {
           </Row>
         </div>
 
-        {/* ── Restoration Details card ── */}
+        {/* ── Restoration Details card ─────────────────────────────────────── */}
         <div className="anc-card">
           <div className="anc-card-header">
             <span className="anc-card-title">
@@ -402,26 +706,15 @@ const AddNewCase: React.FC = () => {
               )}
             </span>
             <div className="anc-card-actions">
-              {/* ✅ Opens the RestorationModal */}
+              {/* ── Add Restoration button — now active ── */}
               <button
                 className="anc-btn anc-btn-primary"
                 type="button"
                 onClick={() => setShowRestorationModal(true)}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  viewBox="0 0 24 24"
-                  style={{ marginRight: 5, verticalAlign: 'middle' }}
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 8v8M8 12h8" />
-                </svg>
                 Add Restoration
               </button>
+
               <button
                 className="anc-btn anc-btn-outline"
                 type="button"
@@ -432,71 +725,54 @@ const AddNewCase: React.FC = () => {
             </div>
           </div>
 
-          {/* ── Saved restorations list ── */}
           {restorations.length === 0 ? (
-            
-          <div style={{ minHeight: 28, color: 'var(--theme-text-disabled)', fontSize: '0.75rem', textAlign: 'center', padding: '8px 0' }}>
-            No restorations added yet. Click "Add Restoration" to begin.
-          </div>
+            <div style={{
+              minHeight: 28, color: "var(--theme-text-disabled, #aaa)",
+              fontSize: "0.75rem", textAlign: "center", padding: "8px 0",
+            }}>
+              No restorations added yet. Click "Add Restoration" to begin.
+            </div>
           ) : (
             <div className="anc-restoration-list">
               {restorations.map((r, idx) => (
                 <div key={r.id} className="anc-restoration-row">
-
-                  {/* Row number */}
                   <span className="anc-rest-index">{idx + 1}</span>
-
-                  {/* Tooth badges */}
                   <div className="anc-rest-teeth">
                     {r.selectedTeeth.length > 0 ? (
-                      r.selectedTeeth.map(t => (
+                      r.selectedTeeth.map((t) => (
                         <span key={t} className="anc-rest-tooth-badge">{t}</span>
                       ))
                     ) : (
                       <span className="anc-rest-no-teeth">No teeth</span>
                     )}
                   </div>
-
-                  {/* Prosthesis · Restoration · Indication */}
                   <div className="anc-rest-summary">
                     <span className="anc-rest-summary-main">{restorationLabel(r)}</span>
                     {r.material && (
                       <span className="anc-rest-summary-sub">
                         {r.material}
-                        {r.shadeGuide && r.shadeGuide !== 'Default'
-                          ? ` · ${r.shadeGuide}`
-                          : ''}
+                        {r.shadeGuide && r.shadeGuide !== "Default" ? ` · ${r.shadeGuide}` : ""}
                       </span>
                     )}
                   </div>
-
-                  {/* Remove */}
                   <button
                     className="anc-rest-remove"
                     type="button"
                     onClick={() => handleRemoveRestoration(r.id)}
                     aria-label={`Remove restoration ${idx + 1}`}
-                    title="Remove restoration"
                   >
-                    <svg
-                      width="13"
-                      height="13"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg width="13" height="13" fill="none" stroke="currentColor"
+                      strokeWidth="2.5" viewBox="0 0 24 24">
                       <path d="M18 6 6 18M6 6l12 12" />
                     </svg>
                   </button>
-
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* ── Document + Case Notes ── */}
+        {/* ── Document + Case Notes ────────────────────────────────────────── */}
         <div className="anc-split">
 
           {/* Document Attachment */}
@@ -512,7 +788,7 @@ const AddNewCase: React.FC = () => {
                   onChange={handleText}
                 >
                   <option value="">Select File Type</option>
-                  {FILE_TYPE_OPTIONS.map(t => (
+                  {FILE_TYPE_OPTIONS.map((t) => (
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
@@ -520,15 +796,15 @@ const AddNewCase: React.FC = () => {
             </div>
 
             <div
-              className={`anc-dropzone${dragOver ? ' dragover' : ''}`}
+              className={`anc-dropzone${dragOver ? " dragover" : ""}`}
               onClick={() => fileInputRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               role="button"
               tabIndex={0}
               aria-label="Upload files"
-              onKeyDown={e => e.key === 'Enter' && fileInputRef.current?.click()}
+              onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
             >
               <div className="anc-dropzone-icon"><UploadIcon /></div>
               <span className="anc-dropzone-text">Drag and Drop Files here or Choose file</span>
@@ -538,8 +814,8 @@ const AddNewCase: React.FC = () => {
               type="file"
               ref={fileInputRef}
               multiple
-              style={{ display: 'none' }}
-              onChange={e => addFiles(e.target.files)}
+              style={{ display: "none" }}
+              onChange={(e) => addFiles(e.target.files)}
             />
 
             {files.length > 0 && (
@@ -547,14 +823,8 @@ const AddNewCase: React.FC = () => {
                 {files.map((f, i) => (
                   <div key={i} className="anc-file-chip">
                     <span className="anc-file-chip-name">{f.name}</span>
-                    <button
-                      className="anc-file-chip-remove"
-                      type="button"
-                      onClick={() => removeFile(i)}
-                      aria-label="Remove file"
-                    >
-                      ×
-                    </button>
+                    <button className="anc-file-chip-remove" type="button"
+                      onClick={() => removeFile(i)} aria-label="Remove file">×</button>
                   </div>
                 ))}
               </div>
@@ -562,12 +832,9 @@ const AddNewCase: React.FC = () => {
 
             <div className="anc-file-note">Note: Max 2GB file upload allowed</div>
 
-            <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                className="anc-btn anc-btn-outline"
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-              >
+            <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
+              <button className="anc-btn anc-btn-outline" type="button"
+                onClick={() => fileInputRef.current?.click()}>
                 Upload Files
               </button>
             </div>
@@ -581,104 +848,120 @@ const AddNewCase: React.FC = () => {
               </span>
             </div>
             <textarea
-              className={`anc-textarea${errors.caseNotes ? ' is-invalid' : ''}`}
+              className={`anc-textarea${errors.caseNotes ? " is-invalid" : ""}`}
               name="caseNotes"
               placeholder="Enter case notes..."
               value={form.caseNotes}
               onChange={handleText}
-              onBlur={e =>
-                setErrors(p => ({ ...p, caseNotes: validateField('caseNotes', e.target.value) }))
+              onBlur={(e) =>
+                setErrors((prev) => ({
+                  ...prev,
+                  caseNotes: validateField("caseNotes", e.target.value),
+                }))
               }
-              style={{ height: 'calc(100% - 50px)', minHeight: 130 }}
+              style={{ height: "calc(100% - 50px)", minHeight: 130 }}
             />
             {errors.caseNotes && <div className="anc-error">{errors.caseNotes}</div>}
           </div>
-
         </div>
+
       </div>
 
-      {/* ── Sticky footer ── */}
+      {/* ── Sticky footer ────────────────────────────────────────────────────── */}
       <div className="anc-footer">
-        <button className="anc-btn anc-btn-reset"   type="button" onClick={handleReset}>Reset</button>
-        <button className="anc-btn anc-btn-draft"   type="button" onClick={handleDraft}>Draft</button>
-        <button className="anc-btn anc-btn-submit"  type="button" onClick={handleSubmit}>Submit</button>
+        <button className="anc-btn anc-btn-reset" type="button"
+          onClick={handleReset} disabled={submitting}>
+          Reset
+        </button>
+        <button className="anc-btn anc-btn-draft" type="button"
+          onClick={handleDraft} disabled={submitting}>
+          Draft
+        </button>
+        <button className="anc-btn anc-btn-submit" type="button"
+          onClick={handleSubmit} disabled={submitting}>
+          {submitting ? "Submitting..." : "Submit"}
+        </button>
       </div>
 
-      {/* ════════════════════════════════════════════
-          Restoration Modal
-          show/onHide/onSave wired to local state.
-          onSave receives completed data and appends
-          a new RestorationEntry to the list.
-      ════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════════════════════
+          Popups & Modals
+      ════════════════════════════════════════════════════════════════════════ */}
+
+      {/* Order To — Lab selector (via lookup endpoint) */}
+      <LabMasterPopup
+        show={showLabPopup}
+        onClose={() => setShowLabPopup(false)}
+        onSelect={handleLabSelect}
+      />
+
+      {/* Order From — Dental Office selector (doctor's own offices pre-loaded) */}
+      <DentalOfficePopup
+        show={showOfficePopup}
+        onClose={() => setShowOfficePopup(false)}
+        onSelect={handleOfficeSelect}
+        offices={myOffices}
+        loading={officesLoading}
+      />
+
+      {/* Restoration Modal */}
       <RestorationModal
         show={showRestorationModal}
         onHide={() => setShowRestorationModal(false)}
         onSave={handleRestorationSave}
-        scheme="Affordable Private"
+        scheme={form.dsoSchemaName || "Default"}
+        dsoMasterId={form.dsoMasterId}
       />
 
-      {/* ════════════════════════════════════════════
-          Additional Services Modal
-      ════════════════════════════════════════════ */}
-      <Modal
-        show={showServiceModal}
-        onHide={handleServiceModalClose}
-        centered
-        size="sm"
-        dialogClassName="anc-modal"
-      >
+      {/* Additional Services Modal */}
+      <Modal show={showServiceModal} onHide={closeServiceModal}
+        centered size="sm" dialogClassName="anc-modal">
         <Modal.Header closeButton>
           <Modal.Title>Additional Services</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           <div className="mb-3">
             <label className="anc-label">
               Service Name <span className="anc-required">*</span>
             </label>
             <KiduDropdown
-              value={service.serviceName}
-              onChange={val => {
-                setService(p => ({ ...p, serviceName: val }));
-                if (serviceErrors.serviceName) setServiceErrors({});
+              value={serviceNameVal}
+              onChange={(val) => {
+                setServiceNameVal(val);
+                if (serviceNameError) setServiceNameError("");
               }}
               placeholder="Select Service Name"
-              error={serviceErrors.serviceName}
+              error={serviceNameError}
               inputWidth="100%"
             />
           </div>
-
           <div>
             <label className="anc-label">General Comments</label>
             <textarea
               className="anc-textarea"
               placeholder="Enter any General Comments"
-              value={service.generalComments}
-              onChange={e => setService(p => ({ ...p, generalComments: e.target.value }))}
+              value={serviceComments}
+              onChange={(e) => setServiceComments(e.target.value)}
               rows={3}
-              style={{ resize: 'vertical' }}
+              style={{ resize: "vertical" }}
             />
           </div>
         </Modal.Body>
-
         <Modal.Footer>
-          <Button
-            variant="light"
-            className="anc-btn anc-btn-outline"
-            onClick={handleServiceModalClose}
-          >
+          <Button variant="light" className="anc-btn anc-btn-outline" onClick={closeServiceModal}>
             Cancel
           </Button>
-          <Button
-            className="anc-btn anc-btn-primary"
-            style={{ border: 'none' }}
-            onClick={handleServiceSave}
-          >
+          <Button className="anc-btn anc-btn-primary" style={{ border: "none" }} onClick={saveService}>
             Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
 
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

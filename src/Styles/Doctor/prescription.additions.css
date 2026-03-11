@@ -1,0 +1,698 @@
+/* =============================================================================
+   FILE: src/Styles/Pages/Prescription.css
+   COVERS: AddNewCase — every class used in AddNewCase.tsx
+   ============================================================================= */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAGE LAYOUT
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #f8fafc;
+}
+
+.anc-body {
+  flex: 1;
+  padding: 20px 24px 100px;   /* bottom pad keeps content above sticky footer */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAGE HEADER
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.anc-page-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.anc-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Remake / Rush checkboxes ─────────────────────────────────────────────── */
+
+.anc-check-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.anc-check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.anc-check-item input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #ef0d50;
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CARDS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-card {
+  background: #ffffff;
+  border: 1px solid #e8edf3;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.anc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.anc-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.anc-card-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #ef0d50;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.anc-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FORM ELEMENTS — inputs, textareas, labels
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 5px;
+  letter-spacing: 0.01em;
+}
+
+.anc-required {
+  color: #ef0d50;
+  margin-left: 2px;
+}
+
+.anc-input {
+  display: block;
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.anc-input::placeholder {
+  color: #a0aec0;
+}
+
+.anc-input:focus {
+  border-color: #ef0d50;
+  box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
+}
+
+.anc-input.is-invalid {
+  border-color: #ef4444;
+}
+
+.anc-input.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.anc-input-readonly {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: default;
+}
+
+.anc-input-readonly:focus {
+  border-color: #e2e8f0;
+  box-shadow: none;
+}
+
+.anc-textarea {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  min-height: 90px;
+}
+
+.anc-textarea::placeholder {
+  color: #a0aec0;
+}
+
+.anc-textarea:focus {
+  border-color: #ef0d50;
+  box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
+}
+
+.anc-textarea.is-invalid {
+  border-color: #ef4444;
+}
+
+.anc-error {
+  font-size: 0.73rem;
+  color: #ef4444;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   POPUP-TRIGGER SELECT BUTTON  (Order To / Order From)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #334155;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.anc-select-btn:hover:not(:disabled) {
+  border-color: #cbd5e1;
+}
+
+.anc-select-btn:focus-visible {
+  outline: none;
+  border-color: #ef0d50;
+  box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
+}
+
+.anc-select-btn:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.anc-select-btn.is-invalid {
+  border-color: #ef4444;
+}
+
+.anc-select-btn--selected {
+  border-color: #cbd5e1;
+}
+
+.anc-select-btn__placeholder {
+  color: #a0aec0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.anc-select-btn__value {
+  color: #1e293b;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.anc-select-btn__icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.anc-select-btn__clear {
+  color: #94a3b8;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.anc-select-btn__clear:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BUTTONS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.anc-btn:active {
+  opacity: 0.88;
+}
+
+/* Primary — pink/red brand */
+.anc-btn-primary {
+  background: #ef0d50;
+  color: #ffffff;
+}
+
+.anc-btn-primary:hover {
+  background: #d4094a;
+  box-shadow: 0 2px 8px rgba(239, 13, 80, 0.25);
+}
+
+/* Outline — border only */
+.anc-btn-outline {
+  background: transparent;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+}
+
+.anc-btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESTORATION DETAILS LIST
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-restoration-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.anc-restoration-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+
+.anc-restoration-row:hover {
+  background: #f1f5f9;
+}
+
+.anc-rest-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ef0d50;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.anc-rest-teeth {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 60px;
+  max-width: 160px;
+}
+
+.anc-rest-tooth-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.anc-rest-no-teeth {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.anc-rest-summary {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.anc-rest-summary-main {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anc-rest-summary-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anc-rest-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+}
+
+.anc-rest-remove:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DOCUMENT + CASE NOTES  (side-by-side split)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .anc-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── File Type selector inside Document Attachment header ─────────────────── */
+
+.anc-filetype-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anc-filetype-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.anc-filetype-select {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.82rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.anc-filetype-select:focus {
+  border-color: #ef0d50;
+}
+
+/* ── Drop zone ────────────────────────────────────────────────────────────── */
+
+.anc-dropzone {
+  border: 2px dashed #e2e8f0;
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.anc-dropzone:hover,
+.anc-dropzone.dragover {
+  border-color: #ef0d50;
+  background: #fff5f8;
+}
+
+.anc-dropzone-icon {
+  color: #cbd5e1;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.anc-dropzone-text {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* ── Uploaded file chips ──────────────────────────────────────────────────── */
+
+.anc-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.anc-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  color: #334155;
+  max-width: 220px;
+}
+
+.anc-file-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anc-file-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+
+.anc-file-chip-remove:hover {
+  color: #ef4444;
+}
+
+.anc-file-note {
+  font-size: 0.73rem;
+  color: #ef0d50;
+  margin-top: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STICKY FOOTER
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #ffffff;
+  border-top: 1px solid #e8edf3;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.06);
+}
+
+/* Footer button variants */
+.anc-btn-reset {
+  background: transparent;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+}
+
+.anc-btn-reset:hover {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.anc-btn-draft {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+}
+
+.anc-btn-draft:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.anc-btn-submit {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+.anc-btn-submit:hover {
+  background: #16a34a;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MODAL OVERRIDES  (Additional Services modal)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.anc-modal .modal-content {
+  border-radius: 14px;
+  border: 1px solid #e8edf3;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+}
+
+.anc-modal .modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.anc-modal .modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.anc-modal .modal-body {
+  padding: 16px 18px;
+}
+
+.anc-modal .modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid #f1f5f9;
+  gap: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SPIN ANIMATION  (loading spinner in Order From button)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
