@@ -1,48 +1,58 @@
 // src/Pages/CasePickup/Create.tsx
 
 import React, { useEffect, useState } from "react";
-import type { LabLookupItem, PracticeLookupItem } from "../../../Types/Auth/Lookup.types";
+import type { LabLookupItem } from "../../../Types/Auth/Lookup.types";
 import LookupService from "../../../Services/Common/Lookup.services";
-import type { PickupAddressDetails, PickupCreateFormData } from "../../../KIDU_COMPONENTS/PickUp/PickupScheduleModal";
-import CasePickupService from "../../Service/Pickup/Pickup.services";
+import type {
+  PickupAddressDetails,
+  PickupCreateFormData,
+} from "../../../KIDU_COMPONENTS/PickUp/PickupScheduleModal";
+import CasePickupService, {
+  type CaseLookupItem,
+  type DoctorPracticeItem,
+} from "../../Service/Pickup/Pickup.services";
 import PickupScheduleModal from "../../../KIDU_COMPONENTS/PickUp/PickupScheduleModal";
-import { API_ENDPOINTS } from "../../../CONSTANTS/API_ENDPOINTS";
-
+import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
-  show: boolean;
-  onHide: () => void;
+  show:      boolean;
+  onHide:    () => void;
   onSuccess: () => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
+  const { dsoDoctorId } = useCurrentUser();
+
   const [labs,      setLabs]      = useState<LabLookupItem[]>([]);
-  const [practices, setPractices] = useState<PracticeLookupItem[]>([]);
-  const [loadingLookup, setLoadingLookup] = useState(false);
+  const [practices, setPractices] = useState<DoctorPracticeItem[]>([]);
+  const [cases,     setCases]     = useState<CaseLookupItem[]>([]);
 
-  // Fetch labs + practices once on mount (or when modal opens)
+  // ── Fetch all three lists when the modal opens ───────────────────────────
   useEffect(() => {
-    if (!show) return;
-    setLoadingLookup(true);
-    Promise.all([LookupService.getLabs(), LookupService.getPractices()])
-      .then(([labList, practiceList]) => {
-        setLabs(labList);
-        setPractices(practiceList);
-      })
-      .finally(() => setLoadingLookup(false));
-  }, [show]);
+    if (!show || !dsoDoctorId) return;
 
-  // ── Paginated address fetch (wraps the pre-loaded practices list) ──────────
+    Promise.all([
+      LookupService.getLabs(),
+      CasePickupService.getPracticesByDoctor(dsoDoctorId),
+      CasePickupService.getCasesByDoctor(dsoDoctorId),
+    ]).then(([labList, practiceList, caseList]) => {
+      setLabs(labList);
+      setPractices(practiceList);
+      setCases(caseList);
+    });
+  }, [show, dsoDoctorId]);
+
+  // ── Paginated address fetch — client-side over the doctor's practices ─────
   const fetchPickupAddresses = async (p: {
     pageNumber: number;
-    pageSize: number;
+    pageSize:   number;
     searchTerm: string;
   }) => {
-    const term = p.searchTerm.toLowerCase();
+    const term     = p.searchTerm.toLowerCase();
     const filtered = term
       ? practices.filter(
           (pr) =>
@@ -51,30 +61,24 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
             pr.city?.toLowerCase().includes(term)
         )
       : practices;
-
     const start = (p.pageNumber - 1) * p.pageSize;
-    return {
-      data: filtered.slice(start, start + p.pageSize),
-      total: filtered.length,
-    };
+    return { data: filtered.slice(start, start + p.pageSize), total: filtered.length };
   };
 
-  // ── Map practice row → dropdown option ───────────────────────────────────
-  const mapPickupAddress = (row: PracticeLookupItem) => ({
+  const mapPickupAddress = (row: DoctorPracticeItem) => ({
     value: row.id,
     label: `${row.officeName}${row.city ? ` — ${row.city}` : ""}`,
   });
 
-  // ── Fetch address details for right panel ─────────────────────────────────
   const fetchAddressDetails = async (
     addressId: string | number
   ): Promise<PickupAddressDetails> => {
-    const practice = practices.find((p) => String(p.id) === String(addressId));
-    if (!practice) return {};
+    const p = practices.find((pr) => String(pr.id) === String(addressId));
+    if (!p) return {};
     return {
-      practiceName: practice.officeName,
-      address:      `${practice.address ?? ""}${practice.city ? `, ${practice.city}` : ""}${practice.postCode ? ` ${practice.postCode}` : ""}`,
-      email:        undefined,   // PracticeLookupItem has no email field; extend if available
+      practiceName: p.officeName,
+      address:      [p.address, p.city, p.postCode].filter(Boolean).join(", "),
+      email:        undefined,
       mobileNo:     undefined,
     };
   };
@@ -92,12 +96,13 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
     });
   };
 
-  // ── Lab columns for KiduSelectPopup ──────────────────────────────────────
+  // ── Column definitions ────────────────────────────────────────────────────
+
   const labColumns = [
-    { key: "labName",     label: "Lab Name",    filterType: "text"   as const },
-    { key: "labCode",     label: "Code",        filterType: "text"   as const },
-    { key: "displayName", label: "Display Name",filterType: "text"   as const },
-    { key: "lmsSystem",   label: "LMS",         filterType: "text"   as const },
+    { key: "labName",     label: "Lab Name",     filterType: "text"   as const },
+    { key: "labCode",     label: "Code",         filterType: "text"   as const },
+    { key: "displayName", label: "Display Name", filterType: "text"   as const },
+    { key: "lmsSystem",   label: "LMS",          filterType: "text"   as const },
     {
       key: "isActive",
       label: "Status",
@@ -111,7 +116,6 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
     },
   ];
 
-  // ── Case columns for KiduMultiSelectPopup ─────────────────────────────────
   const caseColumns = [
     { key: "caseId",      label: "Case ID",      filterType: "text" as const },
     { key: "patientName", label: "Patient Name", filterType: "text" as const },
@@ -124,22 +128,22 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
       show={show}
       onHide={onHide}
       onSuccess={onSuccess}
-      // Lab (uses pre-loaded lookup data)
+      // Lab
       labSelectData={labs}
       labColumns={labColumns}
       labIdKey="id"
       labLabelKey="labName"
       labSearchKeys={["labName", "labCode", "displayName"]}
-      // Pickup address (doctor's practices via lookup)
+      // Pickup address — this doctor's linked practices only
       fetchPickupAddresses={fetchPickupAddresses}
       mapPickupAddress={mapPickupAddress}
       fetchAddressDetails={fetchAddressDetails}
-      // Cases (fetched via endpoint)
-      casesSelectEndpoint={API_ENDPOINTS.LOOKUP.GET("cases")}  // replace with actual cases endpoint
+      // Cases — this doctor's cases only
+      casesSelectData={cases}
       caseColumns={caseColumns}
       caseIdKey="id"
       caseLabelKey="patientName"
-      caseSearchKeys={["caseId", "patientName"]}
+      caseSearchKeys={["caseId", "patientName", "doctorName", "status"]}
       // Submit
       onSubmit={handleSubmit}
       title="Schedule Pickup"

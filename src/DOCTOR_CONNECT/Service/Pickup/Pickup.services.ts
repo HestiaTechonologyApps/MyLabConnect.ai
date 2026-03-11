@@ -3,31 +3,58 @@
 import { API_ENDPOINTS } from "../../../CONSTANTS/API_ENDPOINTS";
 import type { TableRequestParams, TableResponse } from "../../../KIDU_COMPONENTS/KiduServerTable";
 import HttpService from "../../../Services/Common/HttpService";
-import type { CasePickup, CasePickupCreatePayload, CasePickupDetail, CasePickupUpdatePayload } from "../../Types/Pickup.type";
+import type {
+  CasePickup,
+  CasePickupCreatePayload,
+  CasePickupDetail,
+  CasePickupUpdatePayload,
+} from "../../Types/Pickup.type";
 
+// ─── Local return types for the two doctor-scoped helpers ─────────────────────
+
+export interface CaseLookupItem {
+  id:          number;
+  caseId:      string;
+  patientName: string;
+  doctorName:  string;
+  status:      string;
+}
+
+export interface DoctorPracticeItem {
+  id:          number;
+  officeName:  string;
+  officeCode:  string;
+  address:     string;
+  city:        string;
+  postCode:    string;
+  country:     string;
+  isActive:    boolean;
+}
+
+// ─── Service ──────────────────────────────────────────────────────────────────
 
 export default class CasePickupService {
+
   // ── Paginated list (for KiduServerTableList) ──────────────────────────────
   static async getPaginatedList(
     params: TableRequestParams
   ): Promise<TableResponse<CasePickup>> {
     let showInactive: boolean | undefined = undefined;
     const statusFilter = params["isActive"];
-    if (statusFilter === "Active") showInactive = true;
+    if (statusFilter === "Active")   showInactive = true;
     if (statusFilter === "Inactive") showInactive = false;
 
     const payload = {
-      pageNumber: params.pageNumber,
-      pageSize: params.pageSize,
-      searchTerm: params.searchTerm ?? "",
-      sortBy: params.sortBy ?? "",
+      pageNumber:     params.pageNumber,
+      pageSize:       params.pageSize,
+      searchTerm:     params.searchTerm     ?? "",
+      sortBy:         params.sortBy         ?? "",
       sortDescending: params.sortDescending ?? false,
-      showDeleted: false,
+      showDeleted:    false,
       showInactive,
-      // Column-level filters
-      labName: params["labName"] ?? "",
-      pickUpDate: params["pickUpDate"] ?? "",
-      trackingNum: params["trackingNum"] ?? "",
+      labName:        params["labName"]     ?? "",
+      pickUpDate:     params["pickUpDate"]  ?? "",
+      trackingNum:    params["trackingNum"] ?? "",
     };
 
     const response = await HttpService.callApi<any>(
@@ -37,10 +64,9 @@ export default class CasePickupService {
     );
 
     const result = response?.value ?? response;
-
     return {
-      data: result.data ?? result.items ?? [],
-      total: result.totalRecords ?? result.total ?? 0,
+      data:       result.data         ?? result.items ?? [],
+      total:      result.totalRecords ?? result.total ?? 0,
       totalPages: result.totalPages,
     };
   }
@@ -87,5 +113,65 @@ export default class CasePickupService {
     );
     const result = response?.value ?? response?.data ?? response;
     return Array.isArray(result) ? result : [];
+  }
+
+  // ── Get cases belonging to a specific doctor ──────────────────────────────
+  static async getCasesByDoctor(dsoDoctorId: number): Promise<CaseLookupItem[]> {
+    const response = await HttpService.callApi<any>(
+      API_ENDPOINTS.CASE_REGISTRATION.GET_PAGINATED,
+      "POST",
+      {
+        pageNumber:     1,
+        pageSize:       9999,
+        searchTerm:     "",
+        sortBy:         "",
+        sortDescending: false,
+        showDeleted:    false,
+        dsoDoctorId,
+      }
+    );
+
+    const result = response?.value ?? response;
+    const items: any[] = result?.data ?? result?.items ?? [];
+
+    return items.map((c: any): CaseLookupItem => ({
+      id:          c.id,
+      caseId:      c.caseId        ?? c.caseNumber       ?? String(c.id),
+      patientName: c.patientName   ?? c.patientFirstName  ?? "—",
+      doctorName:  c.doctorName    ?? "",
+      status:      c.statusName    ?? c.status            ?? "",
+    }));
+  }
+
+  // ── Get dental offices (practices) linked to a specific doctor ────────────
+  static async getPracticesByDoctor(dsoDoctorId: number): Promise<DoctorPracticeItem[]> {
+    const response = await HttpService.callApi<any>(
+      API_ENDPOINTS.DSO_DOCTOR_DENTAL_OFFICE.UPDATE_PAGINATION,
+      "POST",
+      {
+        pageNumber:     1,
+        pageSize:       9999,
+        searchTerm:     "",
+        sortBy:         "",
+        sortDescending: false,
+        showDeleted:    false,
+        dsoDoctorId,
+      }
+    );
+
+    const result = response?.value ?? response;
+    const items: any[] = result?.data ?? result?.items ?? [];
+
+    return items.map((row: any): DoctorPracticeItem => ({
+      // The junction table may return the office PK under different key names
+      id:         row.dsodentalOfficeId ?? row.dentalOfficeId ?? row.id,
+      officeName: row.officeName        ?? row.dentalOfficeName ?? "",
+      officeCode: row.officeCode        ?? "",
+      address:    row.address           ?? "",
+      city:       row.city              ?? "",
+      postCode:   row.postCode          ?? "",
+      country:    row.country           ?? "",
+      isActive:   row.isActive          ?? true,
+    }));
   }
 }
