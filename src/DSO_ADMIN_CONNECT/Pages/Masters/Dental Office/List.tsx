@@ -11,53 +11,53 @@ import KiduServerTableList from "../../../../KIDU_COMPONENTS/KiduServerTableList
 
 const columns: KiduColumn[] = [
   {
-    key:             "officeCode",
-    label:           "Office Code",
-    enableSorting:   true,
+    key: "officeCode",
+    label: "Office Code",
+    enableSorting: true,
     enableFiltering: true,
-    filterType:      "text",
+    filterType: "text",
   },
   {
-    key:             "officeName",
-    label:           "Office Name",
-    enableSorting:   true,
+    key: "officeName",
+    label: "Office Name",
+    enableSorting: true,
     enableFiltering: true,
-    filterType:      "text",
+    filterType: "text",
   },
   {
-    key:             "city",
-    label:           "City",
-    enableSorting:   true,
+    key: "city",
+    label: "City",
+    enableSorting: true,
     enableFiltering: true,
-    filterType:      "text",
+    filterType: "text",
   },
   {
-    key:             "country",
-    label:           "Country",
-    enableSorting:   true,
+    key: "country",
+    label: "Country",
+    enableSorting: true,
     enableFiltering: true,
-    filterType:      "text",
+    filterType: "text",
   },
   {
-    key:             "mobileNum",
-    label:           "Mobile",
-    enableSorting:   false,
+    key: "mobileNum",
+    label: "Mobile",
+    enableSorting: false,
     enableFiltering: false,
   },
   {
-    key:             "dsoZoneName",
-    label:           "Zone",
-    enableSorting:   true,
+    key: "dsoZoneName",
+    label: "Zone",
+    enableSorting: true,
     enableFiltering: false,
   },
   {
-    key:             "isActive",
-    label:           "Status",
-    type:            "badge",
-    enableSorting:   false,
+    key: "isActive",
+    label: "Status",
+    type: "badge",
+    enableSorting: false,
     enableFiltering: true,
-    filterType:      "select",
-    filterOptions:   ["Inactive", "Active"],
+    filterType: "select",
+    filterOptions: ["Inactive", "Active"],
     render: (value) => (
       <span className={`kidu-badge kidu-badge--${value ? "active" : "inactive"}`}>
         {value ? "Active" : "Inactive"}
@@ -70,29 +70,29 @@ const columns: KiduColumn[] = [
 
 const DSODentalOfficeList: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
-  const [showEdit,   setShowEdit]   = useState(false);
-  const [showView,   setShowView]   = useState(false);
-  const [recordId,   setRecordId]   = useState<string | number>("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [recordId, setRecordId] = useState<string | number>("");
   const tableKeyRef = useRef(0);
-  const [tableKey,   setTableKey]   = useState(0);
+  const [tableKey, setTableKey] = useState(0);
 
   const refreshTable = () => {
     tableKeyRef.current += 1;
     setTableKey(tableKeyRef.current);
   };
 
-  const handleEditClick  = (row: any) => { setRecordId(row.id); setShowEdit(true);  };
-  const handleViewClick  = (row: any) => { setRecordId(row.id); setShowView(true);  };
+  const handleEditClick = (row: any) => { setRecordId(row.id); setShowEdit(true); };
+  const handleViewClick = (row: any) => { setRecordId(row.id); setShowView(true); };
 
   const handleDeleteClick = async (row: any) => {
     const result = await Swal.fire({
-      title:              "Are you sure?",
-      text:               "This dental office will be permanently deleted.",
-      icon:               "warning",
-      showCancelButton:   true,
+      title: "Are you sure?",
+      text: "This dental office will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonColor: "#ef0d50",
-      cancelButtonColor:  "#6c757d",
-      confirmButtonText:  "Yes, delete it!",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, delete it!",
     });
     if (result.isConfirmed) {
       await DSODentalOfficeService.delete(row.id);
@@ -105,13 +105,13 @@ const DSODentalOfficeList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Dental Offices"
-        subtitle="Manage dental office master data"
+        title="Practices"
+        subtitle="Manage dental practice master data"
         columns={columns}
         paginatedFetchService={DSODentalOfficeService.getPaginatedList}
         rowKey="id"
         showAddButton={true}
-        addButtonLabel="Add Dental Office"
+        addButtonLabel="Add Practice"
         onAddClick={() => setShowCreate(true)}
         onEditClick={handleEditClick}
         onViewClick={handleViewClick}

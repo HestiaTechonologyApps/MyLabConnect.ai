@@ -21,7 +21,7 @@ const fields: ViewField[] = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const DSOIndicationModal: React.FC<Props> = ({ show, onHide, recordId }) => {
+const DSOIndicationViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
     return (
         <KiduViewModal
             show={show}
@@ -37,4 +37,4 @@ const DSOIndicationModal: React.FC<Props> = ({ show, onHide, recordId }) => {
     );
 };
 
-export default DSOIndicationModal;
+export default DSOIndicationViewModal;

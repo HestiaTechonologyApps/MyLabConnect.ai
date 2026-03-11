@@ -1,46 +1,39 @@
 import React from "react";
-import KiduSelectPopup from "../../../../KIDU_COMPONENTS/KiduSelectPopup";
-import { API_ENDPOINTS } from "../../../../CONSTANTS/API_ENDPOINTS";
-import type { DSOProductGroup } from "../../../Types/Masters/DsoProductGroup.types";
-import ProductGroupCreateModal from "../Product Group/DsoProductGroupCreateModal";
+import KiduSelectPopup from "../../../KIDU_COMPONENTS/KiduSelectPopup";
+import { API_ENDPOINTS } from "../../../CONSTANTS/API_ENDPOINTS";
+import type { DSOSchema } from "../../Types/Schema/Schema.types";
+import SchemaCreateModal from "../Schema/DSOSchemaCreateModal";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
   show:          boolean;
   onClose:       () => void;
-  onSelect:      (item: DSOProductGroup) => void;
+  onSelect:      (item: DSOSchema) => void;
   showAddButton?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-const DSOProductGroupPopup: React.FC<Props> = ({
+const DSOSchemaPopup: React.FC<Props> = ({
   show,
   onClose,
   onSelect,
   showAddButton = true,
 }) => {
   return (
-    <KiduSelectPopup<DSOProductGroup>
+    <KiduSelectPopup<DSOSchema>
       show={show}
       onClose={onClose}
-      title="Select Product Group"
-      subtitle="Search and pick a product group"
-      fetchEndpoint={API_ENDPOINTS.DSO_PRODUCT_GROUP.GET_ALL}
+      title="Select Schema"
+      subtitle="Search and pick a schema"
+      fetchEndpoint={API_ENDPOINTS.DSO_SCHEMA.GET_ALL}
       columns={[
         {
-          key: "code",
-          label: "Code",
-          filterType: "text",
+          key: "id",
+          label: "ID",
         },
         {
           key: "name",
-          label: "Product Group Name",
-          filterType: "text",
-        },
-        {
-          key: "dsoName",
-          label: "DSO Master",
-          filterType: "text",
+          label: "Schema Name",
         },
         {
           key: "isActive",
@@ -57,16 +50,16 @@ const DSOProductGroupPopup: React.FC<Props> = ({
       onSelect={onSelect}
       idKey="id"
       labelKey="name"
-      searchKeys={["code", "name", "dsoName"]}
+      searchKeys={["name"]}
       rowsPerPage={10}
       rowsPerPageOptions={[5, 10, 20, 50]}
       themeColor="#ef0d50"
       multiSelect={false}
       showAddButton={showAddButton}
-      AddModalComponent={ProductGroupCreateModal}
-      addButtonLabel="Add Product Group"
+      AddModalComponent={SchemaCreateModal}
+      addButtonLabel="Add Schema"
     />
   );
 };
 
-export default DSOProductGroupPopup;
+export default DSOSchemaPopup;

@@ -22,11 +22,14 @@ export default class DSOProductService {
       showDeleted: false,
       showInactive: showInactive,
 
-      // Column filters
+      // Column filters — match API expected field names
       code: params["code"] ?? "",
       name: params["name"] ?? "",
-      dsoMasterId: params["dsoMasterId"] ? Number(params["dsoMasterId"]) : undefined,
+      dsoRestorationTypeId: params["dsoRestorationTypeId"] ? Number(params["dsoRestorationTypeId"]) : undefined,
+      dsoSchemaId: params["dsoSchemaId"] ? Number(params["dsoSchemaId"]) : undefined,
+      dsoIndicationId: params["dsoIndicationId"] ? Number(params["dsoIndicationId"]) : undefined,
       dsoProductGroupId: params["dsoProductGroupId"] ? Number(params["dsoProductGroupId"]) : undefined,
+      dsoMasterId: params["dsoMasterId"] ? Number(params["dsoMasterId"]) : undefined,
     };
 
     console.log("DSOProduct pagination payload:", payload);
@@ -72,8 +75,12 @@ export default class DSOProductService {
       const payload = {
         code: data.code,
         name: data.name,
-        dsoMasterId: Number(data.dsoMasterId),
+        rate: data.rate,
+        dsoRestorationTypeId: Number(data.dsoRestorationTypeId),
+        dsoSchemaId: Number(data.dsoSchemaId),
+        dsoIndicationId: Number(data.dsoIndicationId),
         dsoProductGroupId: Number(data.dsoProductGroupId),
+        dsoMasterId: Number(data.dsoMasterId),
         isActive: data.isActive ?? true,
         isDeleted: false,
       };
@@ -101,8 +108,12 @@ export default class DSOProductService {
         id,
         code: data.code,
         name: data.name,
-        dsoMasterId: Number(data.dsoMasterId),
+        rate: data.rate,
+        dsoRestorationTypeId: Number(data.dsoRestorationTypeId),
+        dsoSchemaId: Number(data.dsoSchemaId),
+        dsoIndicationId: Number(data.dsoIndicationId),
         dsoProductGroupId: Number(data.dsoProductGroupId),
+        dsoMasterId: Number(data.dsoMasterId),
         isActive: data.isActive ?? true,
       };
       

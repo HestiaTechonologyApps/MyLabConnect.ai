@@ -2,53 +2,28 @@ import React, { useState, useEffect } from "react";
 import KiduEditModal, { type Field } from "../../../../KIDU_COMPONENTS/KiduEditModal";
 import DSOProductService from "../../../Services/Masters/DsoProduct.services";
 import type { DSOProduct } from "../../../Types/Masters/DsoProduct.types";
+import type { DSORestoration } from "../../../Types/Restoration/Restoration.types";
+import type { DSOSchema } from "../../../Types/Schema/Schema.types";
+import type { DSOIndication } from "../../../Types/Setup/DSOIndication.types";
 import type { DSOProductGroup } from "../../../Types/Masters/DsoProductGroup.types";
+import DSORestorationTypePopup from "../../Restoration/DSORestorationTypePopup";
+import DSOSchemaPopup from "../../Schema/DSOSchemaPopup";
+import DSOIndicationPopup from "../../Indication/DSOIndicationPopup";
+import DSOProductGroupPopup from "../Product Group/DsoProductGroupPopup";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import toast from "react-hot-toast";
-import DSOProductGroupPopup from "../Product Group/DsoProductGroupPopup";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { 
-    name: "code", 
-    rules: { 
-      type: "text", 
-      label: "Product Code", 
-      required: true, 
-      minLength: 3, 
-      maxLength: 50, 
-      colWidth: 6 
-    } 
-  },
-  { 
-    name: "name", 
-    rules: { 
-      type: "text", 
-      label: "Product Name", 
-      required: true, 
-      minLength: 3, 
-      maxLength: 100, 
-      colWidth: 6 
-    } 
-  },
-  { 
-    name: "dsoProductGroupId", 
-    rules: { 
-      type: "popup", 
-      label: "Product Group", 
-      required: true, 
-      colWidth: 6 
-    } 
-  },
-  { 
-    name: "isActive", 
-    rules: { 
-      type: "toggle", 
-      label: "Active", 
-      colWidth: 6 
-    } 
-  },
+  { name: "code", rules: { type: "text", label: "Product Code", required: true, minLength: 3, maxLength: 50, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Product Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
+  { name: "rate", rules: { type: "number", label: "Rate", required: true, minLength: 1, maxLength: 10, colWidth: 6 } },
+  { name: "dsoRestorationTypeId", rules: { type: "popup", label: "Restoration Type", required: true, colWidth: 6 } },
+  { name: "dsoSchemaId", rules: { type: "popup", label: "Schema", required: true, colWidth: 6 } },
+  { name: "dsoIndicationId", rules: { type: "popup", label: "Indication", required: true, colWidth: 6 } },
+  { name: "dsoProductGroupId", rules: { type: "popup", label: "Product Group", required: true, colWidth: 6 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -64,16 +39,28 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
   const { requireDSOMasterId } = useCurrentUser();
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
 
+  // State for all popup selections
+  const [selectedRestorationType, setSelectedRestorationType] = useState<DSORestoration | null>(null);
+  const [selectedSchema, setSelectedSchema] = useState<DSOSchema | null>(null);
+  const [selectedIndication, setSelectedIndication] = useState<DSOIndication | null>(null);
   const [selectedProductGroup, setSelectedProductGroup] = useState<DSOProductGroup | null>(null);
+
+  // Popup open states
+  const [restorationTypeOpen, setRestorationTypeOpen] = useState(false);
+  const [schemaOpen, setSchemaOpen] = useState(false);
+  const [indicationOpen, setIndicationOpen] = useState(false);
   const [productGroupOpen, setProductGroupOpen] = useState(false);
 
   useEffect(() => {
     if (!show) {
+      setSelectedRestorationType(null);
+      setSelectedSchema(null);
+      setSelectedIndication(null);
       setSelectedProductGroup(null);
     }
   }, [show]);
 
-  // ── Fetch handler — pre-fills the popup pill ──────────────────────────────
+  // ── Fetch handler — pre-fills the popup pills ──────────────────────────────
   const handleFetch = async (id: string | number) => {
     try {
       const response = await DSOProductService.getById(Number(id));
@@ -81,11 +68,32 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
       
       const data = response?.value || response;
 
-      // Set the selected product group from the fetched data
-      if (data?.dsoProductGroupId && data?.dsoProductGroupName) {
+      // Set all selected items from the fetched data
+      if (data?.dsoRestorationTypeId && data?.restorationTypeName) {
+        setSelectedRestorationType({
+          id: data.dsoRestorationTypeId,
+          name: data.restorationTypeName,
+        } as DSORestoration);
+      }
+
+      if (data?.dsoSchemaId && data?.schemaName) {
+        setSelectedSchema({
+          id: data.dsoSchemaId,
+          name: data.schemaName,
+        } as DSOSchema);
+      }
+
+      if (data?.dsoIndicationId && data?.indicationName) {
+        setSelectedIndication({
+          id: data.dsoIndicationId,
+          name: data.indicationName,
+        } as DSOIndication);
+      }
+
+      if (data?.dsoProductGroupId && data?.productGroupName) {
         setSelectedProductGroup({
           id: data.dsoProductGroupId,
-          name: data.dsoProductGroupName,
+          name: data.productGroupName,
         } as DSOProductGroup);
       }
 
@@ -99,8 +107,24 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
   // ── Update handler ────────────────────────────────────────────────────────
   const handleUpdate = async (id: string | number, formData: Record<string, any>) => {
     console.log("Update formData:", formData);
+    console.log("Selected Restoration Type:", selectedRestorationType);
+    console.log("Selected Schema:", selectedSchema);
+    console.log("Selected Indication:", selectedIndication);
     console.log("Selected Product Group:", selectedProductGroup);
 
+    // Validate all selections
+    if (!selectedRestorationType?.id) {
+      toast.error("Please select a restoration type");
+      throw new Error("No restoration type selected");
+    }
+    if (!selectedSchema?.id) {
+      toast.error("Please select a schema");
+      throw new Error("No schema selected");
+    }
+    if (!selectedIndication?.id) {
+      toast.error("Please select an indication");
+      throw new Error("No indication selected");
+    }
     if (!selectedProductGroup?.id) {
       toast.error("Please select a product group");
       throw new Error("No product group selected");
@@ -123,8 +147,12 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
         id: Number(id),
         code: formData.code,
         name: formData.name,
-        dsoMasterId: dsoMasterId,
+        rate: Number(formData.rate),
+        dsoRestorationTypeId: Number(selectedRestorationType.id),
+        dsoSchemaId: Number(selectedSchema.id),
+        dsoIndicationId: Number(selectedIndication.id),
         dsoProductGroupId: Number(selectedProductGroup.id),
+        dsoMasterId: dsoMasterId,
         isActive: formData.isActive ?? true,
       };
 
@@ -148,6 +176,24 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
 
   // ── Popup handlers ────────────────────────────────────────────────────────
   const popupHandlers = {
+    dsoRestorationTypeId: {
+      value: selectedRestorationType?.name ?? "",
+      actualValue: selectedRestorationType?.id,
+      onOpen: () => setRestorationTypeOpen(true),
+      onClear: () => setSelectedRestorationType(null),
+    },
+    dsoSchemaId: {
+      value: selectedSchema?.name ?? "",
+      actualValue: selectedSchema?.id,
+      onOpen: () => setSchemaOpen(true),
+      onClear: () => setSelectedSchema(null),
+    },
+    dsoIndicationId: {
+      value: selectedIndication?.name ?? "",
+      actualValue: selectedIndication?.id,
+      onOpen: () => setIndicationOpen(true),
+      onClear: () => setSelectedIndication(null),
+    },
     dsoProductGroupId: {
       value: selectedProductGroup?.name ?? "",
       actualValue: selectedProductGroup?.id,
@@ -172,6 +218,36 @@ const DSOProductEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
         onSuccess={onSuccess}
         submitButtonText="Update Product"
         themeColor="#ef0d50"
+      />
+
+      <DSORestorationTypePopup
+        show={restorationTypeOpen}
+        onClose={() => setRestorationTypeOpen(false)}
+        onSelect={(type) => {
+          console.log("Selected restoration type:", type);
+          setSelectedRestorationType(type);
+          setRestorationTypeOpen(false);
+        }}
+      />
+
+      <DSOSchemaPopup
+        show={schemaOpen}
+        onClose={() => setSchemaOpen(false)}
+        onSelect={(schema) => {
+          console.log("Selected schema:", schema);
+          setSelectedSchema(schema);
+          setSchemaOpen(false);
+        }}
+      />
+
+      <DSOIndicationPopup
+        show={indicationOpen}
+        onClose={() => setIndicationOpen(false)}
+        onSelect={(indication) => {
+          console.log("Selected indication:", indication);
+          setSelectedIndication(indication);
+          setIndicationOpen(false);
+        }}
       />
 
       <DSOProductGroupPopup

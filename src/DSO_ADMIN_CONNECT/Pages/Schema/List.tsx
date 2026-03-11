@@ -7,7 +7,6 @@ import DSOSchemaCreateModal from "./Create";
 import DSOSchemaEditModal from "./Edit";
 import DSOSchemaViewModal from "./View";
 
-
 const columns: KiduColumn[] = [
   {
     key: "name",
@@ -16,12 +15,6 @@ const columns: KiduColumn[] = [
     enableFiltering: true,
     filterType: "text",
   },
-  // {
-  //   key: "dsoName",
-  //   label: "DSO Master",
-  //   enableSorting: true,
-  //   enableFiltering: false, // int-based (dsoMasterId), not filterable by name
-  // },
   {
     key: "isActive",
     label: "Status",

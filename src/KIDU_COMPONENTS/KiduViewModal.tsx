@@ -291,8 +291,8 @@ const KiduViewModal: React.FC<ViewModalProps> = ({
             )}
           </div>
 
-          {/* Header Right Section with Badge and Active Toggle */}
-          <div className="kidu-modal-header-right">
+          {/* Header Right Section with Badge and Active Toggle - Now in a single line */}
+          <div className="kidu-modal-header-right" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             {showBadge && (
               <span
                 className="kidu-view-badge"
@@ -301,8 +301,8 @@ const KiduViewModal: React.FC<ViewModalProps> = ({
                 {badgeText}
               </span>
             )}
-            {/* Active Toggle - Read Only Visual */}
-            <div className="kidu-active-toggle-wrapper">
+            {/* Active Toggle - Read Only Visual - Now on the same line */}
+            <div className="kidu-active-toggle-wrapper" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span className="kidu-active-label">Active</span>
               <div
                 className={`kidu-toggle kidu-toggle--readonly ${data.isActive ? "kidu-toggle--on" : ""}`}

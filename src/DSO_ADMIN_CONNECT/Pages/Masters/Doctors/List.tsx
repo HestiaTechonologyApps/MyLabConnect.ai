@@ -68,7 +68,7 @@ const DSODoctorList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Doctors"
+        title="Doctors"
         subtitle="Manage doctor master data"
         columns={columns}
         paginatedFetchService={DSODoctorService.getPaginatedList}

@@ -37,12 +37,6 @@ const columns: KiduColumn[] = [
     filterType: "text",
   },
   {
-    key: "authenticationType",
-    label: "Authentication Type",
-    enableSorting: true,
-    enableFiltering: false,
-  },
-  {
     key: "lmsSystem",
     label: "LMS System",
     enableSorting: true,

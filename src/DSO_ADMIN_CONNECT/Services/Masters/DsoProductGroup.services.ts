@@ -10,69 +10,141 @@ export default class DSOProductGroupService {
     // Map "Active"/"Inactive" select filter to showInactive boolean
     let showInactive: boolean | undefined = undefined;
     const statusFilter = params["isActive"];
-    if (statusFilter === "Active") showInactive = true;    // Active → showInactive = false (don't show inactive)
-    if (statusFilter === "Inactive") showInactive = false;   // Inactive → showInactive = true (show only inactive)
+    if (statusFilter === "Active") showInactive = true;
+    if (statusFilter === "Inactive") showInactive = false;
 
     const payload = {
-      pageNumber:     params.pageNumber,
-      pageSize:       params.pageSize,
-      searchTerm:     params.searchTerm     ?? "",
-      sortBy:         params.sortBy         ?? "",
-      sortDescending: params.sortDescending  ?? false,
-      showDeleted:    false,
-      showInactive:   showInactive,
+      pageNumber: params.pageNumber,
+      pageSize: params.pageSize,
+      searchTerm: params.searchTerm ?? "",
+      sortBy: params.sortBy ?? "",
+      sortDescending: params.sortDescending ?? false,
+      showDeleted: false,
+      showInactive: showInactive,
 
       // Column filters — match API expected field names
-      code:         params["code"]         ?? "",
-      name:         params["name"]         ?? "",
-      dsoMasterId:  params["dsoMasterId"]  ? Number(params["dsoMasterId"]) : undefined,
+      code: params["code"] ?? "",
+      name: params["name"] ?? "",
+      dsoMasterId: params["dsoMasterId"] ? Number(params["dsoMasterId"]) : undefined,
     };
 
-    console.log("DSOProductGroup pagination payload:", payload); // Debug log
+    console.log("DSOProductGroup pagination payload:", payload);
 
-    const response = await HttpService.callApi<any>(
-      API_ENDPOINTS.DSO_PRODUCT_GROUP.UPDATE_PAGINATION,
-      "POST",
-      payload
-    );
+    try {
+      const response = await HttpService.callApi<any>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.UPDATE_PAGINATION,
+        "POST",
+        payload
+      );
 
-    const result = response?.value ?? response;
+      console.log("Paginated Response:", response);
 
-    return {
-      data:       result.data         ?? result.items ?? [],
-      total:      result.totalRecords  ?? result.total ?? 0,
-      totalPages: result.totalPages,
-    };
+      const result = response?.value ?? response;
+
+      return {
+        data: result.data ?? result.items ?? [],
+        total: result.totalRecords ?? result.total ?? 0,
+        totalPages: result.totalPages,
+      };
+    } catch (error) {
+      console.error("Error in getPaginatedList:", error);
+      throw error;
+    }
   }
 
   static async getById(id: number): Promise<any> {
-    return await HttpService.callApi<any>(API_ENDPOINTS.DSO_PRODUCT_GROUP.GET_BY_ID(id), "GET");
+    try {
+      const response = await HttpService.callApi<any>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.GET_BY_ID(id), 
+        "GET"
+      );
+      console.log("GetById Response:", response);
+      return response;
+    } catch (error) {
+      console.error("Error in getById:", error);
+      throw error;
+    }
   }
 
   static async create(data: Partial<DSOProductGroup>): Promise<any> {
-    const payload = {
-      ...data,
-      isActive:  data.isActive ?? true,
-      isDeleted: false,
-    };
-    return await HttpService.callApi<any>(API_ENDPOINTS.DSO_PRODUCT_GROUP.CREATE, "POST", payload);
+    try {
+      const payload = {
+        code: data.code,
+        name: data.name,
+        dsoMasterId: Number(data.dsoMasterId),
+        isActive: data.isActive ?? true,
+        isDeleted: false,
+      };
+      
+      console.log("Create Payload:", payload);
+      console.log("Create Endpoint:", API_ENDPOINTS.DSO_PRODUCT_GROUP.CREATE);
+      
+      const response = await HttpService.callApi<any>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.CREATE, 
+        "POST", 
+        payload
+      );
+      
+      console.log("Create Response:", response);
+      return response;
+    } catch (error) {
+      console.error("Error in create:", error);
+      throw error;
+    }
   }
 
   static async update(id: number, data: Partial<DSOProductGroup>): Promise<any> {
-    const payload = {
-      id,
-      ...data,
-    };
-    return await HttpService.callApi<any>(API_ENDPOINTS.DSO_PRODUCT_GROUP.UPDATE(id), "PUT", payload);
+    try {
+      const payload = {
+        id,
+        code: data.code,
+        name: data.name,
+        dsoMasterId: Number(data.dsoMasterId),
+        isActive: data.isActive ?? true,
+      };
+      
+      console.log("Update Payload:", payload);
+      
+      const response = await HttpService.callApi<any>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.UPDATE(id), 
+        "PUT", 
+        payload
+      );
+      
+      console.log("Update Response:", response);
+      return response;
+    } catch (error) {
+      console.error("Error in update:", error);
+      throw error;
+    }
   }
 
   static async delete(id: number): Promise<void> {
-    await HttpService.callApi<void>(API_ENDPOINTS.DSO_PRODUCT_GROUP.DELETE(id), "DELETE");
+    try {
+      await HttpService.callApi<void>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.DELETE(id), 
+        "DELETE"
+      );
+      console.log(`Deleted DSO Product Group with id ${id}`);
+    } catch (error) {
+      console.error("Error in delete:", error);
+      throw error;
+    }
   }
 
   static async getAll(): Promise<DSOProductGroup[]> {
-    const response = await HttpService.callApi<any>(API_ENDPOINTS.DSO_PRODUCT_GROUP.GET_ALL, "GET");
-    const result = response?.value ?? response?.data ?? response;
-    return Array.isArray(result) ? result : [];
+    try {
+      const response = await HttpService.callApi<any>(
+        API_ENDPOINTS.DSO_PRODUCT_GROUP.GET_ALL, 
+        "GET"
+      );
+      console.log("GetAll Response:", response);
+      
+      const result = response?.value ?? response?.data ?? response;
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error("Error in getAll:", error);
+      throw error;
+    }
   }
 }

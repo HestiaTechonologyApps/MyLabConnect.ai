@@ -2,10 +2,10 @@ import React, { useState, useRef } from "react";
 import KiduServerTableList from "../../../../KIDU_COMPONENTS/KiduServerTableList";
 import type { KiduColumn } from "../../../../KIDU_COMPONENTS/KiduServerTable";
 import Swal from "sweetalert2";
+import DSOProductService from "../../../Services/Masters/DsoProduct.services";
 import DSOProductCreateModal from "./Create";
 import DSOProductEditModal from "./Edit";
 import DSOProductViewModal from "./View";
-import DSOProductService from "../../../Services/Masters/DsoProduct.services";
 
 const columns: KiduColumn[] = [
   {
@@ -22,13 +22,45 @@ const columns: KiduColumn[] = [
     enableFiltering: true,
     filterType: "text",
   },
+  // {
+  //   key: "rate",
+  //   label: "Rate",
+  //   enableSorting: true,
+  //   enableFiltering: true,
+  //   filterType: "number",
+  //   render: (value) => <span>${Number(value).toFixed(2)}</span>,
+  // },
   {
-    key: "dsoProductGroupId",
+    key: "restorationTypeName",
+    label: "Restoration Type",
+    enableSorting: true,
+    enableFiltering: true,
+    filterType: "text",
+    render: (value, row) => <span>{value || `Type #${row.dsoRestorationTypeId}`}</span>,
+  },
+  {
+    key: "schemaName",
+    label: "Schema",
+    enableSorting: true,
+    enableFiltering: true,
+    filterType: "text",
+    render: (value, row) => <span>{value || `Schema #${row.dsoSchemaId}`}</span>,
+  },
+  {
+    key: "indicationName",
+    label: "Indication",
+    enableSorting: true,
+    enableFiltering: true,
+    filterType: "text",
+    render: (value, row) => <span>{value || `Indication #${row.dsoIndicationId}`}</span>,
+  },
+  {
+    key: "productGroupName",
     label: "Product Group",
     enableSorting: true,
     enableFiltering: true,
     filterType: "text",
-    render: (value, row) => <span>{row.dsoProductGroupName || `Group #${value}`}</span>,
+    render: (value, row) => <span>{value || `Group #${row.dsoProductGroupId}`}</span>,
   },
   {
     key: "isActive",
@@ -43,13 +75,6 @@ const columns: KiduColumn[] = [
         {value ? "Active" : "Inactive"}
       </span>
     ),
-  },
-  {
-    key: "createdAt",
-    label: "Created Date",
-    type: "date",
-    enableSorting: true,
-    enableFiltering: false,
   },
 ];
 

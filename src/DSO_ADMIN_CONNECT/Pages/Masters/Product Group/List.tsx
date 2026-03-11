@@ -3,9 +3,9 @@ import KiduServerTableList from "../../../../KIDU_COMPONENTS/KiduServerTableList
 import type { KiduColumn } from "../../../../KIDU_COMPONENTS/KiduServerTable";
 import Swal from "sweetalert2";
 import DSOProductGroupService from "../../../Services/Masters/DsoProductGroup.services";
-import DsoProductGroupCreateModal from "./Create";
-import DsoProductGroupEditModal from "./Edit";
-import DsoProductGroupViewModal from "./View";
+import DSOProductGroupCreateModal from "./Create";
+import DSOProductGroupEditModal from "./Edit";
+import DSOProductGroupViewModal from "./View";
 
 const columns: KiduColumn[] = [
   {
@@ -22,12 +22,6 @@ const columns: KiduColumn[] = [
     enableFiltering: true,
     filterType: "text",
   },
-  // {
-  //   key: "dsoName",
-  //   label: "DSO Master",
-  //   enableSorting: true,
-  //   enableFiltering: false, // Not filterable by name (uses dsoMasterId internally)
-  // },
   {
     key: "isActive",
     label: "Status",
@@ -35,7 +29,7 @@ const columns: KiduColumn[] = [
     enableSorting: false,
     enableFiltering: true,
     filterType: "select",
-    filterOptions: ["Inactive", "Active"], // Mapped to showInactive in service
+    filterOptions: ["Active", "Inactive"],
     render: (value) => (
       <span className={`kidu-badge kidu-badge--${value ? "active" : "inactive"}`}>
         {value ? "Active" : "Inactive"}
@@ -44,13 +38,13 @@ const columns: KiduColumn[] = [
   },
 ];
 
-const DsoProductGroupList: React.FC = () => {
+const DSOProductGroupList: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
-  const [showEdit,   setShowEdit]   = useState(false);
-  const [showView,   setShowView]   = useState(false);
-  const [recordId,   setRecordId]   = useState<string | number>("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [recordId, setRecordId] = useState<number>(0);
   const tableKeyRef = useRef(0);
-  const [tableKey,   setTableKey]   = useState(0);
+  const [tableKey, setTableKey] = useState(0);
 
   const refreshTable = () => {
     tableKeyRef.current += 1;
@@ -79,9 +73,14 @@ const DsoProductGroupList: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      await DSOProductGroupService.delete(row.id);
-      refreshTable();
-      Swal.fire("Deleted!", "Product group has been deleted.", "success");
+      try {
+        await DSOProductGroupService.delete(row.id);
+        refreshTable();
+        Swal.fire("Deleted!", "Product group has been deleted.", "success");
+      } catch (error) {
+        console.error("Delete error:", error);
+        Swal.fire("Error!", "Failed to delete product group.", "error");
+      }
     }
   };
 
@@ -89,7 +88,7 @@ const DsoProductGroupList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Product Groups"
+        title="Product Groups"
         subtitle="Manage product group master data"
         columns={columns}
         paginatedFetchService={DSOProductGroupService.getPaginatedList}
@@ -107,24 +106,30 @@ const DsoProductGroupList: React.FC = () => {
         showColumnToggle={true}
         defaultRowsPerPage={10}
         highlightOnHover={true}
-        auditLogTableName="DSO_productGroup"
+        auditLogTableName="dso_product_group"
       />
 
-      <DsoProductGroupCreateModal
+      <DSOProductGroupCreateModal
         show={showCreate}
         onHide={() => setShowCreate(false)}
-        onSuccess={() => { setShowCreate(false); refreshTable(); }}
+        onSuccess={() => {
+          setShowCreate(false);
+          refreshTable();
+        }}
       />
 
-      {recordId && (
+      {recordId > 0 && (
         <>
-          <DsoProductGroupEditModal
+          <DSOProductGroupEditModal
             show={showEdit}
             onHide={() => setShowEdit(false)}
-            onSuccess={() => { setShowEdit(false); refreshTable(); }}
+            onSuccess={() => {
+              setShowEdit(false);
+              refreshTable();
+            }}
             recordId={recordId}
           />
-          <DsoProductGroupViewModal
+          <DSOProductGroupViewModal
             show={showView}
             onHide={() => setShowView(false)}
             recordId={recordId}
@@ -135,4 +140,4 @@ const DsoProductGroupList: React.FC = () => {
   );
 };
 
-export default DsoProductGroupList;
+export default DSOProductGroupList;
