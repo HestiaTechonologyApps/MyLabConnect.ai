@@ -68,7 +68,7 @@ export const doctorMenuItems: MenuItem[] = [
     },
      {
         title: 'Marketplace',
-        url: '/doctor-connect/marketplace-list',
+        url: '/doctor-connect/marketplace',
         icon: ShoppingCart,
     },
      {
