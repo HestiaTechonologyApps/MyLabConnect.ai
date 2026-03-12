@@ -67,7 +67,7 @@ const DSOTerritoryCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) =
       show={show}
       onHide={onHide}
       title="Create Territory"
-      subtitle="Add a new DSO Territory"
+      subtitle="Add a new Territory"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Territory created successfully!"

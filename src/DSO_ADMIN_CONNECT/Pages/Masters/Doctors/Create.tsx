@@ -6,7 +6,7 @@ import KiduTabbedFormCreateModal, {
 import DSODoctorService from "../../../Services/Masters/DsoDoctor.services";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
-import DSODentalOfficePopup from "../Dental Office/DSODentalOfficePopup";
+import { API_ENDPOINTS } from "../../../../CONSTANTS/API_ENDPOINTS";
 import toast from "react-hot-toast";
 
 // ── Header fields ─────────────────────────────────────────────────────────────
@@ -48,46 +48,74 @@ const DSODoctorCreateModal: React.FC<Props> = ({
       addButtonLabel: "Add Practice",
       columns: [
         { 
-          key: "practiceId", 
+          key: "Practice", 
           label: "Practice", 
           type: "popup",
           required: true,
           placeholder: "Select a practice",
           popupConfig: {
-            component: DSODentalOfficePopup,
-            props: {
-              dsoMasterId: externalDsoMasterId,
-              showAddButton: true
-            },
-            mapValue: (selected: any) => ({
-              value: String(selected.id),
-              display: `${selected.officeCode} - ${selected.officeName}`
-            })
+            fetchEndpoint: externalDsoMasterId 
+              ? `${API_ENDPOINTS.DSO_DENTAL_OFFICE.GET_ALL}?dsoMasterId=${externalDsoMasterId}`
+              : API_ENDPOINTS.DSO_DENTAL_OFFICE.GET_ALL,
+            columns: [
+              { key: "officeCode", label: "Code", filterType: "text" },
+              { key: "officeName", label: "Name", filterType: "text" },
+              { 
+                key: "isActive", 
+                label: "Status", 
+                filterType: "select", 
+                filterOptions: ["true", "false"],
+                render: (value: boolean) => (
+                  <span className={`kidu-badge kidu-badge--${value ? "active" : "inactive"}`}>
+                    {value ? "Active" : "Inactive"}
+                  </span>
+                )
+              }
+            ],
+            searchKeys: ["officeCode", "officeName"],
+            idKey: "id",
+            labelKey: "officeName",
+            showAddButton: false,
           }
         },
       ],
     },
-     {
-      key: "lab",
+    {
+      key: "lab", // This matches the key in tabData
       label: "Lab",
       addButtonLabel: "Add Lab",
       columns: [
         { 
-          key: "labId", 
+          key: "Lab", 
           label: "Lab", 
           type: "popup",
           required: true,
-          placeholder: "Select a Lab",
+          placeholder: "Select a lab",
           popupConfig: {
-            component: DSODentalOfficePopup,
-            props: {
-              dsoMasterId: externalDsoMasterId,
-              showAddButton: true
-            },
-            mapValue: (selected: any) => ({
-              value: String(selected.id),
-              display: `${selected.officeCode} - ${selected.officeName}`
-            })
+            fetchEndpoint: externalDsoMasterId 
+              ? `${API_ENDPOINTS.LAB_MASTER.GET_ALL}?dsoMasterId=${externalDsoMasterId}`
+              : API_ENDPOINTS.LAB_MASTER.GET_ALL,
+            columns: [
+              { key: "labCode", label: "Lab Code", filterType: "text" },
+              { key: "labName", label: "Lab Name", filterType: "text" },
+              { key: "displayName", label: "Display Name", filterType: "text" },
+              { key: "email", label: "Email", filterType: "text" },
+              { 
+                key: "isActive", 
+                label: "Status", 
+                filterType: "select", 
+                filterOptions: ["true", "false"],
+                render: (value: boolean) => (
+                  <span className={`kidu-badge kidu-badge--${value ? "active" : "inactive"}`}>
+                    {value ? "Active" : "Inactive"}
+                  </span>
+                )
+              }
+            ],
+            searchKeys: ["labCode", "labName", "displayName", "email"],
+            idKey: "id",
+            labelKey: "labName",
+            showAddButton: false,
           }
         },
       ],
@@ -104,16 +132,36 @@ const DSODoctorCreateModal: React.FC<Props> = ({
     console.log("Header Data:", headerData);
     console.log("Tab Data:", tabData);
 
-    // Validate at least one practice is selected
+    // Get practices from tabData
     const practiceRows = tabData.practices ?? [];
+    
+    // Filter valid practices (those with Practice value)
     const validPractices = practiceRows.filter(
-      (row) => row.practiceId && String(row.practiceId).trim() !== ""
+      (row) => row.Practice && String(row.Practice).trim() !== ""
     );
+
+    console.log("Valid practices:", validPractices);
 
     if (validPractices.length === 0) {
       toast.error("Please add at least one practice");
       throw new Error("No practices added");
     }
+
+    // Get labs from tabData using the correct key "lab" (not "labs")
+    const labRows = tabData.lab ?? [];
+    
+    // Filter valid labs (those with Lab value)
+    const validLabs = labRows.filter(
+      (row) => row.Lab && String(row.Lab).trim() !== ""
+    );
+
+    console.log("Valid labs:", validLabs);
+
+    // Optional: Validate labs if they're required
+    // if (validLabs.length === 0) {
+    //   toast.error("Please add at least one lab");
+    //   throw new Error("No labs added");
+    // }
 
     // 1. Get DSOMasterId from token or props
     let dsoMasterId: number;
@@ -126,12 +174,23 @@ const DSODoctorCreateModal: React.FC<Props> = ({
       return;
     }
 
-    // 2. Build payload - filter out empty rows and map toggle values
+    // 2. Build payload - map practices to dsoDentalDoctors array
     const practices = validPractices.map((row) => ({
       id: 0,
-      dSODentalOfficeId: Number(row.practiceId),
-      dSODoctorId: 0,
+      dsoDentalOfficeId: Number(row.Practice),
+      dsoDoctorId: 0,
       isPrimary: row.isPrimary ?? false,
+      isActive: row.isActive ?? true,
+      isDeleted: false,
+    }));
+
+    // 3. Build payload - map labs to labMappings array
+    const labMappings = validLabs.map((row) => ({
+      id: 0,
+      labMasterId: Number(row.Lab),
+      dsoDoctorId: 0,
+      labName: row.labName || "",
+      labDescription: row.labDescription || "",
       isActive: row.isActive ?? true,
       isDeleted: false,
     }));
@@ -147,15 +206,16 @@ const DSODoctorCreateModal: React.FC<Props> = ({
       licenseNo: headerData.licenseNo ?? "",
       info: headerData.info ?? "",
       address: headerData.address ?? "",
-      isActive: headerData.isActive ?? true, // This comes from the header toggle
+      isActive: headerData.isActive ?? true,
       isDeleted: false,
       dsoMasterId: dsoMasterId,
       dsoDentalDoctors: practices,
+      labMappings: labMappings, // Add lab mappings to payload
     };
 
     console.log("Submitting payload:", payload);
 
-    // 3. Call API
+    // 4. Call API
     let result: any;
     try {
       result = await DSODoctorService.create(payload);
@@ -166,7 +226,7 @@ const DSODoctorCreateModal: React.FC<Props> = ({
       return;
     }
 
-    // 4. Assert success - this will throw if not successful
+    // 5. Assert success
     if (result && result.isSucess) {
       await assertApiSuccess(result, "Failed to create DSO Doctor.");
     } else {

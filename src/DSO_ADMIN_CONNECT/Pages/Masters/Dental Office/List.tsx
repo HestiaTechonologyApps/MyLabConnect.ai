@@ -97,7 +97,7 @@ const DSODentalOfficeList: React.FC = () => {
     if (result.isConfirmed) {
       await DSODentalOfficeService.delete(row.id);
       refreshTable();
-      Swal.fire("Deleted!", "Dental Office has been deleted.", "success");
+      Swal.fire("Deleted!", "Practice has been deleted.", "success");
     }
   };
 
@@ -106,7 +106,7 @@ const DSODentalOfficeList: React.FC = () => {
       <KiduServerTableList
         key={tableKey}
         title="Practices"
-        subtitle="Manage dental practice master data"
+        subtitle="Manage practice master data"
         columns={columns}
         paginatedFetchService={DSODentalOfficeService.getPaginatedList}
         rowKey="id"

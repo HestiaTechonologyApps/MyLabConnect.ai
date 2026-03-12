@@ -75,20 +75,21 @@ const DSODoctorEditModal: React.FC<Props> = ({
             })
           }
         },
-        // Note: The create page doesn't have isPrimary and isActive toggles in the tab
-        // If you want them, uncomment these lines:
-        // {
-        //   key: "isPrimary",
-        //   label: "Primary",
-        //   type: "toggle",
-        //   defaultValue: false
-        // },
-        // {
-        //   key: "isActive",
-        //   label: "Active",
-        //   type: "toggle",
-        //   defaultValue: true
-        // }
+      ],
+    },
+     {
+      key: "Lab",
+      label: "Lab",
+      addButtonLabel: "Add Lab",
+      columns: [
+        { 
+          key: "Lab", 
+          label: "Lab", 
+          type: "popup",
+          required: true,
+          placeholder: "🔍 Select a practice",
+         
+        },
       ],
     },
   ];

@@ -751,3 +751,48 @@
     transition: none !important;
   }
 }
+
+/* Scrollable content area */
+.ktf-scrollable-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 20px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kidu-border) transparent;
+}
+
+.ktf-scrollable-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ktf-scrollable-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ktf-scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--kidu-border);
+  border-radius: 99px;
+}
+
+.ktf-scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: var(--kidu-text-disabled);
+}
+
+/* Ensure header and footer stay fixed */
+.ktf-header {
+  flex-shrink: 0;
+}
+
+.ktf-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--kidu-divider);
+  padding: 12px 20px 16px;
+}
+
+/* Modal layout adjustments */
+.ktf-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}

@@ -17,19 +17,6 @@ const columns: KiduColumn[] = [
         enableFiltering: true,
         filterType: "text",
     },
-    // {
-    //     key: "dsoName",
-    //     label: "DSO Master",
-    //     enableSorting: true,
-    //     enableFiltering: false, // ID-based, not filterable by name
-    // },
-    // {
-    //     key: "createdAt",
-    //     label: "Created At",
-    //     type: "date",
-    //     enableSorting: true,
-    //     enableFiltering: false,
-    // },
     {
         key: "isActive",
         label: "Status",
@@ -85,7 +72,7 @@ const DSOTerritoryList: React.FC = () => {
         <>
             <KiduServerTableList
                 key={tableKey}
-                title="DSO Territories"
+                title="Territories"
                 subtitle="Manage territory master data"
                 columns={columns}
                 paginatedFetchService={DSOTerritoryService.getPaginatedList}

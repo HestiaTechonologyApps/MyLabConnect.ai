@@ -14,7 +14,6 @@ interface Props {
 
 const fields: ViewField[] = [
     { name: "name", label: "Territory Name", colWidth: 6 },
-    { name: "dsoName", label: "DSO Master", colWidth: 6 },
     { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
 ];
 
@@ -26,7 +25,7 @@ const DSOTerritoryViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
             show={show}
             onHide={onHide}
             title="View Territory"
-            subtitle="DSO Territory details"
+            subtitle="Territory details"
             fields={fields}
             recordId={recordId}
             onFetch={(id) => DSOTerritoryService.getById(Number(id))}

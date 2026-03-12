@@ -76,7 +76,28 @@ export default class DSODoctorService {
       // Generate fullName if not provided
       const fullName = data.fullName || 
         (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}`.trim() : "");
-      
+
+      // Ensure dsoDentalDoctors is properly formatted with type assertion
+      const dsoDentalDoctors = (data.dsoDentalDoctors || []).map((doctor: any) => ({
+        id: doctor.id ?? 0,
+        dsoDentalOfficeId: doctor.dsoDentalOfficeId,
+        dsoDoctorId: 0, // Will be set by server
+        isPrimary: doctor.isPrimary === undefined ? false : doctor.isPrimary,
+        isActive: doctor.isActive === undefined ? true : doctor.isActive,
+        isDeleted: false,
+      }));
+
+      // Ensure labMappings is properly formatted
+      const labMappings = (data.labMappings || []).map((mapping: any) => ({
+        id: mapping.id ?? 0,
+        labMasterId: mapping.labMasterId,
+        labName: mapping.labName ?? "",
+        labDescription: mapping.labDescription ?? "",
+        dsoDoctorId: 0, // Will be set by server
+        isActive: mapping.isActive === undefined ? true : mapping.isActive,
+        isDeleted: false,
+      }));
+
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -88,7 +109,8 @@ export default class DSODoctorService {
         doctorCode: data.doctorCode,
         info: data.info ?? "",
         dsoMasterId: Number(data.dsoMasterId),
-        dsoDentalDoctors: data.dsoDentalDoctors || [], // Array of practice assignments
+        dsoDentalDoctors: dsoDentalDoctors,
+        labMappings: labMappings,
         isActive: data.isActive ?? true,
         isDeleted: false,
       };
@@ -115,7 +137,28 @@ export default class DSODoctorService {
       // Generate fullName if not provided
       const fullName = data.fullName || 
         (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}`.trim() : "");
-      
+
+      // Ensure dsoDentalDoctors is properly formatted with type assertion
+      const dsoDentalDoctors = (data.dsoDentalDoctors || []).map((doctor: any) => ({
+        id: doctor.id ?? 0,
+        dsoDentalOfficeId: doctor.dsoDentalOfficeId,
+        dsoDoctorId: id,
+        isPrimary: doctor.isPrimary === undefined ? false : doctor.isPrimary,
+        isActive: doctor.isActive === undefined ? true : doctor.isActive,
+        isDeleted: false,
+      }));
+
+      // Ensure labMappings is properly formatted
+      const labMappings = (data.labMappings || []).map((mapping: any) => ({
+        id: mapping.id ?? 0,
+        labMasterId: mapping.labMasterId,
+        labName: mapping.labName ?? "",
+        labDescription: mapping.labDescription ?? "",
+        dsoDoctorId: id,
+        isActive: mapping.isActive === undefined ? true : mapping.isActive,
+        isDeleted: false,
+      }));
+
       const payload = {
         id,
         firstName: data.firstName,
@@ -128,7 +171,8 @@ export default class DSODoctorService {
         doctorCode: data.doctorCode,
         info: data.info ?? "",
         dsoMasterId: Number(data.dsoMasterId),
-        dsoDentalDoctors: data.dsoDentalDoctors || [],
+        dsoDentalDoctors: dsoDentalDoctors,
+        labMappings: labMappings,
         isActive: data.isActive ?? true,
       };
       
@@ -177,7 +221,7 @@ export default class DSODoctorService {
     }
   }
 
-  // Additional method for getting doctors by practice/office
+  // Additional method for getting doctors by dental office
   static async getByDentalOfficeId(officeId: number): Promise<DSODoctor[]> {
     try {
       const response = await HttpService.callApi<any>(
@@ -190,6 +234,23 @@ export default class DSODoctorService {
       return Array.isArray(result) ? result : [];
     } catch (error) {
       console.error("Error in getByDentalOfficeId:", error);
+      throw error;
+    }
+  }
+
+  // Additional method for getting doctors by lab
+  static async getByLabId(labId: number): Promise<DSODoctor[]> {
+    try {
+      const response = await HttpService.callApi<any>(
+        `${API_ENDPOINTS.DSO_DOCTOR.GET_ALL}?labMasterId=${labId}`, 
+        "GET"
+      );
+      console.log(`Get Doctors for Lab ${labId}:`, response);
+      
+      const result = response?.value ?? response?.data ?? response;
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error("Error in getByLabId:", error);
       throw error;
     }
   }

@@ -15,6 +15,7 @@ export interface LabMaster {
   updatedAt?: string | null;
   isDeleted?: boolean;
   isActive?: boolean;
+  //dsoMasterId?: number; 
 
   // Pagination / filter params
   pageNumber?: number;
