@@ -367,7 +367,7 @@ const AddNewCase: React.FC = () => {
       patientFirstName:   form.firstName,
       patientLastName:    form.lastName,
       patientId:          form.patientId,
-      caseStatusMasterId: 4,
+      caseStatusMasterId: 1,
       dueDate:            form.dueDate || undefined,
       caseNotes:          form.caseNotes,
       dSOMasterId:        form.dsoMasterId,
