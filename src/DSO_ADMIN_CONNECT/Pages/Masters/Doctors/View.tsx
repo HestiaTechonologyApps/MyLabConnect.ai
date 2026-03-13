@@ -25,10 +25,14 @@ const tabs: ViewTabConfig[] = [
     key: "practices",
     label: "Practices",
     columns: [
-      { key: "practiceId", label: "Practice ID" },
-      { key: "practiceName", label: "Practice Name", displayKey: "practiceDisplay" },
-      { key: "isPrimary", label: "Primary", formatter: (value) => value ? "Yes" : "No" },
-      { key: "isActive", label: "Status", formatter: (value) => value ? "Active" : "Inactive" },
+      { key: "practiceName", label: "Practice", displayKey: "practiceDisplay" },
+    ],
+  },
+   {
+    key: "Lab",
+    label: "Lab",
+    columns: [
+      { key: "labName", label: "Lab", displayKey: "practiceDisplay" },
     ],
   },
 ];
