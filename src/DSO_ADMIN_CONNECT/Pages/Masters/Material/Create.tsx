@@ -18,7 +18,7 @@ interface Props {
 }
 
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Material Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Material Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "dsoRestorationTypeId", rules: { type: "popup", label: "Restoration Type", required: true, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];

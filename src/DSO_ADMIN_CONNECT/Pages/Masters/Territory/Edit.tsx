@@ -5,14 +5,9 @@ import type { DSOTerritory } from "../../../Types/Masters/DsoTerritory.types";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is taken from the session token via requireDSOMasterId(),
-// so it is not shown as a form field.
-//
 const fields: Field[] = [
-  { name: "name",     rules: { type: "text",   label: "Territory Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
-  { name: "isActive", rules: { type: "toggle", label: "Active",         colWidth: 6 } },
+  { name: "name",     rules: { type: "text",   label: "Territory Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────

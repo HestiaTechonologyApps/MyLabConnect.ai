@@ -1,21 +1,14 @@
 import React from "react";
-import KiduCreateModal, {
-  type Field,
-} from "../../../../KIDU_COMPONENTS/KiduCreateModal";
+import KiduCreateModal, { type Field, } from "../../../../KIDU_COMPONENTS/KiduCreateModal";
 import DSOZoneService from "../../../Services/Setup/DsoZone.services";
 import type { DSOZone } from "../../../Types/Setup/DsoZone.types";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is no longer a popup field — it is taken from the session token
-// via useCurrentUser().requireDSOMasterId(), exactly like DSODoctor does.
-//
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Zone Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Zone Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -34,7 +27,7 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const DSOZoneCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
-  const { requireDSOMasterId }               = useCurrentUser();
+  const { requireDSOMasterId } = useCurrentUser();
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
 
   // ── Submit handler ────────────────────────────────────────────────────────
@@ -50,9 +43,9 @@ const DSOZoneCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
 
     // 2. Build payload
     const payload: Partial<DSOZone> = {
-      name:        formData.name,
+      name: formData.name,
       dsoMasterId: dsOMasterId,
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     // 3. Call API
@@ -73,7 +66,7 @@ const DSOZoneCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
       show={show}
       onHide={onHide}
       title="Create Zone"
-      subtitle="Add a new DSO Zone"
+      subtitle="Add a new Zone"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Zone created successfully!"

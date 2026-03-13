@@ -9,25 +9,12 @@ import DSOZoneViewModal from "./View";
 
 const columns: KiduColumn[] = [
   {
-    key: "id",
-    label: "Zone Code",
-    enableSorting: true,
-    enableFiltering: true,
-    filterType: "text",
-  },
-  {
     key: "name",
     label: "Zone Name",
     enableSorting: true,
     enableFiltering: true,
     filterType: "text",
   },
-  // {
-  //   key: "dsoName",
-  //   label: "DSO Master",
-  //   enableSorting: true,
-  //   enableFiltering: false, 
-  // },
   {
     key: "isActive",
     label: "Status",
@@ -35,7 +22,7 @@ const columns: KiduColumn[] = [
     enableSorting: false,
     enableFiltering: true,
     filterType: "select",
-    filterOptions: ["Inactive", "Active"], // mapped to showInactive in service ✅
+    filterOptions: ["Inactive", "Active"], // mapped to showInactive in service
     render: (value) => (
       <span className={`kidu-badge kidu-badge--${value ? "active" : "inactive"}`}>
         {value ? "Active" : "Inactive"}
@@ -89,8 +76,8 @@ const DSOZoneList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Zones"
-        subtitle="Manage zone master data"
+        title="Zone"
+        subtitle="Manage zone data"
         columns={columns}
         paginatedFetchService={DSOZoneService.getPaginatedList}
         rowKey="id"

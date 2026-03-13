@@ -21,7 +21,7 @@ const DSOShadeViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
       show={show}
       onHide={onHide}
       title="View Shade"
-      subtitle="DSO Shade details"
+      subtitle="Shade details"
       fields={fields}
       recordId={recordId}
       onFetch={(id) => DSOShadeService.getById(Number(id))}

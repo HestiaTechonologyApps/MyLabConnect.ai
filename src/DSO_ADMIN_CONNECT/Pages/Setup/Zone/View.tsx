@@ -20,7 +20,7 @@ const DSOZoneViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
       show={show}
       onHide={onHide}
       title="View Zone"
-      subtitle="DSO Zone details"
+      subtitle="Zone details"
       fields={fields}
       recordId={recordId}
       onFetch={(id) => DSOZoneService.getById(Number(id))}

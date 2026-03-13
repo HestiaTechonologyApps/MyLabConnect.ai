@@ -9,26 +9,12 @@ import KiduServerTableList from "../../../KIDU_COMPONENTS/KiduServerTableList";
 
 const columns: KiduColumn[] = [
   {
-    key: "id",
-    label: "ID",
-    enableSorting: true,
-    enableFiltering: true,
-    filterType: "number",
-    width: 80,
-  },
-  {
     key: "name",
     label: "Prosthesis Type",
     enableSorting: true,
     enableFiltering: true,
     filterType: "text",
   },
-  // {
-  //   key: "dsoName",
-  //   label: "DSO Master",
-  //   enableSorting: true,
-  //   enableFiltering: false, // Not filterable by name (uses dsoMasterId)
-  // },
   {
     key: "isActive",
     label: "Status",
@@ -47,25 +33,25 @@ const columns: KiduColumn[] = [
 
 const DSOProsthesisTypeList: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
-  const [showEdit,   setShowEdit]   = useState(false);
-  const [showView,   setShowView]   = useState(false);
-  const [recordId,   setRecordId]   = useState<string | number>("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [recordId, setRecordId] = useState<string | number>("");
   const tableKeyRef = useRef(0);
-  const [tableKey,   setTableKey]   = useState(0);
+  const [tableKey, setTableKey] = useState(0);
 
   const refreshTable = () => {
     tableKeyRef.current += 1;
     setTableKey(tableKeyRef.current);
   };
 
-  const handleEditClick = (row: any) => { 
-    setRecordId(row.id); 
-    setShowEdit(true);  
+  const handleEditClick = (row: any) => {
+    setRecordId(row.id);
+    setShowEdit(true);
   };
 
-  const handleViewClick = (row: any) => { 
-    setRecordId(row.id); 
-    setShowView(true);  
+  const handleViewClick = (row: any) => {
+    setRecordId(row.id);
+    setShowView(true);
   };
 
   const handleDeleteClick = async (row: any) => {
@@ -91,8 +77,8 @@ const DSOProsthesisTypeList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Prosthesis Types"
-        subtitle="Manage prosthesis type master data"
+        title="Prosthesis Types"
+        subtitle="Manage prosthesis type data"
         columns={columns}
         paginatedFetchService={DSOProsthesisTypeService.getPaginatedList}
         rowKey="id"

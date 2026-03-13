@@ -18,11 +18,11 @@ const fields: Field[] = [
   },
   {
     name: "key",
-    rules: { type: "text", label: "Key", required: true, minLength: 3, maxLength: 100, colWidth: 6 },
+    rules: { type: "text", label: "Key", required: true, minLength: 3, maxLength: 200, colWidth: 6 },
   },
   {
     name: "value",
-    rules: { type: "text", label: "Value", required: true, minLength: 3, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Value", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -89,7 +89,7 @@ const DSOSettingEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordI
       show={show}
       onHide={onHide}
       title="Edit Setting"
-      subtitle="Update DSO Setting details"
+      subtitle="Update Setting details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

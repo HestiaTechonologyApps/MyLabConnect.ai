@@ -19,11 +19,11 @@ const fields: Field[] = [
   },
   {
     name: "key",
-    rules: { type: "text", label: "Key", required: true, minLength: 3, maxLength: 100, colWidth: 6 },
+    rules: { type: "text", label: "Key", required: true, minLength: 3, maxLength: 200, colWidth: 6 },
   },
   {
     name: "value",
-    rules: { type: "text", label: "Value", required: true, minLength: 3, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Value", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -83,7 +83,7 @@ const DSOSettingCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => 
       show={show}
       onHide={onHide}
       title="Create Setting"
-      subtitle="Add a new DSO Setting"
+      subtitle="Add a new Setting"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Setting created successfully!"

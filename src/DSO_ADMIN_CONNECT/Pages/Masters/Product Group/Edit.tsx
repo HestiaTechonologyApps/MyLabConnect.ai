@@ -7,8 +7,8 @@ import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.se
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "code", rules: { type: "text", label: "Code", required: true, minLength: 3, maxLength: 20, colWidth: 6 } },
-  { name: "name", rules: { type: "text", label: "Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
+  { name: "code", rules: { type: "text", label: "Code", required: true, minLength: 3, maxLength: 10, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
@@ -90,7 +90,7 @@ const DSOProductGroupEditModal: React.FC<Props> = ({ show, onHide, onSuccess, re
       show={show}
       onHide={onHide}
       title="Edit Product Group"
-      subtitle="Update DSO Product Group details"
+      subtitle="Update Product Group details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

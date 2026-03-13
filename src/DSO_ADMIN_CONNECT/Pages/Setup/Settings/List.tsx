@@ -88,8 +88,8 @@ const DSOSettingList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Settings"
-        subtitle="Manage DSO setting configurations"
+        title="Settings"
+        subtitle="Manage setting configurations"
         columns={columns}
         paginatedFetchService={DSOSettingService.getPaginatedList}
         rowKey="id"

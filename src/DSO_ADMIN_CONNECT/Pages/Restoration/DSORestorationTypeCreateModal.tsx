@@ -10,15 +10,15 @@ import type { PopupHandlers } from "../../../KIDU_COMPONENTS/KiduCreateModal";
 // ── Props (matches AddModalComponent interface expected by KiduSelectPopup) ───
 
 interface Props {
-  show:        boolean;
+  show: boolean;
   handleClose: () => void;
-  onAdded:     (item: DSORestoration) => void;
+  onAdded: (item: DSORestoration) => void;
 }
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, maxLength: 100, colWidth: 12 } },
+  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "dsoProthesisTypeId", rules: { type: "popup", label: "Prosthesis Type", required: true, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
@@ -32,8 +32,8 @@ const RestorationTypeCreateModal: React.FC<Props> = ({ show, handleClose, onAdde
 
   const popupHandlers: PopupHandlers = {
     dsoProthesisTypeId: {
-      value:   selectedProsthesis?.name ?? "",
-      onOpen:  () => setProsthesisOpen(true),
+      value: selectedProsthesis?.name ?? "",
+      onOpen: () => setProsthesisOpen(true),
       onClear: () => setSelectedProsthesis(null),
     },
   };
@@ -73,7 +73,7 @@ const RestorationTypeCreateModal: React.FC<Props> = ({ show, handleClose, onAdde
         show={show}
         onHide={handleHide}
         title="Add Restoration Type"
-        subtitle="Create a new DSO Restoration Type"
+        subtitle="Create a new Restoration Type"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}

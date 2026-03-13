@@ -13,7 +13,6 @@ interface Props {
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: ViewField[] = [
-    { name: "id", label: "ID", colWidth: 6 },
     { name: "name", label: "Restoration Name", colWidth: 6 },
     { name: "dsoProthesisname", label: "Prosthesis Type", colWidth: 6 },
     { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
@@ -27,7 +26,7 @@ const DSORestorationTypeViewModal: React.FC<Props> = ({ show, onHide, recordId }
             show={show}
             onHide={onHide}
             title="View Restoration Type"
-            subtitle="DSO Restoration Type details"
+            subtitle="Restoration Type details"
             fields={fields}
             recordId={recordId}
             onFetch={(id) => DSORestorationTypeService.getById(Number(id))}

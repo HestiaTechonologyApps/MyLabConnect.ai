@@ -36,14 +36,7 @@ const columns: KiduColumn[] = [
         {value ? "Active" : "Inactive"}
       </span>
     ),
-  },
-  // {
-  //   key: "createdAt",
-  //   label: "Created Date",
-  //   type: "date",
-  //   enableSorting: true,
-  //   enableFiltering: false,
-  // },
+  }
 ];
 
 const DSOMaterialList: React.FC = () => {
@@ -95,8 +88,8 @@ const DSOMaterialList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Materials"
-        subtitle="Manage material master data"
+        title="Materials"
+        subtitle="Manage material data"
         columns={columns}
         paginatedFetchService={DSOMaterialService.getPaginatedList}
         rowKey="id"

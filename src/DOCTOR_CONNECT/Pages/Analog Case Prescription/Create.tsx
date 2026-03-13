@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import type { DentalOfficeItem } from "./DentalOfficePopup";
 import PrescriptionService from "../../Service/Prescription/Prescription.services";
 import AuthService from "../../../Services/AuthServices/Auth.services";
-import KiduValidation from "../../../KIDU_COMPONENTS/KiduValidation";
+import KiduValidation, { KiduCharacterCounter } from "../../../KIDU_COMPONENTS/KiduValidation";
 import type { LabMasterItem } from "./LabmasterPopup";
 import type { CaseRegistrationCreateDTO } from "../../Types/Case.types";
 import LabMasterPopup from "./LabmasterPopup";
@@ -110,30 +110,30 @@ const restorationLabel = (r: RestorationEntry): string =>
 
 const AddNewCase: React.FC = () => {
   // ── Form state ──────────────────────────────────────────────────────────────
-  const [form, setForm]             = useState<FormState>(INITIAL_FORM);
-  const [errors, setErrors]         = useState<FormErrors>({});
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // ── Popup visibility ────────────────────────────────────────────────────────
-  const [showLabPopup, setShowLabPopup]                 = useState(false);
-  const [showOfficePopup, setShowOfficePopup]           = useState(false);
+  const [showLabPopup, setShowLabPopup] = useState(false);
+  const [showOfficePopup, setShowOfficePopup] = useState(false);
   const [showRestorationModal, setShowRestorationModal] = useState(false);
 
   // ── Doctor's offices ────────────────────────────────────────────────────────
-  const [myOffices, setMyOffices]           = useState<DentalOfficeItem[]>([]);
+  const [myOffices, setMyOffices] = useState<DentalOfficeItem[]>([]);
   const [officesLoading, setOfficesLoading] = useState(false);
-  const [officesError, setOfficesError]     = useState<string | null>(null);
+  const [officesError, setOfficesError] = useState<string | null>(null);
 
   // ── File upload ─────────────────────────────────────────────────────────────
-  const [files, setFiles]       = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
-  const fileInputRef            = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Additional Services modal ───────────────────────────────────────────────
   const [showServiceModal, setShowServiceModal] = useState(false);
-  const [serviceNameVal, setServiceNameVal]     = useState<string | number | null>(null);
-  const [serviceComments, setServiceComments]   = useState("");
+  const [serviceNameVal, setServiceNameVal] = useState<string | number | null>(null);
+  const [serviceComments, setServiceComments] = useState("");
   const [serviceNameError, setServiceNameError] = useState("");
 
   // ── Restoration entries ─────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ const AddNewCase: React.FC = () => {
         const user = AuthService.getUser();
 
         // dsoDoctorId is embedded in the JWT as claim "dsoDoctorId" (e.g. "79")
-        const doctorId    = user?.dsoDoctorId ?? null;
+        const doctorId = user?.dsoDoctorId ?? null;
         const dsoMasterId = user?.dsoMasterId ?? null;
 
         if (!doctorId) {
@@ -194,13 +194,13 @@ const AddNewCase: React.FC = () => {
   const validateField = useCallback(
     (name: keyof FormErrors, value: any): string => {
       const rules: Record<keyof FormErrors, any> = {
-        orderTo:   { type: "select",   required: true, label: "Order To"   },
-        orderFrom: { type: "select",   required: true, label: "Order From" },
-        patientId: { type: "text",     required: true, label: "Patient ID",  minLength: 2 },
-        firstName: { type: "text",     required: true, label: "First Name",  minLength: 2 },
-        lastName:  { type: "text",     required: true, label: "Last Name",   minLength: 2 },
-        dueDate:   { type: "date",     required: true, label: "Due Date"    },
-        caseNotes: { type: "textarea", required: true, label: "Case Notes", minLength: 5  },
+        orderTo: { type: "select", required: true, label: "Order To" },
+        orderFrom: { type: "select", required: true, label: "Order From" },
+        patientId: { type: "text", required: true, label: "Patient ID", minLength: 2, maxLength: 50 },
+        firstName: { type: "text", required: true, label: "First Name", minLength: 2, maxLength: 50 },
+        lastName: { type: "text", required: true, label: "Last Name", minLength: 2, maxLength: 50 },
+        dueDate: { type: "date", required: true, label: "Due Date" },
+        caseNotes: { type: "textarea", required: true, label: "Case Notes", minLength: 5, maxLength: 500 },
       };
       const result = KiduValidation.validate(value, rules[name]);
       return result.isValid ? "" : result.message ?? "";
@@ -210,12 +210,12 @@ const AddNewCase: React.FC = () => {
 
   const validateAll = (): boolean => {
     const newErrors: FormErrors = {
-      orderTo:   validateField("orderTo",   form.orderToId),
+      orderTo: validateField("orderTo", form.orderToId),
       orderFrom: validateField("orderFrom", form.orderFromId),
       patientId: validateField("patientId", form.patientId),
       firstName: validateField("firstName", form.firstName),
-      lastName:  validateField("lastName",  form.lastName),
-      dueDate:   validateField("dueDate",   form.dueDate),
+      lastName: validateField("lastName", form.lastName),
+      dueDate: validateField("dueDate", form.dueDate),
       caseNotes: validateField("caseNotes", form.caseNotes),
     };
     setErrors(newErrors);
@@ -249,7 +249,7 @@ const AddNewCase: React.FC = () => {
   const handleLabSelect = useCallback((lab: LabMasterItem) => {
     setForm((prev) => ({
       ...prev,
-      orderToId:    lab.id,
+      orderToId: lab.id,
       orderToLabel: lab.labName,
     }));
     setErrors((prev) => ({ ...prev, orderTo: "" }));
@@ -268,18 +268,18 @@ const AddNewCase: React.FC = () => {
       if (form.dsoMasterId) {
         const schema = await PrescriptionService.getFirstSchema(form.dsoMasterId);
         if (schema) {
-          schemaId   = schema.id;
+          schemaId = schema.id;
           schemaName = schema.name;
         }
       }
 
       setForm((prev) => ({
         ...prev,
-        orderFromId:    office.id,
+        orderFromId: office.id,
         orderFromLabel: office.officeName,
-        shipTo:         PrescriptionService.buildShipTo(office),
-        dsoSchemaId:    schemaId,
-        dsoSchemaName:  schemaName,
+        shipTo: PrescriptionService.buildShipTo(office),
+        dsoSchemaId: schemaId,
+        dsoSchemaName: schemaName,
       }));
       setErrors((prev) => ({ ...prev, orderFrom: "" }));
       setShowOfficePopup(false);
@@ -296,14 +296,14 @@ const AddNewCase: React.FC = () => {
       setRestorations((prev) => [
         ...prev,
         {
-          id:              crypto.randomUUID(),
-          selectedTeeth:   data.selectedTeeth,
-          prosthesis:      data.prosthesis,
-          restoration:     data.restoration,
-          indication:      data.indication,
-          material:        data.material,
-          shadeGuide:      data.shadeGuide,
-          shadeComments:   data.shadeComments,
+          id: crypto.randomUUID(),
+          selectedTeeth: data.selectedTeeth,
+          prosthesis: data.prosthesis,
+          restoration: data.restoration,
+          indication: data.indication,
+          material: data.material,
+          shadeGuide: data.shadeGuide,
+          shadeComments: data.shadeComments,
           generalComments: data.generalComments,
         },
       ]);
@@ -362,24 +362,24 @@ const AddNewCase: React.FC = () => {
     }
 
     return {
-      caseNo:             "",
-      shipTo:             form.shipTo,
-      patientFirstName:   form.firstName,
-      patientLastName:    form.lastName,
-      patientId:          form.patientId,
+      caseNo: "",
+      shipTo: form.shipTo,
+      patientFirstName: form.firstName,
+      patientLastName: form.lastName,
+      patientId: form.patientId,
       caseStatusMasterId: 1,
-      dueDate:            form.dueDate || undefined,
-      caseNotes:          form.caseNotes,
-      dSOMasterId:        form.dsoMasterId,
-      dSODentalOfficeId:  form.orderFromId,
-      dSODoctorId:        form.dsoDoctorId,
-      dSOSchemaId:        form.dsoSchemaId ?? 0,
-      labMasterId:        form.orderToId,
-      isActive:           true,
-      products:           [],
-      documents:          [],
+      dueDate: form.dueDate || undefined,
+      caseNotes: form.caseNotes,
+      dSOMasterId: form.dsoMasterId,
+      dSODentalOfficeId: form.orderFromId,
+      dSODoctorId: form.dsoDoctorId,
+      dSOSchemaId: form.dsoSchemaId ?? 0,
+      labMasterId: form.orderToId,
+      isActive: true,
+      products: [],
+      documents: [],
       additionalServices: [],
-      pickUps:            [],
+      pickUps: [],
     };
   };
 
@@ -403,16 +403,16 @@ const AddNewCase: React.FC = () => {
       if (result?.isSucess) {
         // ── SweetAlert2 success — replaces browser alert() ──────────────────
         await Swal.fire({
-          icon:              "success",
-          title:             "Case Created Successfully!",
-          html:              `Case No: <strong>${result.value?.caseNo ?? ""}</strong>`,
+          icon: "success",
+          title: "Case Created Successfully!",
+          html: `Case No: <strong>${result.value?.caseNo ?? ""}</strong>`,
           confirmButtonText: "OK",
           confirmButtonColor: "#ef0d50",
-          timer:             4000,
-          timerProgressBar:  true,
+          timer: 4000,
+          timerProgressBar: true,
           customClass: {
-            popup:         "swal-popup",
-            title:         "swal-title",
+            popup: "swal-popup",
+            title: "swal-title",
             confirmButton: "swal-confirm-btn",
           },
         });
@@ -623,8 +623,9 @@ const AddNewCase: React.FC = () => {
 
             {/* Patient ID */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">
-                Patient ID <span className="anc-required">*</span>
+              <label className="anc-label" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Patient ID <span className="anc-required">*</span></span>
+                <KiduCharacterCounter value={form.patientId} maxLength={50} type="text" />
               </label>
               <input
                 className={`anc-input${errors.patientId ? " is-invalid" : ""}`}
@@ -644,8 +645,9 @@ const AddNewCase: React.FC = () => {
 
             {/* First Name */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">
-                First Name <span className="anc-required">*</span>
+              <label className="anc-label" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>First Name <span className="anc-required">*</span></span>
+                <KiduCharacterCounter value={form.firstName} maxLength={50} type="text" />
               </label>
               <input
                 className={`anc-input${errors.firstName ? " is-invalid" : ""}`}
@@ -665,8 +667,9 @@ const AddNewCase: React.FC = () => {
 
             {/* Last Name */}
             <Col xs={12} sm={6} md={3}>
-              <label className="anc-label">
-                Last Name <span className="anc-required">*</span>
+              <label className="anc-label" style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Last Name <span className="anc-required">*</span></span>
+                <KiduCharacterCounter value={form.lastName} maxLength={50} type="text" />
               </label>
               <input
                 className={`anc-input${errors.lastName ? " is-invalid" : ""}`}
@@ -853,8 +856,9 @@ const AddNewCase: React.FC = () => {
           {/* Case Notes */}
           <div className="anc-card">
             <div className="anc-card-header">
-              <span className="anc-card-title">
-                Case Notes <span className="anc-required">*</span>
+              <span className="anc-card-title" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                <span>Case Notes <span className="anc-required">*</span></span>
+                <KiduCharacterCounter value={form.caseNotes} maxLength={500} type="textarea" />
               </span>
             </div>
             <textarea

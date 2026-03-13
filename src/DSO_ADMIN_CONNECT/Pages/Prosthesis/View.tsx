@@ -4,15 +4,14 @@ import KiduViewModal from "../../../KIDU_COMPONENTS/KiduViewModal";
 import DSOProsthesisTypeService from "../../Services/Prosthesis/Prosthesis.services";
 
 interface Props {
-  show:     boolean;
-  onHide:   () => void;
+  show: boolean;
+  onHide: () => void;
   recordId: string | number;
 }
 
 const fields: ViewField[] = [
-  { name: "id",         label: "ID",                 colWidth: 6 },
-  { name: "name",       label: "Prosthesis Type",    colWidth: 6 },
-  { name: "isActive",   label: "Status",             colWidth: 6, isToggle: true },
+  { name: "name", label: "Prosthesis Type", colWidth: 12 },
+  { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
 ];
 
 const DSOProsthesisTypeViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
@@ -21,7 +20,7 @@ const DSOProsthesisTypeViewModal: React.FC<Props> = ({ show, onHide, recordId })
       show={show}
       onHide={onHide}
       title="View Prosthesis Type"
-      subtitle="DSO Prosthesis Type details"
+      subtitle="Prosthesis Type details"
       fields={fields}
       recordId={recordId}
       onFetch={(id) => DSOProsthesisTypeService.getById(Number(id))}

@@ -16,7 +16,7 @@ interface Props {
 }
 
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Material Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Material Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "dsoRestorationTypeId", rules: { type: "popup", label: "Restoration Type", required: true, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
@@ -38,9 +38,9 @@ const DSOMaterialEditModal: React.FC<Props> = ({ show, onHide, onSuccess, record
     try {
       const response = await DSOMaterialService.getById(Number(id));
       console.log("Fetch Response:", response);
-      
+
       const data = response?.value || response;
-      
+
       // Set the selected restoration type from the fetched data
       if (data?.dsoRestorationTypeId) {
         setSelectedRestorationType({
@@ -48,7 +48,7 @@ const DSOMaterialEditModal: React.FC<Props> = ({ show, onHide, onSuccess, record
           name: data.restorationTypeName || `Restoration Type #${data.dsoRestorationTypeId}`,
         } as DSORestoration);
       }
-      
+
       return response;
     } catch (error) {
       console.error("Error in handleFetch:", error);

@@ -9,8 +9,8 @@ import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.se
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "code", rules: { type: "text", label: "Code", required: true, minLength: 3, maxLength: 20, colWidth: 6 } },
-  { name: "name", rules: { type: "text", label: "Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
+  { name: "code", rules: { type: "text", label: "Code", required: true, minLength: 3, maxLength: 10, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
@@ -85,7 +85,7 @@ const DSOProductGroupCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }
       show={show}
       onHide={handleHide}
       title="Create Product Group"
-      subtitle="Add a new DSO Product Group"
+      subtitle="Add a new Product Group"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Product group created successfully!"

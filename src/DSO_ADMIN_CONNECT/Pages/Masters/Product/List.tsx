@@ -128,7 +128,7 @@ const DSOProductList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Products"
+        title="Products"
         subtitle="Manage product master data"
         columns={columns}
         paginatedFetchService={DSOProductService.getPaginatedList}

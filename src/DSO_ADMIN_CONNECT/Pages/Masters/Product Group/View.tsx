@@ -20,7 +20,7 @@ const DSOProductGroupViewModal: React.FC<Props> = ({ show, onHide, recordId }) =
       show={show}
       onHide={onHide}
       title="View Product Group"
-      subtitle="DSO Product Group details"
+      subtitle="Product Group details"
       fields={fields}
       recordId={recordId}
       onFetch={(id) => DSOProductGroupService.getById(Number(id))}

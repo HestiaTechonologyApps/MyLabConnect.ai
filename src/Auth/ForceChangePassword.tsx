@@ -136,11 +136,11 @@ const ForceChangePassword: React.FC = () => {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: 'var(--theme-bg, #f4f6fb)', padding: '24px',
+      justifyContent: 'center', background: 'var(--theme-bg)', padding: '24px',
     }}>
       <div style={{
         width: '100%', maxWidth: '440px',
-        background: 'var(--theme-card-bg, #fff)', borderRadius: '20px',
+        background: 'var(--theme-bg-paper)', borderRadius: '20px',
         boxShadow: '0 8px 40px rgba(0,0,0,0.10)', padding: '40px 36px',
       }}>
         {/* Logo */}
@@ -152,7 +152,7 @@ const ForceChangePassword: React.FC = () => {
         <div style={{ marginBottom: '28px', textAlign: 'center' }}>
           <div style={{
             width: 52, height: 52, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--theme-primary, #ef0d50), #eb3a70)',
+            background: 'linear-gradient(135deg, var(--theme-primary), #eb3a70)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 14px', boxShadow: '0 4px 16px rgba(239,13,80,0.3)',
           }}>
@@ -161,7 +161,7 @@ const ForceChangePassword: React.FC = () => {
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
           </div>
-          <h5 style={{ fontWeight: 700, marginBottom: 6 }}>Set Your New Password</h5>
+          <h5 style={{ fontWeight: 700, marginBottom: 6,color: 'var(--theme-text-primary)' }}>Set Your New Password</h5>
           <p style={{ fontSize: '0.83rem', color: 'var(--theme-text-secondary, #6b7280)', margin: 0 }}>
             Your account was created with a temporary password.
             Please set a secure password to continue.
@@ -170,8 +170,8 @@ const ForceChangePassword: React.FC = () => {
 
         {/* New Password */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: 6 }}>
-            New Password <span style={{ color: '#ef4444' }}>*</span>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: 6, color: 'var(--theme-text-primary)'}}>
+            New Password <span style={{ color: 'var(--theme-danger, #ef4444)' }}>*</span>
           </label>
           <div style={{ position: 'relative' }}>
             <input
@@ -182,19 +182,19 @@ const ForceChangePassword: React.FC = () => {
               autoComplete="new-password"
               style={{
                 width: '100%', padding: '10px 40px 10px 12px',
-                border: `1.5px solid ${errors.newPass ? '#ef4444' : 'var(--theme-border, #e5e7eb)'}`,
+                border: `1.5px solid ${errors.newPass ? 'var(--theme-danger, #ef4444)' : 'var(--theme-border)'}`,
                 borderRadius: '10px', fontSize: '0.88rem', outline: 'none',
-                background: 'var(--theme-input-bg, #fafafa)',
-                color: 'var(--theme-text-primary, #111)', boxSizing: 'border-box',
+                background: 'var(--theme-bg-input, var(--theme-bg-hover))',
+                color:  'var(--theme-text-primary)', boxSizing: 'border-box',
               }}
             />
             <button type="button" onClick={() => setVisible(p => ({ ...p, newPass: !p.newPass }))}
-              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--theme-text-secondary, #6b7280)' }}>
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--theme-text-secondary)' }}>
               {visible.newPass ? <EyeIcon /> : <EyeOffIcon />}
             </button>
           </div>
           {errors.newPass && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: '0.75rem', color: '#ef4444' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: '0.75rem', color: 'var(--theme-danger, #ef4444)' }}>
               <ErrorIcon />{errors.newPass}
             </div>
           )}
@@ -208,7 +208,7 @@ const ForceChangePassword: React.FC = () => {
                     flex: 1, height: 4, borderRadius: 4,
                     background: i <= score
                       ? (level === 'weak' ? '#ef4444' : level === 'fair' ? '#f59e0b' : level === 'good' ? '#3b82f6' : '#22c55e')
-                      : 'var(--theme-border, #e5e7eb)',
+                      : 'var(--theme-border)',
                     transition: 'background 0.2s',
                   }} />
                 ))}
@@ -227,11 +227,11 @@ const ForceChangePassword: React.FC = () => {
             {reqs.map(r => (
               <div key={r.id} style={{
                 display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem',
-                color: r.met ? '#22c55e' : 'var(--theme-text-secondary, #9ca3af)',
+                color: r.met ? 'var(--theme-success, #22c55e)' : 'var(--theme-text-disabled)',
               }}>
                 <div style={{
                   width: 14, height: 14, borderRadius: '50%',
-                  background: r.met ? '#22c55e' : 'var(--theme-border, #e5e7eb)',
+                  background: r.met ? 'var(--theme-success, #22c55e)' : 'var(--theme-border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0, transition: 'background 0.18s',
                 }}>
@@ -245,8 +245,8 @@ const ForceChangePassword: React.FC = () => {
 
         {/* Confirm Password */}
         <div style={{ marginBottom: '24px' }}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: 6 }}>
-            Confirm Password <span style={{ color: '#ef4444' }}>*</span>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: 6 , color: 'var(--theme-text-primary)'}}>
+            Confirm Password <span style={{ color: 'var(--theme-danger, #ef4444)' }}>*</span>
           </label>
           <div style={{ position: 'relative' }}>
             <input
@@ -257,19 +257,19 @@ const ForceChangePassword: React.FC = () => {
               autoComplete="new-password"
               style={{
                 width: '100%', padding: '10px 40px 10px 12px',
-                border: `1.5px solid ${errors.confirm ? '#ef4444' : fields.confirm && !errors.confirm ? '#22c55e' : 'var(--theme-border, #e5e7eb)'}`,
+                border: `1.5px solid ${errors.confirm ? 'var(--theme-danger, #ef4444)' : fields.confirm && !errors.confirm ? 'var(--theme-success, #22c55e)' : 'var(--theme-border)'}`,
                 borderRadius: '10px', fontSize: '0.88rem', outline: 'none',
-                background: 'var(--theme-input-bg, #fafafa)',
-                color: 'var(--theme-text-primary, #111)', boxSizing: 'border-box',
+                background: 'var(--theme-bg-input, var(--theme-bg-hover))',
+                color: 'var(--theme-text-primary)', boxSizing: 'border-box',
               }}
             />
             <button type="button" onClick={() => setVisible(p => ({ ...p, confirm: !p.confirm }))}
-              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--theme-text-secondary, #6b7280)' }}>
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--theme-text-secondary)' }}>
               {visible.confirm ? <EyeIcon /> : <EyeOffIcon />}
             </button>
           </div>
           {errors.confirm && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: '0.75rem', color: '#ef4444' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: '0.75rem', color:'var(--theme-danger, #ef4444)' }}>
               <ErrorIcon />{errors.confirm}
             </div>
           )}
@@ -293,7 +293,7 @@ const ForceChangePassword: React.FC = () => {
           }
         </Button>
 
-        <p style={{ fontSize: '0.72rem', color: 'var(--theme-text-secondary, #9ca3af)', textAlign: 'center', marginTop: 16, marginBottom: 0 }}>
+        <p style={{ fontSize: '0.72rem', color: 'var(--theme-text-disabled)', textAlign: 'center', marginTop: 16, marginBottom: 0 }}>
           You cannot access your portal until this step is complete.
         </p>
       </div>

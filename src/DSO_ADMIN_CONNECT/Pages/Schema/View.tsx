@@ -10,7 +10,7 @@ interface Props {
 }
 
 const fields: ViewField[] = [
-  { name: "name", label: "Schema Name", colWidth: 6 },
+  { name: "name", label: "Schema Name", colWidth: 12 },
   { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
 ];
 

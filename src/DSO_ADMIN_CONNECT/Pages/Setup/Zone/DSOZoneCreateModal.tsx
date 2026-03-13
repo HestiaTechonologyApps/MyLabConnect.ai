@@ -7,11 +7,10 @@ import type { DSOZone } from "../../../Types/Setup/DsoZone.types";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Props (matches AddModalComponent interface expected by KiduSelectPopup) ───
 interface Props {
-  show:        boolean;
+  show: boolean;
   handleClose: () => void;
-  onAdded:     (item: DSOZone) => void;
+  onAdded: (item: DSOZone) => void;
 }
 
 // ── Field definitions ─────────────────────────────────────────────────────────
@@ -60,7 +59,7 @@ const ZoneCreateModal: React.FC<Props> = ({ show, handleClose, onAdded }) => {
       // 3. Call API
       const result = await DSOZoneService.create(payload);
       console.log("API Response:", result);
-      
+
       // 4. Store result in ref for later use
       createdDataRef.current = result;
 
@@ -98,7 +97,7 @@ const ZoneCreateModal: React.FC<Props> = ({ show, handleClose, onAdded }) => {
       show={show}
       onHide={handleHide}
       title="Add Zone"
-      subtitle="Create a new DSO Zone"
+      subtitle="Create a new Zone"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Zone created successfully!"

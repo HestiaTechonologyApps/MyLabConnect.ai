@@ -13,7 +13,6 @@ const fields: ViewField[] = [
   { name: "key", label: "Key", colWidth: 6 },
   { name: "value", label: "Value", colWidth: 12 },
   { name: "dsoName", label: "DSO Master", colWidth: 6 },
-  { name: "dsoMasterId", label: "DSO Master ID", colWidth: 6 },
   { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
 ];
 
@@ -23,7 +22,7 @@ const DSOSettingViewModal: React.FC<Props> = ({ show, onHide, recordId }) => {
       show={show}
       onHide={onHide}
       title="View Setting"
-      subtitle="DSO Setting details"
+      subtitle="Setting details"
       fields={fields}
       recordId={recordId}
       onFetch={(id) => DSOSettingService.getById(Number(id))}

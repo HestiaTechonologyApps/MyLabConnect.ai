@@ -10,9 +10,9 @@ import toast from "react-hot-toast";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "name",               rules: { type: "text",   label: "Indication Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
-  { name: "dsoProthesisTypeId", rules: { type: "popup",  label: "Prosthesis Type", required: true, colWidth: 6 } },
-  { name: "isActive",           rules: { type: "toggle", label: "Active",          colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Indication Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
+  { name: "dsoProthesisTypeId", rules: { type: "popup", label: "Prosthesis Type", required: true, colWidth: 6 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -26,11 +26,11 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
   const [selectedProsthesis, setSelectedProsthesis] = useState<DSOProsthesisType | null>(null);
-  const [prosthesisOpen, setProsthesisOpen]         = useState(false);
+  const [prosthesisOpen, setProsthesisOpen] = useState(false);
   // ← REMOVED: isSubmitting
 
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
-  const { requireDSOMasterId }               = useCurrentUser();
+  const { requireDSOMasterId } = useCurrentUser();
 
   useEffect(() => {
     if (!show) {
@@ -48,7 +48,7 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
 
       if (data?.dsoProthesisTypeId) {
         setSelectedProsthesis({
-          id:   data.dsoProthesisTypeId,
+          id: data.dsoProthesisTypeId,
           name: data.dsoProthesisname || `Prosthesis #${data.dsoProthesisTypeId}`,
         } as DSOProsthesisType);
       }
@@ -82,11 +82,11 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
       }
 
       const payload: Partial<DSOIndication> = {
-        id:                 Number(id),
-        name:               formData.name,
+        id: Number(id),
+        name: formData.name,
         dsoProthesisTypeId: Number(selectedProsthesis.id),
-        isActive:           formData.isActive ?? true,
-        dsoMasterId:        dsoMasterId,
+        isActive: formData.isActive ?? true,
+        dsoMasterId: dsoMasterId,
       };
 
       console.log("Update payload:", payload);
@@ -110,10 +110,10 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
   // ── Popup handlers ────────────────────────────────────────────────────────
   const popupHandlers = {
     dsoProthesisTypeId: {
-      value:       selectedProsthesis?.name ?? "",
+      value: selectedProsthesis?.name ?? "",
       actualValue: selectedProsthesis?.id,
-      onOpen:      () => setProsthesisOpen(true),
-      onClear:     () => setSelectedProsthesis(null),
+      onOpen: () => setProsthesisOpen(true),
+      onClear: () => setSelectedProsthesis(null),
     },
   };
 
@@ -123,7 +123,7 @@ const DSOIndicationEditModal: React.FC<Props> = ({ show, onHide, onSuccess, reco
         show={show}
         onHide={onHide}
         title="Edit Indication"
-        subtitle="Update DSO Indication details"
+        subtitle="Update Indication details"
         fields={fields}
         recordId={recordId}
         onFetch={handleFetch}

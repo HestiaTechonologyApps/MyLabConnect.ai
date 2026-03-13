@@ -7,20 +7,18 @@ import DSOmasterSelectPopup from "../../../ADMIN/Pages/Master/PopUp";
 import { useState } from "react";
 import type { PopupHandlers } from "../../../KIDU_COMPONENTS/KiduCreateModal";
 
-// ── Props (matches AddModalComponent interface expected by KiduSelectPopup) ───
-
 interface Props {
-  show:        boolean;
+  show: boolean;
   handleClose: () => void;
-  onAdded:     (item: DSOProsthesisType) => void;
+  onAdded: (item: DSOProsthesisType) => void;
 }
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: Field[] = [
-  { name: "name",        rules: { type: "text",   label: "Prosthesis Type Name", required: true, maxLength: 100, colWidth: 12 } },
-  { name: "dsoMasterId", rules: { type: "popup",  label: "DSO Master",           required: true,                 colWidth: 6 } },
-  { name: "isActive",    rules: { type: "toggle", label: "Active",                                               colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Prosthesis Type Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
+  { name: "dsoMasterId", rules: { type: "popup", label: "DSO Master", required: true, colWidth: 6 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -32,8 +30,8 @@ const ProsthesisTypeCreateModal: React.FC<Props> = ({ show, handleClose, onAdded
 
   const popupHandlers: PopupHandlers = {
     dsoMasterId: {
-      value:   selectedMaster?.name ?? "",
-      onOpen:  () => setMasterOpen(true),
+      value: selectedMaster?.name ?? "",
+      onOpen: () => setMasterOpen(true),
       onClear: () => setSelectedMaster(null),
     },
   };
@@ -44,9 +42,9 @@ const ProsthesisTypeCreateModal: React.FC<Props> = ({ show, handleClose, onAdded
 
   const handleSubmit = async (formData: Record<string, any>) => {
     const payload: Partial<DSOProsthesisType> = {
-      name:        formData.name,
+      name: formData.name,
       dsoMasterId: Number(formData.dsoMasterId),
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     const response = await DSOProsthesisTypeService.create(payload);
@@ -73,7 +71,7 @@ const ProsthesisTypeCreateModal: React.FC<Props> = ({ show, handleClose, onAdded
         show={show}
         onHide={handleHide}
         title="Add Prosthesis Type"
-        subtitle="Create a new DSO Prosthesis Type"
+        subtitle="Create a new Prosthesis Type"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}

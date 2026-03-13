@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  background: #f8fafc;
+  background: var(--theme-bg);
 }
 
 .anc-body {
@@ -37,7 +37,7 @@
 .anc-page-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--theme-text-primary);
   letter-spacing: -0.01em;
 }
 
@@ -61,7 +61,7 @@
   gap: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--theme-text-secondary);
   cursor: pointer;
   user-select: none;
 }
@@ -69,7 +69,7 @@
 .anc-check-item input[type="checkbox"] {
   width: 15px;
   height: 15px;
-  accent-color: #ef0d50;
+  accent-color: var(--theme-primary);
   cursor: pointer;
 }
 
@@ -78,8 +78,8 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .anc-card {
-  background: #ffffff;
-  border: 1px solid #e8edf3;
+  background: var(--theme-bg-paper);
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
   padding: 18px 20px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -97,7 +97,7 @@
 .anc-card-title {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--theme-text-primary);
 }
 
 .anc-card-count {
@@ -108,7 +108,7 @@
   height: 20px;
   padding: 0 6px;
   border-radius: 10px;
-  background: #ef0d50;
+  background: var(--theme-primary);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
@@ -131,13 +131,13 @@
   display: block;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--theme-text-secondary);
   margin-bottom: 5px;
   letter-spacing: 0.01em;
 }
 
 .anc-required {
-  color: #ef0d50;
+  color: var(--theme-primary);
   margin-left: 2px;
 }
 
@@ -147,20 +147,20 @@
   height: 38px;
   padding: 0 10px;
   font-size: 0.85rem;
-  color: #1e293b;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  color: var(--theme-text-primary);
+  background: var(--theme-bg-paper);
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
 }
 
 .anc-input::placeholder {
-  color: #a0aec0;
+  color: var(--theme-text-disabled);
 }
 
 .anc-input:focus {
-  border-color: #ef0d50;
+  border-color: var(--theme-primary);
   box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
 }
 
@@ -173,14 +173,19 @@
 }
 
 .anc-input-readonly {
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--theme-bg);
+  color: var(--theme-text-secondary);
   cursor: default;
 }
 
 .anc-input-readonly:focus {
-  border-color: #e2e8f0;
+  border-color: var(--theme-border);
   box-shadow: none;
+}
+
+/* date input calendar icon colour in dark mode */
+[data-theme="dark"] .anc-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
 .anc-textarea {
@@ -188,9 +193,9 @@
   width: 100%;
   padding: 9px 10px;
   font-size: 0.85rem;
-  color: #1e293b;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  color: var(--theme-text-primary);
+  background: var(--theme-bg-paper);
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   resize: vertical;
   outline: none;
@@ -200,11 +205,11 @@
 }
 
 .anc-textarea::placeholder {
-  color: #a0aec0;
+  color: var(--theme-text-disabled);
 }
 
 .anc-textarea:focus {
-  border-color: #ef0d50;
+  border-color: var(--theme-primary);
   box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
 }
 
@@ -232,12 +237,12 @@
   width: 100%;
   min-height: 38px;
   padding: 0 10px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--theme-bg-paper);
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #334155;
+  color: var(--theme-text-primary);
   text-align: left;
   transition: border-color 0.15s, box-shadow 0.15s;
   gap: 6px;
@@ -245,17 +250,17 @@
 }
 
 .anc-select-btn:hover:not(:disabled) {
-  border-color: #cbd5e1;
+  border-color: var(--theme-text-disabled);
 }
 
 .anc-select-btn:focus-visible {
   outline: none;
-  border-color: #ef0d50;
+  border-color: var(--theme-primary);
   box-shadow: 0 0 0 3px rgba(239, 13, 80, 0.08);
 }
 
 .anc-select-btn:disabled {
-  background: #f8fafc;
+  background: var(--theme-bg);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -265,11 +270,11 @@
 }
 
 .anc-select-btn--selected {
-  border-color: #cbd5e1;
+  border-color: var(--theme-text-disabled);
 }
 
 .anc-select-btn__placeholder {
-  color: #a0aec0;
+  color: var(--theme-text-disabled);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -278,7 +283,7 @@
 }
 
 .anc-select-btn__value {
-  color: #1e293b;
+  color: var(--theme-text-primary);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -288,14 +293,14 @@
 }
 
 .anc-select-btn__icon {
-  color: #94a3b8;
+  color: var(--theme-text-disabled);
   flex-shrink: 0;
   display: flex;
   align-items: center;
 }
 
 .anc-select-btn__clear {
-  color: #94a3b8;
+  color: var(--theme-text-disabled);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -310,7 +315,7 @@
 
 .anc-select-btn__clear:hover {
   color: #ef4444;
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -342,25 +347,25 @@
 
 /* Primary — pink/red brand */
 .anc-btn-primary {
-  background: #ef0d50;
+  background: var(--theme-primary);
   color: #ffffff;
 }
 
 .anc-btn-primary:hover {
-  background: #d4094a;
+  background: var(--theme-primary-hover);
   box-shadow: 0 2px 8px rgba(239, 13, 80, 0.25);
 }
 
 /* Outline — border only */
 .anc-btn-outline {
   background: transparent;
-  color: #475569;
-  border: 1.5px solid #e2e8f0;
+  color: var(--theme-text-secondary);
+  border: 1.5px solid var(--theme-border);
 }
 
 .anc-btn-outline:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--theme-bg-hover);
+  border-color: var(--theme-text-disabled);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -379,14 +384,14 @@
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  background: #f8fafc;
-  border: 1px solid #e8edf3;
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   transition: background 0.12s;
 }
 
 .anc-restoration-row:hover {
-  background: #f1f5f9;
+  background: var(--theme-bg-hover);
 }
 
 .anc-rest-index {
@@ -396,7 +401,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #ef0d50;
+  background: var(--theme-primary);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
@@ -416,8 +421,8 @@
   align-items: center;
   justify-content: center;
   padding: 1px 6px;
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--theme-accent-light);
+  color: var(--theme-text-primary);
   border-radius: 4px;
   font-size: 0.72rem;
   font-weight: 600;
@@ -425,7 +430,7 @@
 
 .anc-rest-no-teeth {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--theme-text-disabled);
   font-style: italic;
 }
 
@@ -440,7 +445,7 @@
 .anc-rest-summary-main {
   font-size: 0.83rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--theme-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -448,7 +453,7 @@
 
 .anc-rest-summary-sub {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--theme-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -464,14 +469,14 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--theme-text-disabled);
   flex-shrink: 0;
   transition: background 0.12s, color 0.12s;
   padding: 0;
 }
 
 .anc-rest-remove:hover {
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }
 
@@ -503,7 +508,7 @@
 .anc-filetype-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--theme-text-secondary);
   white-space: nowrap;
 }
 
@@ -511,10 +516,10 @@
   height: 32px;
   padding: 0 8px;
   font-size: 0.82rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--theme-border);
   border-radius: 6px;
-  background: #fff;
-  color: #334155;
+  background: var(--theme-bg-paper);
+  color: var(--theme-text-primary);
   outline: none;
   cursor: pointer;
   transition: border-color 0.15s;
@@ -522,30 +527,30 @@
 }
 
 .anc-filetype-select:focus {
-  border-color: #ef0d50;
+  border-color: var(--theme-primary);
 }
 
 /* ── Drop zone ────────────────────────────────────────────────────────────── */
 
 .anc-dropzone {
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed var(--theme-border);
   border-radius: 10px;
   padding: 28px 20px;
   text-align: center;
   cursor: pointer;
-  background: #f8fafc;
+  background: var(--theme-bg);
   transition: border-color 0.15s, background 0.15s;
   user-select: none;
 }
 
 .anc-dropzone:hover,
 .anc-dropzone.dragover {
-  border-color: #ef0d50;
-  background: #fff5f8;
+  border-color: var(--theme-primary);
+  background: var(--theme-bg-hover);
 }
 
 .anc-dropzone-icon {
-  color: #cbd5e1;
+  color: var(--theme-text-disabled);
   margin-bottom: 8px;
   display: flex;
   justify-content: center;
@@ -553,7 +558,7 @@
 
 .anc-dropzone-text {
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--theme-text-secondary);
 }
 
 /* ── Uploaded file chips ──────────────────────────────────────────────────── */
@@ -570,11 +575,11 @@
   align-items: center;
   gap: 6px;
   padding: 3px 10px 3px 10px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--theme-bg-hover);
+  border: 1px solid var(--theme-border);
   border-radius: 20px;
   font-size: 0.78rem;
-  color: #334155;
+  color: var(--theme-text-primary);
   max-width: 220px;
 }
 
@@ -588,7 +593,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--theme-text-disabled);
   font-size: 1rem;
   line-height: 1;
   padding: 0;
@@ -602,7 +607,7 @@
 
 .anc-file-note {
   font-size: 0.73rem;
-  color: #ef0d50;
+  color: var(--theme-primary);
   margin-top: 8px;
 }
 
@@ -614,8 +619,8 @@
   position: sticky;
   bottom: 0;
   z-index: 10;
-  background: #ffffff;
-  border-top: 1px solid #e8edf3;
+  background: var(--theme-bg-paper);
+  border-top: 1px solid var(--theme-border);
   padding: 10px 24px;
   display: flex;
   align-items: center;
@@ -627,24 +632,24 @@
 /* Footer button variants */
 .anc-btn-reset {
   background: transparent;
-  color: #64748b;
-  border: 1.5px solid #e2e8f0;
+  color: var(--theme-text-secondary);
+  border: 1.5px solid var(--theme-border);
 }
 
 .anc-btn-reset:hover {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--theme-bg-hover);
+  color: var(--theme-text-primary);
 }
 
 .anc-btn-draft {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1.5px solid #e2e8f0;
+  background: var(--theme-bg-hover);
+  color: var(--theme-text-secondary);
+  border: 1.5px solid var(--theme-border);
 }
 
 .anc-btn-draft:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: var(--theme-accent);
+  color: var(--theme-text-primary);
 }
 
 .anc-btn-submit {
@@ -663,29 +668,79 @@
 
 .anc-modal .modal-content {
   border-radius: 14px;
-  border: 1px solid #e8edf3;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-bg-paper);
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
 }
 
 .anc-modal .modal-header {
   padding: 14px 18px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--theme-divider);
+  background: var(--theme-bg-paper);
 }
 
 .anc-modal .modal-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--theme-text-primary);
 }
 
 .anc-modal .modal-body {
   padding: 16px 18px;
+  background: var(--theme-bg-paper);
 }
 
 .anc-modal .modal-footer {
   padding: 12px 18px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--theme-divider);
+  background: var(--theme-bg-paper);
   gap: 8px;
+}
+
+/* Bootstrap modal backdrop — close button in dark mode */
+[data-theme="dark"] .anc-modal .btn-close {
+  filter: invert(1) grayscale(1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INLINE BANNER DARK MODE OVERRIDES
+   (banners are inline-styled in AddNewCase.tsx — override here via attribute
+    selector so no TSX logic needs to change)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] .anc-body > div[style*="#fff3cd"],
+[data-theme="dark"] .anc-body > div[style*="#fde8ef"] {
+  background: var(--theme-bg-elevated) !important;
+  border-color: var(--theme-border) !important;
+}
+
+[data-theme="dark"] .anc-body > div[style*="#fff3cd"] {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .anc-body > div[style*="#fde8ef"] {
+  color: #fca5a5 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SWEETALERT2 DARK MODE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] .swal-popup {
+  background: var(--theme-bg-paper) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+[data-theme="dark"] .swal-title {
+  color: var(--theme-text-primary) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DATE INPUT — invert calendar picker icon in dark mode
+   ───────────────────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

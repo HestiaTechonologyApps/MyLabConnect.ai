@@ -1,18 +1,13 @@
-import React, {  } from "react";
+import React, { } from "react";
 import KiduEditModal, { type Field } from "../../../KIDU_COMPONENTS/KiduEditModal";
 import DSOProsthesisTypeService from "../../Services/Prosthesis/Prosthesis.services";
 import type { DSOProsthesisType } from "../../Types/Prosthesis/Prosthesis.types";
 import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is taken from the session token via requireDSOMasterId(),
-// so it is not shown as a form field.
-//
 const fields: Field[] = [
-  { name: "name",     rules: { type: "text",   label: "Prosthesis Type Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
-  { name: "isActive", rules: { type: "toggle", label: "Active",               colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Prosthesis Type Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 } },
+  { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -27,7 +22,7 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const DSOProsthesisTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
-  const { requireDSOMasterId }               = useCurrentUser();
+  const { requireDSOMasterId } = useCurrentUser();
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
 
   // ── Fetch handler ─────────────────────────────────────────────────────────
@@ -48,10 +43,10 @@ const DSOProsthesisTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, 
 
     // 2. Build payload
     const payload: Partial<DSOProsthesisType> = {
-      id:          Number(id),
-      name:        formData.name,
+      id: Number(id),
+      name: formData.name,
       dsoMasterId: dsOMasterId,
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     // 3. Call API
@@ -74,7 +69,7 @@ const DSOProsthesisTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, 
       show={show}
       onHide={onHide}
       title="Edit Prosthesis Type"
-      subtitle="Update DSO Prosthesis Type details"
+      subtitle="Update Prosthesis Type details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

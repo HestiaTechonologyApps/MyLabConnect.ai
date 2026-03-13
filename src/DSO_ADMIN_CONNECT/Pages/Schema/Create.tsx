@@ -7,15 +7,10 @@ import DSOSchemaService from "../../Services/Schema/Schema.services";
 import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is taken from the session token via requireDSOMasterId(),
-// so it is not shown as a form field.
-//
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Schema Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Schema Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -34,7 +29,7 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const DSOSchemaCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
-  const { requireDSOMasterId }               = useCurrentUser();
+  const { requireDSOMasterId } = useCurrentUser();
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
 
   // ── Submit handler ────────────────────────────────────────────────────────
@@ -50,9 +45,9 @@ const DSOSchemaCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
 
     // 2. Build payload
     const payload: Partial<DSOSchema> = {
-      name:        formData.name,
+      name: formData.name,
       dsoMasterId: dsOMasterId,
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     // 3. Call API
@@ -65,7 +60,7 @@ const DSOSchemaCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
     }
 
     // 4. Assert success
-    await assertApiSuccess(result, "Failed to create DSO Schema.");
+    await assertApiSuccess(result, "Failed to create Schema.");
   };
 
   return (
@@ -73,7 +68,7 @@ const DSOSchemaCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
       show={show}
       onHide={onHide}
       title="Create Schema"
-      subtitle="Add a new DSO Schema"
+      subtitle="Add a new Schema"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Schema created successfully!"

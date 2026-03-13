@@ -20,7 +20,7 @@ const columns: KiduColumn[] = [
     key: "dsoProthesisTypeId",
     label: "Prosthesis Type", // Fixed spelling: "Prosthesis" not "Prothesis"
     enableSorting: true,
-    enableFiltering: true,
+    enableFiltering: false,
     filterType: "text",
     render: (value, row) => (
       <span>{row.dsoProthesisname || row.prosthesisTypeName || `Type #${value}`}</span>
@@ -39,14 +39,7 @@ const columns: KiduColumn[] = [
         {value ? "Active" : "Inactive"}
       </span>
     ),
-  },
-  {
-    key: "createdAt",
-    label: "Created Date",
-    type: "date",
-    enableSorting: true,
-    enableFiltering: false,
-  },
+  }
 ];
 
 const DSOIndicationList: React.FC = () => {
@@ -100,8 +93,8 @@ const DSOIndicationList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Indications"
-        subtitle="Manage indication master data"
+        title="Indication"
+        subtitle="Manage indication data"
         columns={columns}
         paginatedFetchService={DSOIndicationService.getPaginatedList}
         rowKey="id"

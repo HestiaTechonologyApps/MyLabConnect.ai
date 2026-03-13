@@ -89,7 +89,7 @@ const DSOProductGroupList: React.FC = () => {
       <KiduServerTableList
         key={tableKey}
         title="Product Groups"
-        subtitle="Manage product group master data"
+        subtitle="Manage product group data"
         columns={columns}
         paginatedFetchService={DSOProductGroupService.getPaginatedList}
         rowKey="id"

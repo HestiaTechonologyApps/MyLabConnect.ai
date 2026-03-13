@@ -26,8 +26,8 @@ const DSOIndicationViewModal: React.FC<Props> = ({ show, onHide, recordId }) => 
         <KiduViewModal
             show={show}
             onHide={onHide}
-            title="View Restoration Type"
-            subtitle="DSO Restoration Type details"
+            title="View Indication"
+            subtitle="Indication details"
             fields={fields}
             recordId={recordId}
             onFetch={(id) => DSOIndicationService.getById(Number(id))}

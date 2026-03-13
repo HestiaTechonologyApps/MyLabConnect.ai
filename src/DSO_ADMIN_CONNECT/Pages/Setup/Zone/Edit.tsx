@@ -6,15 +6,10 @@ import DSOZoneService from "../../../Services/Setup/DsoZone.services";
 import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is no longer a popup field — it is taken from the session token
-// via useCurrentUser().requireDSOMasterId(), exactly like DSODoctor does.
-//
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Zone Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Zone Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -81,7 +76,7 @@ const DSOZoneEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }
       show={show}
       onHide={onHide}
       title="Edit Zone"
-      subtitle="Update DSO Zone details"
+      subtitle="Update Zone details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

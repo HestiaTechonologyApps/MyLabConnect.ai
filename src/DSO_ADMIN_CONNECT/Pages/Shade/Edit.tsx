@@ -1,6 +1,6 @@
 import React from "react";
 import KiduEditModal, {
-    type Field,
+  type Field,
 } from "../../../KIDU_COMPONENTS/KiduEditModal";
 import DSOShadeService from "../../Services/Shade/Shade.services";
 
@@ -8,7 +8,7 @@ import DSOShadeService from "../../Services/Shade/Shade.services";
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Shade Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Shade Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -38,7 +38,7 @@ const DSOShadeEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId 
       show={show}
       onHide={onHide}
       title="Edit Shade"
-      subtitle="Update DSO Shade details"
+      subtitle="Update Shade details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

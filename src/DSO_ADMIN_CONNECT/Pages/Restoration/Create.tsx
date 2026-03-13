@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import KiduCreateModal, {
-  type Field,
-  type PopupHandlers,
-} from "../../../KIDU_COMPONENTS/KiduCreateModal";
+import KiduCreateModal, { type Field, type PopupHandlers } from "../../../KIDU_COMPONENTS/KiduCreateModal";
 import type { DSOProsthesisType } from "../../Types/Prosthesis/Prosthesis.types";
 import DSORestorationTypeService from "../../Services/Restoration/Restoration.services";
 import DSOProsthesisTypePopup from "../Prosthesis/ProsthesisTypePopup";
@@ -12,7 +9,7 @@ import toast from "react-hot-toast";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
+  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "dsoProthesisTypeId", rules: { type: "popup", label: "Prosthesis Type", required: true, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
@@ -117,7 +114,7 @@ const DSORestorationTypeCreateModal: React.FC<Props> = ({ show, onHide, onSucces
         show={show}
         onHide={handleHide}
         title="Create Restoration Type"
-        subtitle="Add a new DSO Restoration Type"
+        subtitle="Add a new Restoration Type"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}

@@ -7,7 +7,6 @@ import type { DSOSchema } from "../../Types/Schema/Schema.types";
 import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Props (matches AddModalComponent interface expected by KiduSelectPopup) ───
 interface Props {
   show:        boolean;
   handleClose: () => void;
@@ -18,7 +17,7 @@ interface Props {
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Schema Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Schema Name", required: true,minLength:3, maxLength: 100, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -98,7 +97,7 @@ const SchemaCreateModal: React.FC<Props> = ({ show, handleClose, onAdded }) => {
       show={show}
       onHide={handleHide}
       title="Add Schema"
-      subtitle="Create a new DSO Schema"
+      subtitle="Create a new Schema"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Schema created successfully!"

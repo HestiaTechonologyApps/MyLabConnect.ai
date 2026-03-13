@@ -6,15 +6,10 @@ import DSOSchemaService from "../../Services/Schema/Schema.services";
 import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 import { useApiErrorHandler } from "../../../Services/AuthServices/APIErrorHandler.services";
 
-// ── Field definitions ─────────────────────────────────────────────────────────
-//
-// dsoMasterId is taken from the session token via requireDSOMasterId(),
-// so it is not shown as a form field.
-//
 const fields: Field[] = [
   {
     name: "name",
-    rules: { type: "text", label: "Schema Name", required: true, maxLength: 100, colWidth: 12 },
+    rules: { type: "text", label: "Schema Name", required: true, minLength: 3, maxLength: 200, colWidth: 12 },
   },
   {
     name: "isActive",
@@ -34,7 +29,7 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const DSOSchemaEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
-  const { requireDSOMasterId }               = useCurrentUser();
+  const { requireDSOMasterId } = useCurrentUser();
   const { handleApiError, assertApiSuccess } = useApiErrorHandler();
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
@@ -56,9 +51,9 @@ const DSOSchemaEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
     // 2. Build payload
     const payload = {
       ...formData,
-      id:          Number(id),
+      id: Number(id),
       dsoMasterId: dsOMasterId,
-      isActive:    formData.isActive ?? true,
+      isActive: formData.isActive ?? true,
     };
 
     // 3. Call API
@@ -81,7 +76,7 @@ const DSOSchemaEditModal: React.FC<Props> = ({ show, onHide, onSuccess, recordId
       show={show}
       onHide={onHide}
       title="Edit Schema"
-      subtitle="Update DSO Schema details"
+      subtitle="Update Schema details"
       fields={fields}
       recordId={recordId}
       onFetch={handleFetch}

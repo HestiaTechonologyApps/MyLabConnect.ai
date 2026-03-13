@@ -68,7 +68,7 @@ const DSOSchemaList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Schemas"
+        title="Schema"
         subtitle="Manage schema master data"
         columns={columns}
         paginatedFetchService={DSOSchemaService.getPaginatedList}

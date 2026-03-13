@@ -9,13 +9,6 @@ import DSOShadeViewModal from "./View";
 
 const columns: KiduColumn[] = [
   {
-    key: "id",
-    label: "Shade Code",
-    enableSorting: true,
-    enableFiltering: true,
-    filterType: "text",
-  },
-  {
     key: "name",
     label: "Shade Name",
     enableSorting: true,
@@ -40,11 +33,11 @@ const columns: KiduColumn[] = [
 
 const DSOShadeList: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
-  const [showEdit,   setShowEdit]   = useState(false);
-  const [showView,   setShowView]   = useState(false);
-  const [recordId,   setRecordId]   = useState<string | number>("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [recordId, setRecordId] = useState<string | number>("");
   const tableKeyRef = useRef(0);
-  const [tableKey,   setTableKey]   = useState(0);
+  const [tableKey, setTableKey] = useState(0);
 
   const refreshTable = () => {
     tableKeyRef.current += 1;
@@ -83,8 +76,8 @@ const DSOShadeList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Shades"
-        subtitle="Manage shade master data"
+        title="Shade"
+        subtitle="Manage shade data"
         columns={columns}
         paginatedFetchService={DSOShadeService.getPaginatedList}
         rowKey="id"

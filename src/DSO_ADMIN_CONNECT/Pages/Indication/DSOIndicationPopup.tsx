@@ -6,9 +6,9 @@ import IndicationCreateModal from "../Indication/DSOIndicationCreateModal";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
-  show:          boolean;
-  onClose:       () => void;
-  onSelect:      (item: DSOIndication) => void;
+  show: boolean;
+  onClose: () => void;
+  onSelect: (item: DSOIndication) => void;
   showAddButton?: boolean;
 }
 

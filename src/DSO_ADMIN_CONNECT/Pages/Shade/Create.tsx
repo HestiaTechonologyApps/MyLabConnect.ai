@@ -5,34 +5,27 @@ import { useApiErrorHandler } from "../../../Services/AuthServices/APIErrorHandl
 import type { DSOShade } from "../../Types/Shade/Shade.types";
 import DSOShadeService from "../../Services/Shade/Shade.services";
 import KiduCreateModal from "../../../KIDU_COMPONENTS/KiduCreateModal";
-// import KiduCreateModal, {
-//   type Field,
-// } from "../../../../KIDU_COMPONENTS/KiduCreateModal";
-// import DSOShadeService from "../../../Services/Setup/DSOShade.services";
-// import type { DSOShade } from "../../../Types/Setup/DSOShade.types";
-// import { useApiErrorHandler } from "../../../../Services/AuthServices/APIErrorHandler.services";
-// import { useCurrentUser } from "../../../../Services/AuthServices/CurrentUser.services";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { 
-    name: "name", 
-    rules: { 
-      type: "text", 
-      label: "Shade Name", 
-      required: true, 
-      minLength: 3, 
-      maxLength: 100, 
-      colWidth: 12 
-    } 
+  {
+    name: "name",
+    rules: {
+      type: "text",
+      label: "Shade Name",
+      required: true,
+      minLength: 3,
+      maxLength: 200,
+      colWidth: 12
+    }
   },
-  { 
-    name: "isActive", 
-    rules: { 
-      type: "toggle", 
-      label: "Active", 
-      colWidth: 6 
-    } 
+  {
+    name: "isActive",
+    rules: {
+      type: "toggle",
+      label: "Active",
+      colWidth: 6
+    }
   },
 ];
 
@@ -106,7 +99,7 @@ const DSOShadeCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => {
       show={show}
       onHide={handleHide}
       title="Create Shade"
-      subtitle="Add a new DSO Shade"
+      subtitle="Add a new Shade"
       fields={fields}
       onSubmit={handleSubmit}
       successMessage="Shade created successfully!"

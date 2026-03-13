@@ -13,7 +13,7 @@ interface Props {
 // ── Field definitions ─────────────────────────────────────────────────────────
 
 const fields: ViewField[] = [
-    { name: "name", label: "Territory Name", colWidth: 6 },
+    { name: "name", label: "Territory Name", colWidth: 12 },
     { name: "isActive", label: "Status", colWidth: 6, isToggle: true },
 ];
 

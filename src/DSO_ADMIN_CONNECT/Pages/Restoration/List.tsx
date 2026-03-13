@@ -10,14 +10,6 @@ import DSORestorationTypeService from "../../Services/Restoration/Restoration.se
 // ── Column definitions ────────────────────────────────────────────────────────
 
 const columns: KiduColumn[] = [
-  // {
-  //   key: "id",
-  //   label: "ID",
-  //   enableSorting: true,
-  //   enableFiltering: true,
-  //   filterType: "number",
-  //   width: 80,
-  // },
   {
     key: "name",
     label: "Restoration Name",
@@ -95,8 +87,8 @@ const DSORestorationTypeList: React.FC = () => {
     <>
       <KiduServerTableList
         key={tableKey}
-        title="DSO Restoration Types"
-        subtitle="Manage restoration type master data"
+        title="Restoration Types"
+        subtitle="Manage restoration type data"
         columns={columns}
         paginatedFetchService={DSORestorationTypeService.getPaginatedList}
         rowKey="id"

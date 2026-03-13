@@ -25,8 +25,8 @@ const fields: Field[] = [
       label: "Indication Name",
       required: true,
       minLength: 3,
-      maxLength: 100,
-      colWidth: 12,
+      maxLength: 200,
+      colWidth: 6,
     },
   },
   {
@@ -103,7 +103,7 @@ const IndicationCreateModal: React.FC<Props> = ({ show, handleClose, onAdded }) 
         show={show}
         onHide={handleHide}
         title="Add Indication"
-        subtitle="Create a new DSO Indication"
+        subtitle="Create a new Indication"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}

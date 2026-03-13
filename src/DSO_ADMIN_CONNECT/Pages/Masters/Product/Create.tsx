@@ -19,9 +19,9 @@ import toast from "react-hot-toast";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "code", rules: { type: "text", label: "Product Code", required: true, minLength: 3, maxLength: 50, colWidth: 6 } },
-  { name: "name", rules: { type: "text", label: "Product Name", required: true, minLength: 3, maxLength: 100, colWidth: 6 } },
-  { name: "rate", rules: { type: "number", label: "Rate", required: true, minLength: 1, maxLength: 10, colWidth: 6 } },
+  { name: "code", rules: { type: "text", label: "Product Code", required: true, minLength: 3, maxLength: 10, colWidth: 6 } },
+  { name: "name", rules: { type: "text", label: "Product Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
+  { name: "rate", rules: { type: "number", label: "Rate", required: true, minLength: 1, maxLength: 100, colWidth: 6 } },
   { name: "dsoRestorationTypeId", rules: { type: "popup", label: "Restoration Type", required: true, colWidth: 6 } },
   { name: "dsoSchemaId", rules: { type: "popup", label: "Schema", required: true, colWidth: 6 } },
   { name: "dsoIndicationId", rules: { type: "popup", label: "Indication", required: true, colWidth: 6 } },
@@ -179,7 +179,7 @@ const DSOProductCreateModal: React.FC<Props> = ({ show, onHide, onSuccess }) => 
         show={show}
         onHide={handleHide}
         title="Create Product"
-        subtitle="Add a new DSO Product"
+        subtitle="Add a new Product"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}

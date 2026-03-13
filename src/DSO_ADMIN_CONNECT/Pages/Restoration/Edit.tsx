@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 
 // ── Field definitions ─────────────────────────────────────────────────────────
 const fields: Field[] = [
-  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, minLength: 3, maxLength: 100, colWidth: 12 } },
+  { name: "name", rules: { type: "text", label: "Restoration Name", required: true, minLength: 3, maxLength: 200, colWidth: 6 } },
   { name: "dsoProthesisTypeId", rules: { type: "popup", label: "Prosthesis Type", required: true, colWidth: 6 } },
   { name: "isActive", rules: { type: "toggle", label: "Active", colWidth: 6 } },
 ];
@@ -43,7 +43,7 @@ const DSORestorationTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess,
     try {
       const response = await DSORestorationTypeService.getById(Number(id));
       console.log("Fetch response:", response);
-      
+
       const data = response?.value ?? response?.data ?? response;
 
       if (data?.dsoProthesisTypeId) {
@@ -125,7 +125,7 @@ const DSORestorationTypeEditModal: React.FC<Props> = ({ show, onHide, onSuccess,
         show={show}
         onHide={onHide}
         title="Edit Restoration Type"
-        subtitle="Update DSO Restoration Type details"
+        subtitle="Update Restoration Type details"
         fields={fields}
         recordId={recordId}
         onFetch={handleFetch}

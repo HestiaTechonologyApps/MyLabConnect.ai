@@ -26,8 +26,8 @@ const fields: Field[] = [
       label: "Indication Name",
       required: true,
       minLength: 3,
-      maxLength: 100,
-      colWidth: 12,
+      maxLength: 200,
+      colWidth: 6,
     },
   },
   {
@@ -74,7 +74,7 @@ const DSOIndicationCreateModal: React.FC<Props> = ({
     useState<DSOProsthesisType | null>(null);
 
   const [prosthesisOpen, setProsthesisOpen] = useState(false);
-  
+
 
 
   // ── Popup handlers ────────────────────────────────────────────────────────
@@ -118,15 +118,15 @@ const DSOIndicationCreateModal: React.FC<Props> = ({
 
       //  Build payload
       const payload: Partial<DSOIndication> = {
-        name:               formData.name,
+        name: formData.name,
         dsoProthesisTypeId: Number(selectedProsthesis.id),
-        dsoMasterId:        dsOMasterId,
-        isActive:           formData.isActive ?? true,
+        dsoMasterId: dsOMasterId,
+        isActive: formData.isActive ?? true,
       };
 
       console.log("Submitting payload:", payload);
 
-      
+
       const result = await DSOIndicationService.create(payload);
       console.log("API Response:", result);
 
@@ -145,7 +145,7 @@ const DSOIndicationCreateModal: React.FC<Props> = ({
   };
 
 
-  
+
 
   const handleHide = () => {
     setSelectedProsthesis(null);
@@ -167,7 +167,7 @@ const DSOIndicationCreateModal: React.FC<Props> = ({
         show={show}
         onHide={handleHide}
         title="Create Indication"
-        subtitle="Add a new DSO Indication"
+        subtitle="Add a new Indication"
         fields={fields}
         onSubmit={handleSubmit}
         popupHandlers={popupHandlers}
