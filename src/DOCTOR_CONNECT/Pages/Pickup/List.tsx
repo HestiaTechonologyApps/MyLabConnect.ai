@@ -75,14 +75,12 @@ const columns: KiduColumn[] = [
     filterType: "text",
   },
   {
-    // ✅ FIX: key changed from "casePickUpDetails" to "cases"
-    // backend paginated now returns `cases` array
+    // backend paginated returns `cases` array
     key: "cases",
     label: "Cases",
     enableSorting: false,
     enableFiltering: false,
     render: (details: CasePickUpDetailItem[], row: any) => {
-      // ✅ FIX: fallback to casePickUpDetails if cases not present
       const items = details ?? row?.casePickUpDetails ?? [];
 
       if (!items?.length && !row?.caseCount) {
@@ -152,6 +150,10 @@ const CasePickupList: React.FC = () => {
   const [showView, setShowView]     = useState(false);
   const [recordId, setRecordId]     = useState<number | string>("");
 
+  // ✅ Store the full clicked row so Edit and View can use labMasterName
+  // from the list data as a fallback (getById doesn't return labMasterName)
+  const [activeRowData, setActiveRowData] = useState<any>(null);
+
   const tableKeyRef = useRef(0);
   const [tableKey, setTableKey] = useState(0);
 
@@ -162,11 +164,13 @@ const CasePickupList: React.FC = () => {
 
   const handleEditClick = (row: any) => {
     setRecordId(row.id);
+    setActiveRowData(row);  // ✅ capture row for labMasterName fallback
     setShowEdit(true);
   };
 
   const handleViewClick = (row: any) => {
     setRecordId(row.id);
+    setActiveRowData(row);  // ✅ capture row for labMasterName fallback
     setShowView(true);
   };
 
@@ -209,7 +213,7 @@ const CasePickupList: React.FC = () => {
         showColumnToggle={true}
         defaultRowsPerPage={10}
         highlightOnHover={true}
-        auditLogTableName="CasePickUp"
+        auditLogTableName="Case_PickUp"
       />
 
       <CasePickupCreate
@@ -231,11 +235,13 @@ const CasePickupList: React.FC = () => {
               refreshTable();
             }}
             recordId={recordId}
+            rowData={activeRowData}   // ✅ labMasterName fallback for Edit
           />
           <CasePickupView
             show={showView}
             onHide={() => setShowView(false)}
             recordId={recordId}
+            rowData={activeRowData}   // ✅ labMasterName fallback for View
           />
         </>
       )}

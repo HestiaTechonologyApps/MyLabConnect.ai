@@ -23,11 +23,7 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
   const [practices, setPractices] = useState<DoctorPracticeItem[]>([]);
   const [loadingPractices, setLoadingPractices] = useState(false);
 
-  // ── Same pattern as AddNewCase.tsx bootstrap ──────────────────────────────
-  // Pre-load labs + doctor's offices + doctor's cases when modal opens.
-  // Practices are loaded via getPracticesByDoctor (doctor-filtered, MODE 1)
-  // and passed as `practicesData` prop — exactly like DentalOfficePopup receives
-  // `offices` from AddNewCase.
+  
   useEffect(() => {
     if (!show || !dsoDoctorId) return;
 
@@ -51,20 +47,16 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
   }, [show, dsoDoctorId]);
 
   // ── Submit ─────────────────────────────────────────────────────────────────
-  const handleSubmit = async (data: PickupCreateFormData) => {
-  // Helper: combine a date string "2026-03-15" + time string "09:00" 
-  // into a full ISO datetime "2026-03-15T09:00:00"
+ const handleSubmit = async (data: PickupCreateFormData) => {
   const combineDateTime = (date: string, time: string): string => {
     if (!date) return "";
-    // If time already looks like a full ISO string, return as-is
     if (time?.includes("T")) return time;
-    // If time is HH:mm or HH:mm:ss, append to date
     const t = time?.includes(":") ? time : "00:00:00";
     return `${date}T${t.length === 5 ? t + ":00" : t}`;
   };
 
   const pickUpDate = typeof data.pickUpDate === "string"
-    ? data.pickUpDate.split("T")[0]   // ensure we have just the date part
+    ? data.pickUpDate.split("T")[0]
     : data.pickUpDate;
 
   await CasePickupService.create({
@@ -73,7 +65,7 @@ const CasePickupCreate: React.FC<Props> = ({ show, onHide, onSuccess }) => {
     pickUpDate:         combineDateTime(pickUpDate, pickUpDate),
     pickUpEarliestTime: combineDateTime(pickUpDate, data.pickUpEarliestTime),
     pickUpLateTime:     combineDateTime(pickUpDate, data.pickUpLateTime),
-    pickUpAddress: String(data.pickUpAddress ?? ""),
+    pickUpAddress: data.pickUpAddressText || String(data.pickUpAddress ?? ""), 
     trackingNum: data.trackingNum || "",
     isActive: true,
     isDeleted: false,

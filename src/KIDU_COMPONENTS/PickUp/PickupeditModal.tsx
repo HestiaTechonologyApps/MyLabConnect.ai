@@ -1,11 +1,3 @@
-/**
- * PickupEditModal.tsx  —  EDIT
- *
- * Read-only: Lab, Date, Earliest Time, Latest Time, Address
- * Editable:  Patient / Case ID (KiduMultiSelectPopup), Tracking No.
- *
- * Right panel: Address details + map (via PickupAddressPanel).
- */
 
 import React, { useState, useEffect } from "react";
 import { Modal } from "react-bootstrap";
@@ -16,6 +8,8 @@ import KiduMultiSelectPopup, {
   type KiduMultiSelectColumn,
 } from "../Kidumultiselectpopup";
 import { useTheme } from "../../ThemeProvider/ThemeProvider";
+import type { DoctorPracticeItem } from "../../DOCTOR_CONNECT/Service/Pickup/Pickup.services";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +43,13 @@ export interface PickupEditModalProps {
     addressId: string | number
   ) => Promise<PickupAddressDetails>;
 
+  /**
+   * Pre-loaded doctor practices passed from Edit.tsx.
+   * Used to match the stored pickUpAddress string back to a DoctorPracticeItem
+   * so the right panel can display practiceName, email, and mobileNo.
+   */
+  practicesData?: DoctorPracticeItem[];
+
   casesSelectEndpoint?: string;
   casesSelectData?: any[];
   caseColumns: KiduMultiSelectColumn<any>[];
@@ -67,10 +68,18 @@ export interface PickupEditModalProps {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Format a time value to 12-hour display.
+ * ✅ FIX: handles full ISO datetime strings e.g. "2026-03-14T10:22:00"
+ * by stripping the date prefix before parsing hours/minutes.
+ * Original only split on ":" which broke on ISO strings.
+ */
 function fmt12(t?: string) {
   if (!t) return "—";
-  const [h, m] = t.split(":").map(Number);
-  if (isNaN(h)) return t;
+  // Strip date portion if this is a full ISO datetime string
+  const timePart = t.includes("T") ? t.split("T")[1] : t;
+  const [h, m] = timePart.split(":").map(Number);
+  if (isNaN(h) || isNaN(m)) return t;
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
 }
 
@@ -90,6 +99,29 @@ function fmtDate(d?: string) {
   }
 }
 
+
+function buildAddressText(p: DoctorPracticeItem): string {
+  return [p.address, p.city, p.postCode, p.country].filter(Boolean).join(", ");
+}
+
+
+function matchPractice(
+  addressStr: string,
+  practices: DoctorPracticeItem[]
+): DoctorPracticeItem | undefined {
+  if (!addressStr || !practices.length) return undefined;
+  const needle = addressStr.trim().toLowerCase();
+  return practices.find((p) => {
+    const full = buildAddressText(p).toLowerCase();
+    return (
+      full === needle ||
+      p.address.toLowerCase() === needle ||
+      full.startsWith(needle) ||
+      needle.startsWith(p.address.toLowerCase())
+    );
+  });
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const PickupEditModal: React.FC<PickupEditModalProps> = ({
@@ -99,6 +131,7 @@ const PickupEditModal: React.FC<PickupEditModalProps> = ({
   recordId,
   fetchRecord,
   fetchAddressDetails,
+  practicesData = [],   // ✅ NEW prop — defaults to empty array
   casesSelectEndpoint,
   casesSelectData,
   caseColumns,
@@ -140,6 +173,7 @@ const PickupEditModal: React.FC<PickupEditModalProps> = ({
         const rec = await fetchRecord(recordId);
         setRecord(rec);
 
+        // Build case label map from fetched record
         const lblMap: Record<string | number, string> = {};
         (rec.caseRegistrationMasterIds ?? []).forEach((id, i) => {
           lblMap[id] = rec.caseLabels?.[i] ?? String(id);
@@ -150,12 +184,35 @@ const PickupEditModal: React.FC<PickupEditModalProps> = ({
           trackingNum: rec.trackingNum ?? "",
         });
 
+        // ── Populate right-panel address details ──────────────────────────
         if (rec.pickUpAddressId) {
+          // Future-proof: if backend ever returns an office ID, do a full lookup
           const details = await fetchAddressDetails(rec.pickUpAddressId);
           setAddrDetails(details);
         } else if (rec.pickUpAddress) {
-          // Fallback: use address string for map if no id
-          setAddrDetails({ address: rec.pickUpAddress });
+          // ✅ FIX: match stored address string against doctor's practice list
+          // to recover practiceName, email, mobileNo for the right panel.
+          // practicesData is passed in from Edit.tsx (loaded via getPracticesByDoctor).
+          const matched = matchPractice(rec.pickUpAddress, practicesData);
+
+          if (matched) {
+            setAddrDetails({
+              practiceName: matched.officeName,
+              address:      buildAddressText(matched),
+              // DoctorPracticeItem interface doesn't include email/mobileNo but
+              // some backends return them — cast via any as a safe reach.
+              email:        (matched as any).email    ?? undefined,
+              mobileNo:     (matched as any).mobileNo ?? (matched as any).phone ?? undefined,
+            });
+          } else {
+            // Fallback: at minimum show the address string and map
+            setAddrDetails({
+              practiceName: undefined,
+              address:      rec.pickUpAddress,
+              email:        undefined,
+              mobileNo:     undefined,
+            });
+          }
         }
       } catch {
         setSubmitError("Failed to load record.");
@@ -163,7 +220,9 @@ const PickupEditModal: React.FC<PickupEditModalProps> = ({
         setLoading(false);
       }
     })();
-  }, [show, recordId]);
+  // ✅ FIX: practicesData added to deps so the right panel re-runs once
+  // practices finish loading asynchronously in the parent (Edit.tsx).
+  }, [show, recordId, practicesData]);
 
   const set = (key: keyof PickupEditFormData, value: any) => {
     setForm((p) => ({ ...p, [key]: value }));
@@ -279,10 +338,10 @@ const PickupEditModal: React.FC<PickupEditModalProps> = ({
                   {/* Read-only fields */}
                   <div className="pickup-readonly-section">
                     <div className="pickup-readonly-grid">
-                      <ROField label="Lab" value={record?.labName} />
-                      <ROField label="Pickup Date" value={fmtDate(record?.pickUpDate)} />
+                      <ROField label="Lab"           value={record?.labName} />
+                      <ROField label="Pickup Date"   value={fmtDate(record?.pickUpDate)} />
                       <ROField label="Earliest Time" value={fmt12(record?.pickUpEarliestTime)} />
-                      <ROField label="Latest Time" value={fmt12(record?.pickUpLateTime)} />
+                      <ROField label="Latest Time"   value={fmt12(record?.pickUpLateTime)} />
                     </div>
                     <ROField label="Pickup Address" value={record?.pickUpAddress} fullWidth />
                   </div>

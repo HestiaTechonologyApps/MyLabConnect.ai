@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CasePickupService from "../../Service/Pickup/Pickup.services";
-import type { CaseLookupItem } from "../../Service/Pickup/Pickup.services";
+import type { CaseLookupItem, DoctorPracticeItem } from "../../Service/Pickup/Pickup.services";
 import type { PickupAddressDetails } from "../../../KIDU_COMPONENTS/PickUp/PickupScheduleModal";
 import { useCurrentUser } from "../../../Services/AuthServices/CurrentUser.services";
 import type { PickupEditFormData, PickupRecord } from "../../../KIDU_COMPONENTS/PickUp/PickupeditModal";
@@ -13,37 +13,58 @@ interface Props {
   onHide: () => void;
   onSuccess: () => void;
   recordId: number | string;
+  /**
+   * The full row object from the list table.
+   * We pass this so labMasterName (and other list-only fields) are always
+   * available even if getById doesn't return them.
+   */
+  rowData?: any;
 }
 
-const CasePickupEdit: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) => {
+const CasePickupEdit: React.FC<Props> = ({ show, onHide, onSuccess, recordId, rowData }) => {
   const { dsoDoctorId } = useCurrentUser();
-  const [cases, setCases] = useState<CaseLookupItem[]>([]);
+  const [cases, setCases]         = useState<CaseLookupItem[]>([]);
+  const [practices, setPractices] = useState<DoctorPracticeItem[]>([]);
 
+  // ── Pre-load cases + practices when modal opens ───────────────────────────
   useEffect(() => {
     if (!show || !dsoDoctorId) return;
-    CasePickupService.getCasesByDoctor(dsoDoctorId).then(setCases);
+    Promise.all([
+      CasePickupService.getCasesByDoctor(dsoDoctorId),
+      CasePickupService.getPracticesByDoctor(dsoDoctorId),
+    ]).then(([caseList, practiceList]) => {
+      setCases(caseList);
+      setPractices(practiceList);
+    });
   }, [show, dsoDoctorId]);
 
   // ── Fetch existing record ─────────────────────────────────────────────────
   const fetchRecord = async (id: number | string): Promise<PickupRecord> => {
     const data = await CasePickupService.getById(Number(id));
 
+    // ✅ FIX: getById may not return labMasterName in its response.
+    // Fall back to rowData.labMasterName (from the list table row) if missing.
+    const labName =
+      (data.labMasterName && data.labMasterName.trim() !== "")
+        ? data.labMasterName
+        : (rowData?.labMasterName ?? "");
+
     return {
-      id:                       data.id ?? id,
-      labName:                  data.labMasterName ?? "",
-      pickUpDate:               data.pickUpDate,
-      pickUpEarliestTime:       data.pickUpEarliestTime,
-      pickUpLateTime:           data.pickUpLateTime,
-      pickUpAddress:            data.pickUpAddress,
-      pickUpAddressId:          undefined, // ✅ not returned by backend
+      id:                        data.id ?? id,
+      labName,
+      pickUpDate:                data.pickUpDate,
+      pickUpEarliestTime:        data.pickUpEarliestTime,
+      pickUpLateTime:            data.pickUpLateTime,
+      pickUpAddress:             data.pickUpAddress,
+      pickUpAddressId:           undefined, // not returned by backend
       caseRegistrationMasterIds: data.caseRegistrationMasterIds ?? [],
-      caseLabels:               data.caseLabels ?? [],
-      trackingNum:              data.trackingNum ?? "",
-      isActive:                 data.isActive,
+      caseLabels:                data.caseLabels ?? [],
+      trackingNum:               data.trackingNum ?? "",
+      isActive:                  data.isActive,
     };
   };
 
-  // ── Fetch address details ─────────────────────────────────────────────────
+  // ── fetchAddressDetails — unused: we pass practicesData directly ──────────
   const fetchAddressDetails = async (
     _addressId: string | number
   ): Promise<PickupAddressDetails> => {
@@ -51,7 +72,6 @@ const CasePickupEdit: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) 
   };
 
   // ── Submit ────────────────────────────────────────────────────────────────
-  // ✅ FIX: fetch current record first, build full payload
   const handleSubmit = async (id: number | string, data: PickupEditFormData) => {
     const current = await CasePickupService.getById(Number(id));
 
@@ -65,8 +85,7 @@ const CasePickupEdit: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) 
       trackingNum:        data.trackingNum,
       isActive:           current.isActive,
       isDeleted:          false,
-      // ✅ FIX: map caseRegistrationMasterIds → casePickUpDetails array
-      casePickUpDetails: data.caseRegistrationMasterIds.map((caseId) => ({
+      casePickUpDetails:  data.caseRegistrationMasterIds.map((caseId) => ({
         id:                       0,
         casePickUpId:             Number(id),
         caseRegistrationMasterId: Number(caseId),
@@ -95,6 +114,7 @@ const CasePickupEdit: React.FC<Props> = ({ show, onHide, onSuccess, recordId }) 
       recordId={recordId}
       fetchRecord={fetchRecord}
       fetchAddressDetails={fetchAddressDetails}
+      practicesData={practices}
       casesSelectData={cases}
       caseColumns={caseColumns}
       caseIdKey="id"

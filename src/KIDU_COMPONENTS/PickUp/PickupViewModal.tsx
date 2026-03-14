@@ -1,15 +1,11 @@
-/**
- * PickupViewModal.tsx  —  VIEW
- *
- * Read-only display of a pickup record.
- * All data comes from fetchRecord() called by the parent.
- */
 
 import React, { useState, useEffect } from "react";
 import { Modal } from "react-bootstrap";
 import { PickupAddressPanel, type PickupAddressDetails } from "./PickupScheduleModal";
 import "../../Styles/PickUp/PickUpModal.css";
 import { useTheme } from "../../ThemeProvider/ThemeProvider";
+import type { DoctorPracticeItem } from "../../DOCTOR_CONNECT/Service/Pickup/Pickup.services";
+//import type { DoctorPracticeItem } from "../../Service/Pickup/Pickup.services";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -41,15 +37,21 @@ export interface PickupViewModalProps {
   fetchRecord:          (id: number | string) => Promise<PickupViewRecord>;
   fetchAddressDetails?: (addressId: string | number) => Promise<PickupAddressDetails>;
 
+  
+  practicesData?: DoctorPracticeItem[];
+
   title?: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
 
+
 function fmt12(t?: string) {
   if (!t) return "—";
-  const [h, m] = t.split(":").map(Number);
-  if (isNaN(h)) return t;
+  // Strip date portion if this is a full ISO datetime string
+  const timePart = t.includes("T") ? t.split("T")[1] : t;
+  const [h, m] = timePart.split(":").map(Number);
+  if (isNaN(h) || isNaN(m)) return t;
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
 }
 
@@ -67,42 +69,94 @@ function fmtDateTime(d?: string) {
   try {
     const dt = new Date(d);
     return isNaN(dt.getTime()) ? d :
-      dt.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric",
-        hour: "2-digit", minute: "2-digit" });
+      dt.toLocaleString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
   } catch { return d; }
+}
+
+/** Build canonical address string — same format as Create/Edit */
+function buildAddressText(p: DoctorPracticeItem): string {
+  return [p.address, p.city, p.postCode, p.country].filter(Boolean).join(", ");
+}
+
+/** Match stored address string to a practice entry */
+function matchPractice(
+  addressStr: string,
+  practices: DoctorPracticeItem[]
+): DoctorPracticeItem | undefined {
+  if (!addressStr || !practices.length) return undefined;
+  const needle = addressStr.trim().toLowerCase();
+  return practices.find((p) => {
+    const full = buildAddressText(p).toLowerCase();
+    return (
+      full === needle ||
+      p.address.toLowerCase() === needle ||
+      full.startsWith(needle) ||
+      needle.startsWith(p.address.toLowerCase())
+    );
+  });
 }
 
 // ─── Component ───────────────────────────────────────────────
 
 const PickupViewModal: React.FC<PickupViewModalProps> = ({
   show, onHide, recordId, fetchRecord, fetchAddressDetails,
+  practicesData = [],
   title = "Pickup Details",
 }) => {
   const { theme } = useTheme();
 
-  const [record,      setRecord]     = useState<PickupViewRecord | null>(null);
+  const [record,      setRecord]      = useState<PickupViewRecord | null>(null);
   const [addrDetails, setAddrDetails] = useState<PickupAddressDetails | null>(null);
-  const [loading,     setLoading]    = useState(false);
-  const [error,       setError]      = useState<string | null>(null);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
 
   useEffect(() => {
     if (!show || !recordId) return;
-    setLoading(true); setRecord(null); setAddrDetails(null); setError(null);
+    setLoading(true);
+    setRecord(null);
+    setAddrDetails(null);
+    setError(null);
 
     (async () => {
       try {
         const rec = await fetchRecord(recordId);
         setRecord(rec);
 
+        // ── Populate right-panel address details ──────────────────────────
         if (fetchAddressDetails && rec.pickUpAddressId) {
           setAddrDetails(await fetchAddressDetails(rec.pickUpAddressId));
         } else if (rec.practiceName || rec.addressLine || rec.email || rec.mobileNo) {
+          // embedded details already on the record
           setAddrDetails({
             practiceName: rec.practiceName,
             address:      rec.addressLine,
             email:        rec.email,
             mobileNo:     rec.mobileNo,
           });
+        } else if (rec.pickUpAddress) {
+          // ✅ FIX: match stored address string against doctor's practice list
+          // to recover practiceName, email, mobileNo for the right panel.
+          const matched = matchPractice(rec.pickUpAddress, practicesData);
+
+          if (matched) {
+            setAddrDetails({
+              practiceName: matched.officeName,
+              address:      buildAddressText(matched),
+              email:        (matched as any).email    ?? undefined,
+              mobileNo:     (matched as any).mobileNo ?? (matched as any).phone ?? undefined,
+            });
+          } else {
+            // Fallback: at minimum show address string + map
+            setAddrDetails({
+              practiceName: undefined,
+              address:      rec.pickUpAddress,
+              email:        undefined,
+              mobileNo:     undefined,
+            });
+          }
         }
       } catch {
         setError("Failed to load pickup details.");
@@ -110,12 +164,18 @@ const PickupViewModal: React.FC<PickupViewModalProps> = ({
         setLoading(false);
       }
     })();
-  }, [show, recordId]);
+  // ✅ FIX: practicesData in deps so panel re-populates once practices load
+  }, [show, recordId, practicesData]);
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" centered
+    <Modal
+      show={show}
+      onHide={onHide}
+      size="xl"
+      centered
       className={`pickup-modal ${theme === "dark" ? "pickup-modal--dark" : ""}`}
-      dialogClassName="pickup-modal-dialog">
+      dialogClassName="pickup-modal-dialog"
+    >
       <Modal.Body className="pickup-modal-body p-0">
         <button className="pickup-modal-close" onClick={onHide} type="button">×</button>
 
@@ -161,6 +221,7 @@ const PickupViewModal: React.FC<PickupViewModalProps> = ({
 
             {!loading && !error && record && (
               <div className="pickup-view-body">
+
                 {/* Status + ID row */}
                 <div className="pickup-view-status-row">
                   <span className={`pickup-view-badge ${record.isActive ? "active" : "inactive"}`}>
@@ -182,10 +243,12 @@ const PickupViewModal: React.FC<PickupViewModalProps> = ({
                     Schedule
                   </div>
                   <div className="pickup-view-grid">
-                    <VF label="Lab"           value={record.labName}/>
-                    <VF label="Pickup Date"   value={fmtDate(record.pickUpDate)}/>
-                    <VF label="Earliest Time" value={fmt12(record.pickUpEarliestTime)}/>
-                    <VF label="Latest Time"   value={fmt12(record.pickUpLateTime)}/>
+                    {/* ✅ FIX: labName now populated from rowData fallback in View.tsx */}
+                    <VF label="Lab"           value={record.labName} />
+                    <VF label="Pickup Date"   value={fmtDate(record.pickUpDate)} />
+                    {/* ✅ FIX: fmt12 strips ISO date prefix before formatting */}
+                    <VF label="Earliest Time" value={fmt12(record.pickUpEarliestTime)} />
+                    <VF label="Latest Time"   value={fmt12(record.pickUpLateTime)} />
                   </div>
                 </div>
 
@@ -199,7 +262,7 @@ const PickupViewModal: React.FC<PickupViewModalProps> = ({
                     </svg>
                     Pickup Address
                   </div>
-                  <VF label="Address" value={record.pickUpAddress} fullWidth/>
+                  <VF label="Address" value={record.pickUpAddress} fullWidth />
                 </div>
 
                 {/* Cases */}
@@ -252,18 +315,18 @@ const PickupViewModal: React.FC<PickupViewModalProps> = ({
                       Timestamps
                     </div>
                     <div className="pickup-view-grid">
-                      {record.createdAt && <VF label="Created At"  value={fmtDateTime(record.createdAt)}/>}
-                      {record.updatedAt && <VF label="Updated At"  value={fmtDateTime(record.updatedAt)}/>}
+                      {record.createdAt && <VF label="Created At" value={fmtDateTime(record.createdAt)} />}
+                      {record.updatedAt && <VF label="Updated At" value={fmtDateTime(record.updatedAt)} />}
                     </div>
                   </div>
                 )}
+
               </div>
             )}
           </div>
 
           {/* ── Right: Address panel ── */}
-          {/* ── Right: Address panel ── */}
-<PickupAddressPanel details={addrDetails}/>
+          <PickupAddressPanel details={addrDetails} />
         </div>
       </Modal.Body>
     </Modal>
